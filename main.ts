@@ -1,5 +1,5 @@
 #!/usr/bin/env -S deno run --unstable --allow-run --allow-read --allow-write --allow-env
-// Copyright 2018-2021 the Deno authors. All rights reserved. MIT license.
+// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
 import * as colors from "https://deno.land/std@0.117.0/fmt/colors.ts";
 import { copy } from "https://deno.land/std@0.117.0/fs/copy.ts";

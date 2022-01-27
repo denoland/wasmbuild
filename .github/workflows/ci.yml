@@ -21,11 +21,34 @@ jobs:
       - name: ☑️ clone repository
         uses: actions/checkout@v2
 
-      - name: ➡️  install up Deno
+      - name: Install Rust
+        uses: hecrj/setup-rust-action@v1.3.4
+        with:
+          rust-version: 1.58.0
+
+      - name: Install clippy and rustfmt
+        run: |
+          rustup component add clippy
+          rustup component add rustfmt
+      
+      - name: Setup rust-cache
+        uses: Swatinem/rust-cache@v1
+      
+      - name: Install wasm32-unknown-unknown toolchain
+        run: |
+          rustup target add wasm32-unknown-unknown
+          cargo install wasm-bindgen-cli
+
+      - name: Install deno
         uses: denoland/setup-deno@v1.0.0
         with:
           deno-version: 1.x
 
       - name: Check fmt
-        run: deno fmt --check
+        run: |
+          deno fmt --ignore=./test/target --check
+          cargo fmt -- --check
       
+      - name: Test
+        run: make test
+

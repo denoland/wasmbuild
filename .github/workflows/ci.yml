@@ -18,7 +18,7 @@ jobs:
       GH_ACTIONS: 1
 
     steps:
-      - name: ☑️ clone repository
+      - name: clone repository
         uses: actions/checkout@v2
 
       - name: Install Rust
@@ -47,7 +47,7 @@ jobs:
       - name: Check fmt
         run: |
           deno fmt --ignore=./test/target --check
-          cargo fmt -- --check
+          cd tests/ && cargo fmt -- --check
       
       - name: Test
         run: make test

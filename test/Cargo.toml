@@ -1,0 +1,21 @@
+[package]
+name = "deno_test"
+version = "0.1.0"
+edition = "2021"
+authors = ["the Deno authors"]
+license = "MIT"
+
+[dependencies]
+wasm-bindgen = { version = "0.2.78" }
+
+[lib]
+name = "deno_test"
+crate_type = ["cdylib"]
+path = "lib.rs"
+
+[profile.release]
+codegen-units = 1
+incremental = true
+lto = true
+opt-level = "z"
+

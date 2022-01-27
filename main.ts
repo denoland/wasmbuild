@@ -44,8 +44,6 @@ const cargoBuildCmd = [
   "build",
   "--release",
   "--no-default-features",
-  "--features",
-  "wasm",
   "--target",
   "wasm32-unknown-unknown",
 ];
@@ -87,6 +85,7 @@ console.log(
 );
 
 const wasmDest = `./lib/${crateName}_bg.wasm`;
+await Deno.mkdir("lib", { recursive: true });
 await Deno.copyFile(
   `./target/wasm32-bindgen-deno-js/${crateName}_bg.wasm`,
   wasmDest,
@@ -96,6 +95,8 @@ console.log(`  copy ${colors.yellow(wasmDest)}`);
 const snippetsDest = "./lib/snippets";
 await emptyDir(snippetsDest);
 console.log(`  delete ${colors.yellow(snippetsDest)}`);
+// For when, there are no snippets
+await emptyDir("./target/wasm32-bindgen-deno-js/snippets");
 await copy("./target/wasm32-bindgen-deno-js/snippets", snippetsDest, {
   overwrite: true,
 });

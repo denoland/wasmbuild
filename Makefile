@@ -7,6 +7,6 @@ fmt:
 
 test: install
 	cd tests \
-	&& wasmbuild \
+	&& deno run --unstable -A ../main.ts \
 	&& deno test -A
 

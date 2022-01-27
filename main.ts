@@ -13,8 +13,9 @@ await Deno.permissions.request({ name: "read" });
 await Deno.permissions.request({ name: "write" });
 
 const home = Deno.env.get("HOME");
-const root = path.dirname(path.fromFileUrl(import.meta.url));
+const root = Deno.cwd();
 const crateName = await getCrateName();
+
 console.log(
   `${colors.bold(colors.green("Building"))} ${crateName} web assembly...`,
 );

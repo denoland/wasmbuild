@@ -2,11 +2,11 @@ install:
 	deno install --unstable -A -f -n wasmbuild ./main.ts
 
 fmt:
-	deno fmt --ignore=./test/target
-	cd test && cargo fmt
+	deno fmt --ignore=./tests/target
+	cd tests && cargo fmt
 
 test: install
-	cd test \
+	cd tests \
 	&& wasmbuild \
 	&& deno test -A
 

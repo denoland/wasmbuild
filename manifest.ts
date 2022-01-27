@@ -1,5 +1,4 @@
-import { parse } from "https://deno.land/std@0.122.0/encoding/yaml.ts";
-
+// Copyright 2018-2021 the Deno authors. All rights reserved. MIT license.
 interface MetaData {
   packages: {
     name: string;

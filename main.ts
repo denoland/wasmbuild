@@ -13,6 +13,7 @@ await Deno.permissions.request({ name: "read" });
 await Deno.permissions.request({ name: "write" });
 
 const home = Deno.env.get("HOME");
+const profile = Deno.args.includes("--release") ? "release" : "debug";
 const root = Deno.cwd();
 const crateName = await getCrateName();
 
@@ -39,14 +40,22 @@ if (!(await cargoFmtCmdStatus).success) {
   Deno.exit(1);
 }
 
-const cargoBuildCmd = [
+let cargoBuildCmd = [
   "cargo",
   "build",
-  "--release",
+];
+
+if (profile == "release") {
+  cargoBuildCmd.push("--release");
+}
+
+cargoBuildCmd = [
+  ...cargoBuildCmd,
   "--no-default-features",
   "--target",
   "wasm32-unknown-unknown",
 ];
+
 console.log(`  ${colors.bold(colors.gray(cargoBuildCmd.join(" ")))}`);
 const cargoBuildReleaseCmdStatus = Deno.run({
   cmd: cargoBuildCmd,
@@ -66,7 +75,7 @@ await emptyDir("./target/wasm32-bindgen-deno-js");
 
 const wasmBindGenCmd = [
   "wasm-bindgen",
-  `./target/wasm32-unknown-unknown/release/${crateName}.wasm`,
+  `./target/wasm32-unknown-unknown/${profile}/${crateName}.wasm`,
   "--target",
   "deno",
   "--weak-refs",

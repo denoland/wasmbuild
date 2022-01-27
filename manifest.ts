@@ -13,7 +13,7 @@ interface MetaData {
 export async function getMetadata(directory: string) {
   const p = Deno.run({
     cwd: directory,
-    cmd: ["cargo", "metadata", "--format-version", "1"],
+    cmd: ["cargo", "metadata", "--no-deps", "--format-version", "1"],
     stdout: "piped",
     stderr: "piped",
   });
@@ -30,7 +30,7 @@ export async function getCrateName(path?: string): Promise<string> {
     const wasmlib = metadata.targets?.find((p) =>
       p.kind.includes("cdylib") && p.crate_types?.includes("cdylib")
     );
-    if (wasmlib) {
+    if (wasmlib?.name) {
       return wasmlib.name;
     }
   }

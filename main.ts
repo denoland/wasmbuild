@@ -43,19 +43,14 @@ if (!(await cargoFmtCmdStatus).success) {
 let cargoBuildCmd = [
   "cargo",
   "build",
-];
-
-if (profile == "release") {
-  cargoBuildCmd.push("--release");
-}
-
-cargoBuildCmd = [
-  ...cargoBuildCmd,
+  ...Deno.args,
   "--no-default-features",
   "--target",
   "wasm32-unknown-unknown",
 ];
 
+const RUSTFLAGS = Deno.env.get("RUSTFLAGS") ||
+  "" + `--remap-path-prefix=${root}=. --remap-path-prefix=${home}=~`;
 console.log(`  ${colors.bold(colors.gray(cargoBuildCmd.join(" ")))}`);
 const cargoBuildReleaseCmdStatus = Deno.run({
   cmd: cargoBuildCmd,
@@ -63,7 +58,7 @@ const cargoBuildReleaseCmdStatus = Deno.run({
     "SOURCE_DATE_EPOCH": "1600000000",
     "TZ": "UTC",
     "LC_ALL": "C",
-    "RUSTFLAGS": `--remap-path-prefix=${root}=. --remap-path-prefix=${home}=~`,
+    RUSTFLAGS,
   },
 }).status();
 if (!(await cargoBuildReleaseCmdStatus).success) {

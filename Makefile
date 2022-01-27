@@ -1,0 +1,3 @@
+fmt:
+	deno fmt
+

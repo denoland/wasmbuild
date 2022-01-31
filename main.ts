@@ -91,7 +91,7 @@ await Deno.copyFile(
 console.log(`  copy ${colors.yellow(wasmDest)}`);
 
 const snippetsDest = "./lib/snippets";
-await emptyDir(snippetsDest);
+await Deno.mkdir(snippetsDest, { recursive: true });
 console.log(`  delete ${colors.yellow(snippetsDest)}`);
 // For when, there are no snippets
 await emptyDir("./target/wasm32-bindgen-deno-js/snippets");

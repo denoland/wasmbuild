@@ -25,13 +25,6 @@ const copyrightHeader = `// Copyright 2018-${
   new Date().getFullYear()
 } the Deno authors. All rights reserved. MIT license.`;
 
-if (new URL(import.meta.url).protocol === "file:") {
-  Deno.chdir(root);
-} else {
-  console.error("The build script can only be run from a local file system");
-  Deno.exit(1);
-}
-
 const cargoFmtCmd = ["cargo", "fmt"];
 console.log(`  ${colors.bold(colors.gray(cargoFmtCmd.join(" ")))}`);
 const cargoFmtCmdStatus = Deno.run({ cmd: cargoFmtCmd }).status();

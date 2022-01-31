@@ -43,8 +43,9 @@ if (!(await cargoFmtCmdStatus).success) {
 let cargoBuildCmd = [
   "cargo",
   "build",
+  "-p",
+  crateName,
   ...Deno.args,
-  "--no-default-features",
   "--target",
   "wasm32-unknown-unknown",
 ];

@@ -1,10 +1,9 @@
 #!/usr/bin/env -S deno run --unstable --allow-run --allow-read --allow-write --allow-env
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
-import * as colors from "https://deno.land/std@0.117.0/fmt/colors.ts";
-import { copy } from "https://deno.land/std@0.117.0/fs/copy.ts";
-import { emptyDir } from "https://deno.land/std@0.117.0/fs/empty_dir.ts";
-import * as path from "https://deno.land/std@0.117.0/path/mod.ts";
+import * as colors from "https://deno.land/std@0.130.0/fmt/colors.ts";
+import { copy } from "https://deno.land/std@0.130.0/fs/copy.ts";
+import { emptyDir } from "https://deno.land/std@0.130.0/fs/empty_dir.ts";
 import { getCrateName } from "./manifest.ts";
 
 await Deno.permissions.request({ name: "env" });
@@ -33,7 +32,7 @@ if (!(await cargoFmtCmdStatus).success) {
   Deno.exit(1);
 }
 
-let cargoBuildCmd = [
+const cargoBuildCmd = [
   "cargo",
   "build",
   "-p",

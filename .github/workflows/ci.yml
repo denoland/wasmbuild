@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: clone repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install Rust
         uses: hecrj/setup-rust-action@v1.3.4

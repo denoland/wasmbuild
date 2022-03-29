@@ -17,6 +17,9 @@ const profile = Deno.args.includes("--release") ? "release" : "debug";
 const root = Deno.cwd();
 const crateName = await getCrateName();
 
+// Hyphens are not allowed in crate names https://doc.rust-lang.org/reference/items/extern-crates.html
+const libName = crateName.replaceAll("-", "_");
+
 console.log(
   `${colors.bold(colors.green("Building"))} ${crateName} web assembly...`,
 );
@@ -64,7 +67,7 @@ await emptyDir("./target/wasm32-bindgen-deno-js");
 
 const wasmBindGenCmd = [
   "wasm-bindgen",
-  `./target/wasm32-unknown-unknown/${profile}/${crateName}.wasm`,
+  `./target/wasm32-unknown-unknown/${profile}/${libName}.wasm`,
   "--target",
   "deno",
   "--weak-refs",
@@ -82,10 +85,10 @@ console.log(
   `${colors.bold(colors.green("Copying"))} lib wasm...`,
 );
 
-const wasmDest = `./lib/${crateName}_bg.wasm`;
+const wasmDest = `./lib/${libName}_bg.wasm`;
 await Deno.mkdir("lib", { recursive: true });
 await Deno.copyFile(
-  `./target/wasm32-bindgen-deno-js/${crateName}_bg.wasm`,
+  `./target/wasm32-bindgen-deno-js/${libName}_bg.wasm`,
   wasmDest,
 );
 console.log(`  copy ${colors.yellow(wasmDest)}`);
@@ -131,7 +134,7 @@ const wasm = wasmInstance.exports;
 `;
 
 const generatedJs = await Deno.readTextFile(
-  `./target/wasm32-bindgen-deno-js/${crateName}.js`,
+  `./target/wasm32-bindgen-deno-js/${libName}.js`,
 );
 const bindingJs = `${copyrightHeader}
 // @generated file from build script, do not edit
@@ -141,7 +144,7 @@ ${generatedJs.replace(/^let\swasmCode\s.+/ms, loader)}
 export const _wasm = wasm;
 export const _wasmInstance = wasmInstance;
 `;
-const libDenoJs = `./lib/${crateName}.generated.js`;
+const libDenoJs = `./lib/${libName}.generated.js`;
 console.log(`  write ${colors.yellow(libDenoJs)}`);
 await Deno.writeTextFile(libDenoJs, bindingJs);
 
@@ -149,7 +152,7 @@ const denoFmtCmd = [
   "deno",
   "fmt",
   "--quiet",
-  `./lib/${crateName}.generated.js`,
+  `./lib/${libName}.generated.js`,
 ];
 console.log(`  ${colors.bold(colors.gray(denoFmtCmd.join(" ")))}`);
 const denoFmtCmdStatus = Deno.run({ cmd: denoFmtCmd }).status();

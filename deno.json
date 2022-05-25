@@ -9,7 +9,7 @@
   },
   "tasks": {
     "fmt": "deno fmt && cargo fmt && cd tests && cargo fmt",
-    "build:rs-lib": "deno run -A --unstable https://raw.githubusercontent.com/denoland/wasmbuild/abd231f7f96c4df14206eb5dc30dbc4fb06d0b21/main.ts",
+    "build": "deno run -A --unstable https://raw.githubusercontent.com/denoland/wasmbuild/abd231f7f96c4df14206eb5dc30dbc4fb06d0b21/main.ts",
     "test": "cd tests && deno run --unstable -A ../main.ts && deno test -A"
   }
 }

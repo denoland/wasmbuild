@@ -16,6 +16,8 @@ Just invoke `wasmbuild` on your project root.
 
 ```bash
 $ wasmbuild
+# or build for debug
+$ wasmbuild --debug
 ```
 
 bindings will be generated at `./lib/<crate-name>.generated.js`:

@@ -14,7 +14,7 @@ await Deno.permissions.request({ name: "read" });
 await Deno.permissions.request({ name: "write" });
 
 const home = Deno.env.get("HOME");
-const profile = Deno.args.includes("--release") ? "release" : "debug";
+const profile = Deno.args.includes("--debug") ? "debug" : "release";
 const root = Deno.cwd();
 const crateName = await getCrateName();
 
@@ -29,7 +29,7 @@ const copyrightHeader = `// Copyright 2018-${
   new Date().getFullYear()
 } the Deno authors. All rights reserved. MIT license.`;
 
-let cargoBuildCmd = [
+const cargoBuildCmd = [
   "cargo",
   "build",
   "-p",
@@ -38,6 +38,10 @@ let cargoBuildCmd = [
   "--target",
   "wasm32-unknown-unknown",
 ];
+
+if (profile === "release") {
+  cargoBuildCmd.push("--release");
+}
 
 const RUSTFLAGS = Deno.env.get("RUSTFLAGS") ||
   "" + `--remap-path-prefix=${root}=. --remap-path-prefix=${home}=~`;
@@ -62,7 +66,7 @@ console.log(`  ${colors.bold(colors.gray("Running wasm-bindgen..."))}`);
 const wasmBytes = await Deno.readFile(
   `./target/wasm32-unknown-unknown/${profile}/${libName}.wasm`,
 );
-const bindgenOutput = await generate_bindgen(wasmBytes) as {
+const bindgenOutput = await generate_bindgen(libName, wasmBytes) as {
   js: string;
   wasm_bytes: number[];
 };

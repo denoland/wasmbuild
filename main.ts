@@ -59,7 +59,9 @@ if (!(await cargoBuildReleaseCmdStatus).success) {
 await emptyDir("./target/wasm32-bindgen-deno-js");
 
 console.log(`  ${colors.bold(colors.gray("Running wasm-bindgen..."))}`);
-const wasmBytes = await Deno.readFile(`./target/wasm32-unknown-unknown/${profile}/${libName}.wasm`);
+const wasmBytes = await Deno.readFile(
+  `./target/wasm32-unknown-unknown/${profile}/${libName}.wasm`,
+);
 const bindgenOutput = await generate_bindgen(wasmBytes) as {
   js: string;
   wasm_bytes: number[];

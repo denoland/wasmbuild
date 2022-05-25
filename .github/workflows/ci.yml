@@ -45,7 +45,7 @@ jobs:
 
       - name: Check fmt
         run: |
-          deno fmt --ignore=./test/target --check
+          deno fmt --check
           cargo fmt -- --check
           cd tests/ && cargo fmt -- --check
 

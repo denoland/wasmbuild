@@ -60,14 +60,17 @@ await emptyDir("./target/wasm32-bindgen-deno-js");
 
 console.log(`  ${colors.bold(colors.gray("Running wasm-bindgen..."))}`);
 const wasmBytes = await Deno.readFile(`./target/wasm32-unknown-unknown/${profile}/${libName}.wasm`);
-const output = await generate_bindgen(wasmBytes);
+const bindgenOutput = await generate_bindgen(wasmBytes) as {
+  js: string;
+  wasm_bytes: number[];
+};
 const wasmDest = `./lib/${libName}_bg.wasm`;
 const snippetsDest = "./lib/snippets";
 
 await Deno.mkdir("lib", { recursive: true });
 // todo: snippets
 await Deno.mkdir(snippetsDest, { recursive: true });
-await Deno.writeFile(wasmDest, output.wasm);
+await Deno.writeFile(wasmDest, new Uint8Array(bindgenOutput.wasm_bytes));
 
 console.log(
   `${colors.bold(colors.green("Generating"))} lib JS bindings...`,
@@ -99,7 +102,7 @@ const wasmInstance = (await wasmInstantiatePromise).instance;
 const wasm = wasmInstance.exports;
 `;
 
-const generatedJs = output.js;
+const generatedJs = bindgenOutput.js;
 const bindingJs = `${copyrightHeader}
 // @generated file from build script, do not edit
 // deno-lint-ignore-file

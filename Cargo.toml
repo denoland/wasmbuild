@@ -1,5 +1,6 @@
 [workspace]
 members = [
-    "rs-lib",
-    "tests",
+  "rs-lib",
 ]
+
+exclude = ["tests"]

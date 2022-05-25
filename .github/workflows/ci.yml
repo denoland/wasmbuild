@@ -30,14 +30,13 @@ jobs:
         run: |
           rustup component add clippy
           rustup component add rustfmt
-      
+
       - name: Setup rust-cache
         uses: Swatinem/rust-cache@v1
-      
+
       - name: Install wasm32-unknown-unknown toolchain
         run: |
           rustup target add wasm32-unknown-unknown
-          cargo install wasm-bindgen-cli
 
       - name: Install deno
         uses: denoland/setup-deno@v1.0.0
@@ -47,8 +46,9 @@ jobs:
       - name: Check fmt
         run: |
           deno fmt --ignore=./test/target --check
+          cargo fmt -- --check
           cd tests/ && cargo fmt -- --check
-      
+
       - name: Test
         run: make test
 

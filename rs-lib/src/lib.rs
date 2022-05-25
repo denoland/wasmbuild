@@ -1,5 +1,5 @@
-use wasm_bindgen::prelude::*;
 use anyhow::Result;
+use wasm_bindgen::prelude::*;
 
 #[derive(serde::Serialize)]
 pub struct Output {
@@ -8,9 +8,11 @@ pub struct Output {
 }
 
 #[wasm_bindgen]
-pub fn bindgen(wasm: &[u8]) -> Result<JsValue, JsValue> {
-  let output = inner(wasm).map_err(|err| JsValue::from(js_sys::Error::new(&err.to_string())))?;
-  let output = JsValue::from_serde(&output).map_err(|err| JsValue::from(js_sys::Error::new(&err.to_string())))?;
+pub fn generate_bindgen(wasm: &[u8]) -> Result<JsValue, JsValue> {
+  let output = inner(wasm)
+    .map_err(|err| JsValue::from(js_sys::Error::new(&err.to_string())))?;
+  let output = JsValue::from_serde(&output)
+    .map_err(|err| JsValue::from(js_sys::Error::new(&err.to_string())))?;
   Ok(output)
 }
 
@@ -25,16 +27,4 @@ fn inner(wasm: &[u8]) -> Result<Output> {
     js: x.js().to_string(),
     wasm: x.wasm_mut().emit_wasm(),
   })
-}
-
-#[cfg(test)]
-mod tests {
-  use crate::bindgen;
-
-  // todo: temporary
-  const TEST_WASM_BYTES: &[u8] = include_bytes!("../deno_test.wasm");
-
-  #[test]
-  fn it_works() {
-  }
 }

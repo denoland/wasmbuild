@@ -6,6 +6,7 @@ import { copy } from "https://deno.land/std@0.117.0/fs/copy.ts";
 import { emptyDir } from "https://deno.land/std@0.117.0/fs/empty_dir.ts";
 import * as path from "https://deno.land/std@0.117.0/path/mod.ts";
 import { getCrateName } from "./manifest.ts";
+import { generate_bindgen } from "./lib/wasmbuild.generated.js";
 
 await Deno.permissions.request({ name: "env" });
 await Deno.permissions.request({ name: "run" });
@@ -27,14 +28,6 @@ console.log(
 const copyrightHeader = `// Copyright 2018-${
   new Date().getFullYear()
 } the Deno authors. All rights reserved. MIT license.`;
-
-const cargoFmtCmd = ["cargo", "fmt"];
-console.log(`  ${colors.bold(colors.gray(cargoFmtCmd.join(" ")))}`);
-const cargoFmtCmdStatus = Deno.run({ cmd: cargoFmtCmd }).status();
-if (!(await cargoFmtCmdStatus).success) {
-  console.error(`cargo fmt failed`);
-  Deno.exit(1);
-}
 
 let cargoBuildCmd = [
   "cargo",
@@ -65,43 +58,16 @@ if (!(await cargoBuildReleaseCmdStatus).success) {
 
 await emptyDir("./target/wasm32-bindgen-deno-js");
 
-const wasmBindGenCmd = [
-  "wasm-bindgen",
-  `./target/wasm32-unknown-unknown/${profile}/${libName}.wasm`,
-  "--target",
-  "deno",
-  "--weak-refs",
-  "--out-dir",
-  "./target/wasm32-bindgen-deno-js",
-];
-console.log(`  ${colors.bold(colors.gray(wasmBindGenCmd.join(" ")))}`);
-const wasmBindgenCmdStatus = Deno.run({ cmd: wasmBindGenCmd }).status();
-if (!(await wasmBindgenCmdStatus).success) {
-  console.error(`wasm-bindgen failed`);
-  Deno.exit(1);
-}
-
-console.log(
-  `${colors.bold(colors.green("Copying"))} lib wasm...`,
-);
-
+console.log(`  ${colors.bold(colors.gray("Running wasm-bindgen..."))}`);
+const wasmBytes = await Deno.readFile(`./target/wasm32-unknown-unknown/${profile}/${libName}.wasm`);
+const output = await generate_bindgen(wasmBytes);
 const wasmDest = `./lib/${libName}_bg.wasm`;
-await Deno.mkdir("lib", { recursive: true });
-await Deno.copyFile(
-  `./target/wasm32-bindgen-deno-js/${libName}_bg.wasm`,
-  wasmDest,
-);
-console.log(`  copy ${colors.yellow(wasmDest)}`);
-
 const snippetsDest = "./lib/snippets";
+
+await Deno.mkdir("lib", { recursive: true });
+// todo: snippets
 await Deno.mkdir(snippetsDest, { recursive: true });
-console.log(`  delete ${colors.yellow(snippetsDest)}`);
-// For when, there are no snippets
-await emptyDir("./target/wasm32-bindgen-deno-js/snippets");
-await copy("./target/wasm32-bindgen-deno-js/snippets", snippetsDest, {
-  overwrite: true,
-});
-console.log(`  copy ${colors.yellow(snippetsDest)}`);
+await Deno.writeFile(wasmDest, output.wasm);
 
 console.log(
   `${colors.bold(colors.green("Generating"))} lib JS bindings...`,
@@ -133,9 +99,7 @@ const wasmInstance = (await wasmInstantiatePromise).instance;
 const wasm = wasmInstance.exports;
 `;
 
-const generatedJs = await Deno.readTextFile(
-  `./target/wasm32-bindgen-deno-js/${libName}.js`,
-);
+const generatedJs = output.js;
 const bindingJs = `${copyrightHeader}
 // @generated file from build script, do not edit
 // deno-lint-ignore-file

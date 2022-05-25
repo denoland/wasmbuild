@@ -50,5 +50,4 @@ jobs:
           cd tests/ && cargo fmt -- --check
 
       - name: Test
-        run: make test
-
+        run: deno task test

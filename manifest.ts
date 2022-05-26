@@ -9,9 +9,9 @@ export interface CargoMetadata {
   resolve: {
     nodes: {
       id: string;
-      dependencies: string[],
+      dependencies: string[];
     }[];
-  },
+  };
 }
 
 export interface CargoPackageMetadata {
@@ -113,10 +113,14 @@ export class CargoWorkspace {
       return wasmlib?.name?.replaceAll("-", "_");
     }
 
-    function getWasmBindgenVersion(pkg: CargoPackageMetadata, metadata: CargoMetadata) {
-      const wasmBindgenReq = metadata.resolve.nodes.find(n => n.id === pkg.id);
+    function getWasmBindgenVersion(
+      pkg: CargoPackageMetadata,
+      metadata: CargoMetadata,
+    ) {
+      const wasmBindgenReq = metadata.resolve.nodes
+        .find((n) => n.id === pkg.id);
       for (const depId of wasmBindgenReq?.dependencies ?? []) {
-        const pkg = metadata.packages.find(pkg => pkg.id === depId);
+        const pkg = metadata.packages.find((pkg) => pkg.id === depId);
         if (pkg?.name === "wasm-bindgen") {
           return pkg.version;
         }

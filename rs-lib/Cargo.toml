@@ -16,6 +16,6 @@ opt-level = "z"
 anyhow = "1.0.57"
 js-sys = { version = "0.3.55" }
 serde = { version = "1.0.130", features = ["derive", "rc"] }
-wasm-bindgen = { version = "0.2.78", features = ["serde-serialize"] }
+wasm-bindgen = { version = "0.2.80", features = ["serde-serialize"] }
 wasm-bindgen-cli-support = "0.2.80"
 walrus = "0.19.0"

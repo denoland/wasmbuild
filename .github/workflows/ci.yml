@@ -47,7 +47,6 @@ jobs:
         run: |
           deno fmt --check
           cargo fmt -- --check
-          cd tests/ && cargo fmt -- --check
 
       - name: Test
         run: deno task test

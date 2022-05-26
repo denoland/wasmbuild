@@ -1,11 +1,10 @@
 #!/usr/bin/env -S deno run --unstable --allow-run --allow-read --allow-write --allow-env
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
-import * as colors from "https://deno.land/std@0.117.0/fmt/colors.ts";
-import { copy } from "https://deno.land/std@0.117.0/fs/copy.ts";
-import { emptyDir } from "https://deno.land/std@0.117.0/fs/empty_dir.ts";
-import * as path from "https://deno.land/std@0.117.0/path/mod.ts";
-import { getCrateName } from "./manifest.ts";
+import * as colors from "https://deno.land/std@0.140.0/fmt/colors.ts";
+import { emptyDir } from "https://deno.land/std@0.140.0/fs/empty_dir.ts";
+import { parse as parseFlags } from "https://deno.land/std@0.140.0/flags/mod.ts";
+import { getCargoWorkspace } from "./manifest.ts";
 import { generate_bindgen } from "./lib/wasmbuild.generated.js";
 
 await Deno.permissions.request({ name: "env" });
@@ -13,16 +12,26 @@ await Deno.permissions.request({ name: "run" });
 await Deno.permissions.request({ name: "read" });
 await Deno.permissions.request({ name: "write" });
 
-const home = Deno.env.get("HOME");
-const profile = Deno.args.includes("--debug") ? "debug" : "release";
-const root = Deno.cwd();
-const crateName = await getCrateName();
+const flags = parseFlags(Deno.args);
 
-// Hyphens are not allowed in crate names https://doc.rust-lang.org/reference/items/extern-crates.html
-const libName = crateName.replaceAll("-", "_");
+const home = Deno.env.get("HOME");
+const profile = flags.debug ? "debug" : "release";
+const root = Deno.cwd();
+const workspace = await getCargoWorkspace(root);
+const specifiedCrateName: string | undefined = flags.p ?? flags.project;
+const crate = workspace.getWasmCrate(specifiedCrateName);
+const expectedWasmBindgenVersion = "0.2.80";
+
+if (crate.wasmBindgenVersion !== expectedWasmBindgenVersion) {
+  throw new Error(
+    `The crate '${crate.name}' must have a dependency on wasm-bindgen `
+    + `${crate.wasmBindgenVersion} (found `
+    + `${crate.wasmBindgenVersion ?? "<WASM-BINDGEN NOT FOUND>"})`
+  );
+}
 
 console.log(
-  `${colors.bold(colors.green("Building"))} ${crateName} web assembly...`,
+  `${colors.bold(colors.green("Building"))} ${crate.name} web assembly...`,
 );
 
 const copyrightHeader = `// Copyright 2018-${
@@ -33,7 +42,7 @@ const cargoBuildCmd = [
   "cargo",
   "build",
   "-p",
-  crateName,
+  crate.name,
   ...Deno.args,
   "--target",
   "wasm32-unknown-unknown",
@@ -64,13 +73,13 @@ await emptyDir("./target/wasm32-bindgen-deno-js");
 
 console.log(`  ${colors.bold(colors.gray("Running wasm-bindgen..."))}`);
 const wasmBytes = await Deno.readFile(
-  `./target/wasm32-unknown-unknown/${profile}/${libName}.wasm`,
+  `./target/wasm32-unknown-unknown/${profile}/${crate.libName}.wasm`,
 );
-const bindgenOutput = await generate_bindgen(libName, wasmBytes) as {
+const bindgenOutput = await generate_bindgen(crate.libName, wasmBytes) as {
   js: string;
   wasm_bytes: number[];
 };
-const wasmDest = `./lib/${libName}_bg.wasm`;
+const wasmDest = `./lib/${crate.libName}_bg.wasm`;
 const snippetsDest = "./lib/snippets";
 
 await Deno.mkdir("lib", { recursive: true });
@@ -117,7 +126,7 @@ ${generatedJs.replace(/^let\swasmCode\s.+/ms, loader)}
 export const _wasm = wasm;
 export const _wasmInstance = wasmInstance;
 `;
-const libDenoJs = `./lib/${libName}.generated.js`;
+const libDenoJs = `./lib/${crate.libName}.generated.js`;
 console.log(`  write ${colors.yellow(libDenoJs)}`);
 await Deno.writeTextFile(libDenoJs, bindingJs);
 
@@ -125,7 +134,7 @@ const denoFmtCmd = [
   "deno",
   "fmt",
   "--quiet",
-  `./lib/${libName}.generated.js`,
+  `./lib/${crate.libName}.generated.js`,
 ];
 console.log(`  ${colors.bold(colors.gray(denoFmtCmd.join(" ")))}`);
 const denoFmtCmdStatus = Deno.run({ cmd: denoFmtCmd }).status();
@@ -135,5 +144,5 @@ if (!(await denoFmtCmdStatus).success) {
 }
 
 console.log(
-  `${colors.bold(colors.green("Finished"))} ${crateName} web assembly.`,
+  `${colors.bold(colors.green("Finished"))} ${crate.name} web assembly.`,
 );

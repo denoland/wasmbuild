@@ -4,6 +4,7 @@
 import * as colors from "https://deno.land/std@0.140.0/fmt/colors.ts";
 import { emptyDir } from "https://deno.land/std@0.140.0/fs/empty_dir.ts";
 import { parse as parseFlags } from "https://deno.land/std@0.140.0/flags/mod.ts";
+import * as path from "https://deno.land/std@0.140.0/path/mod.ts";
 import { getCargoWorkspace } from "./manifest.ts";
 import { generate_bindgen } from "./lib/wasmbuild.generated.js";
 
@@ -41,9 +42,9 @@ const copyrightHeader = `// Copyright 2018-${
 const cargoBuildCmd = [
   "cargo",
   "build",
+  "--lib",
   "-p",
   crate.name,
-  ...Deno.args,
   "--target",
   "wasm32-unknown-unknown",
 ];
@@ -77,15 +78,36 @@ const wasmBytes = await Deno.readFile(
 );
 const bindgenOutput = await generate_bindgen(crate.libName, wasmBytes) as {
   js: string;
-  wasm_bytes: number[];
+  snippets: { [name: string]: string[] };
+  localModules: { [name: string]: string };
+  wasmBytes: number[];
 };
 const wasmDest = `./lib/${crate.libName}_bg.wasm`;
 const snippetsDest = "./lib/snippets";
 
 await Deno.mkdir("lib", { recursive: true });
-// todo: snippets
 await Deno.mkdir(snippetsDest, { recursive: true });
-await Deno.writeFile(wasmDest, new Uint8Array(bindgenOutput.wasm_bytes));
+await Deno.writeFile(wasmDest, new Uint8Array(bindgenOutput.wasmBytes));
+
+for (const [name, text] of Object.entries(bindgenOutput.localModules)) {
+  const filePath = path.join(snippetsDest, name);
+  const dirPath = path.dirname(filePath);
+  await Deno.mkdir(dirPath, { recursive: true });
+  await Deno.writeTextFile(filePath, text);
+}
+
+for (const [identifier, list] of Object.entries(bindgenOutput.snippets)) {
+  if (list.length === 0) {
+    continue;
+  }
+  const dirPath = path.join(snippetsDest, identifier);
+  await Deno.mkdir(dirPath, { recursive: true });
+  for (const [i, text] of list.entries()) {
+    const name = `inline${i}.js`;
+    const filePath = path.join(dirPath, name);
+    await Deno.writeTextFile(filePath, text);
+  }
+}
 
 console.log(
   `${colors.bold(colors.green("Generating"))} lib JS bindings...`,

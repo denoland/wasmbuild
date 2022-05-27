@@ -14,8 +14,9 @@ opt-level = "z"
 
 [dependencies]
 anyhow = "1.0.57"
-js-sys = { version = "0.3.55" }
+# todo(dsherret): when upgrading to the actual wasm-bindgen, we should update the
+# root Cargo.toml to include the "tests" folder as a workspace member again
+js-sys = { git = "https://github.com/dsherret/wasm-bindgen", branch = "add_bytes_input" }
 serde = { version = "1.0.130", features = ["derive", "rc"] }
-wasm-bindgen = { version = "0.2.80", features = ["serde-serialize"] }
-wasm-bindgen-cli-support = "0.2.80"
-walrus = "0.19.0"
+wasm-bindgen = { git = "https://github.com/dsherret/wasm-bindgen", branch = "add_bytes_input", features = ["serde-serialize"] }
+wasm-bindgen-cli-support = { git = "https://github.com/dsherret/wasm-bindgen", branch = "add_bytes_input" }

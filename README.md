@@ -2,21 +2,21 @@
 
 A tiny build tool to generate wasm-bindgen glue for Deno.
 
-### Installing
+### Setup
 
-Add a build task to your _deno.json_ file:
+Add a build task to the _deno.json_ file in your project:
 
 ```json
 {
   "tasks": {
-    "build": "deno run --unstable -A https://raw.githubusercontent.com/denoland/wasmbuild/main/main.ts"
+    "build": "deno run --unstable -A https://deno.land/x/wasmbuild@VERSION_GOES_HERE/main.ts"
   }
 }
 ```
 
 ### Usage
 
-Now invoke `deno task build` in your project root.
+Now invoke `deno task build` in your project's root.
 
 ```bash
 $ deno task build

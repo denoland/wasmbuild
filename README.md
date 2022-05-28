@@ -4,7 +4,7 @@ A tiny build tool to generate wasm-bindgen glue for Deno.
 
 ### Installing
 
-Add a build task to your *deno.json* file:
+Add a build task to your _deno.json_ file:
 
 ```json
 {

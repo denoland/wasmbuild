@@ -32,7 +32,9 @@ if (crate.wasmBindgenVersion !== expectedWasmBindgenVersion) {
 }
 
 console.log(
-  `${colors.bold(colors.green("Ensuring"))} wasm32-unknown-unknown target installed...`,
+  `${
+    colors.bold(colors.green("Ensuring"))
+  } wasm32-unknown-unknown target installed...`,
 );
 
 const rustupAddWasm = Deno.run({

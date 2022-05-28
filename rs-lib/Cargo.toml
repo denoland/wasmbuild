@@ -1,0 +1,22 @@
+[package]
+name = "wasmbuild"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate_type = ["cdylib"]
+
+[profile.release]
+codegen-units = 1
+incremental = true
+lto = true
+opt-level = "z"
+
+[dependencies]
+anyhow = "1.0.57"
+# todo(dsherret): when upgrading to the actual wasm-bindgen, we should update the
+# root Cargo.toml to include the "tests" folder as a workspace member again
+js-sys = { git = "https://github.com/dsherret/wasm-bindgen", branch = "add_bytes_input" }
+serde = { version = "1.0.130", features = ["derive", "rc"] }
+wasm-bindgen = { git = "https://github.com/dsherret/wasm-bindgen", branch = "add_bytes_input", features = ["serde-serialize"] }
+wasm-bindgen-cli-support = { git = "https://github.com/dsherret/wasm-bindgen", branch = "add_bytes_input" }

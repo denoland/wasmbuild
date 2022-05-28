@@ -6,7 +6,6 @@ A tiny build tool to generate wasm-bindgen glue for Deno.
 
 ```bash
 rustup target add wasm32-unknown-unknown
-cargo install wasm-bindgen-cli
 
 deno install --unstable -A -f -n wasmbuild https://raw.githubusercontent.com/denoland/wasmbuild/main/main.ts
 ```
@@ -17,6 +16,8 @@ Just invoke `wasmbuild` on your project root.
 
 ```bash
 $ wasmbuild
+# or build for debug
+$ wasmbuild --debug
 ```
 
 bindings will be generated at `./lib/<crate-name>.generated.js`:

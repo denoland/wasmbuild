@@ -6,7 +6,7 @@ authors = ["the Deno authors"]
 license = "MIT"
 
 [dependencies]
-wasm-bindgen = { version = "0.2.78" }
+wasm-bindgen = { version = "0.2.80" }
 
 [lib]
 name = "deno_test"
@@ -18,4 +18,3 @@ codegen-units = 1
 incremental = true
 lto = true
 opt-level = "z"
-

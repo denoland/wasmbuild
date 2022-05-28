@@ -4,23 +4,27 @@ A tiny build tool to generate wasm-bindgen glue for Deno.
 
 ### Installing
 
-```bash
-rustup target add wasm32-unknown-unknown
+Add a build task to your _deno.json_ file:
 
-deno install --unstable -A -f -n wasmbuild https://raw.githubusercontent.com/denoland/wasmbuild/main/main.ts
+```json
+{
+  "tasks": {
+    "build": "deno run --unstable -A https://raw.githubusercontent.com/denoland/wasmbuild/main/main.ts"
+  }
+}
 ```
 
 ### Usage
 
-Just invoke `wasmbuild` on your project root.
+Now invoke `deno task build` in your project root.
 
 ```bash
-$ wasmbuild
+$ deno task build
 # or build for debug
-$ wasmbuild --debug
+$ deno task build --debug
 ```
 
-bindings will be generated at `./lib/<crate-name>.generated.js`:
+Bindings will be generated at `./lib/<crate-name>.generated.js`:
 
 ```typescript
 import { greet } from "./lib/deno_test.generated.js";

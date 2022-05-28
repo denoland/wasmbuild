@@ -32,6 +32,20 @@ if (crate.wasmBindgenVersion !== expectedWasmBindgenVersion) {
 }
 
 console.log(
+  `${
+    colors.bold(colors.green("Ensuring"))
+  } wasm32-unknown-unknown target installed...`,
+);
+
+const rustupAddWasm = Deno.run({
+  cmd: ["rustup", "target", "add", "wasm32-unknown-unknown"],
+}).status();
+if (!(await rustupAddWasm).success) {
+  console.error(`adding wasm32-unknown-unknown target failed`);
+  Deno.exit(1);
+}
+
+console.log(
   `${colors.bold(colors.green("Building"))} ${crate.name} web assembly...`,
 );
 
@@ -143,7 +157,11 @@ const generatedJs = bindgenOutput.js;
 const bindingJs = `${copyrightHeader}
 // @generated file from build script, do not edit
 // deno-lint-ignore-file
-${generatedJs.replace(/^let\swasmCode\s.+/ms, loader)}
+${generatedJs.replace(/let\swasmCode\s.+/ms, loader)}
+
+cachedInt32Memory0 = new Int32Array(wasm.memory.buffer);
+cachedUint8Memory0 = new Uint8Array(wasm.memory.buffer);
+
 /* for testing and debugging */
 export const _wasm = wasm;
 export const _wasmInstance = wasmInstance;

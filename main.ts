@@ -26,7 +26,7 @@ const expectedWasmBindgenVersion = "0.2.80";
 if (crate.wasmBindgenVersion !== expectedWasmBindgenVersion) {
   throw new Error(
     `The crate '${crate.name}' must have a dependency on wasm-bindgen ` +
-      `${crate.wasmBindgenVersion} (found ` +
+      `${expectedWasmBindgenVersion} (found ` +
       `${crate.wasmBindgenVersion ?? "<WASM-BINDGEN NOT FOUND>"})`,
   );
 }

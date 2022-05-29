@@ -127,44 +127,81 @@ console.log(
   `${colors.bold(colors.green("Generating"))} lib JS bindings...`,
 );
 
-const loader = `let wasmInstantiatePromise;
-switch (wasm_url.protocol) {
-  case "file:": {
-    if ("permissions" in Deno) Deno.permissions.request({ name: "read", path: wasm_url });
-    const wasmCode = await Deno.readFile(wasm_url);
-    wasmInstantiatePromise = WebAssembly.instantiate(wasmCode, imports);
-    break;
-  }
-  case "https:":
-  case "http:": {
-    if ("permissions" in Deno) Deno.permissions.request({ name: "net", host: wasm_url.host });
-    const wasmResponse = await fetch(wasm_url);
-    if (wasmResponse.headers.get("content-type")?.toLowerCase().startsWith("application/wasm")) {
-      wasmInstantiatePromise = WebAssembly.instantiateStreaming(wasmResponse, imports);
-    } else {
-      wasmInstantiatePromise = WebAssembly.instantiate(await wasmResponse.arrayBuffer(), imports);
-    }
-    break;
-  }
-  default:
-    throw new Error(\`Unsupported protocol: \${wasm_url.protocol}\`);
+const exportNames = Array.from(bindgenOutput.js.matchAll(
+  /export function ([^(]+)\(/g,
+)).map((m) => m[1]);
+const loader = `
+/** Instantiates an instance of the Wasm module returning its functions.
+ * @remarks It is safe to call this multiple times and once successfully
+ * loaded it will always return a reference to the same object.
+ */
+export async function instantiate() {
+  return (await instantiateWithInstance()).exports;
 }
-const wasmInstance = (await wasmInstantiatePromise).instance;
-const wasm = wasmInstance.exports;
+
+let instanceWithExports;
+let lastLoadPromise;
+
+/** Instantiates an instance of the Wasm module along with its exports.
+ * @remarks It is safe to call this multiple times and once successfully
+ * loaded it will always return a reference to the same object.
+ * @returns {Promise<{
+ *   instance: WebAssembly.Instance;
+ *   exports: { ${exportNames.map((n) => `${n}: typeof ${n}`).join("; ")} }
+ * }>}
+ */
+export function instantiateWithInstance() {
+  if (instanceWithExports != null) {
+    return instanceWithExports;
+  }
+  if (lastLoadPromise == null) {
+    lastLoadPromise = (async () => {
+      try {
+        const instance = (await instantiateModule()).instance;
+        wasm = instance.exports;
+        cachedInt32Memory0 = new Int32Array(wasm.memory.buffer);
+        cachedUint8Memory0 = new Uint8Array(wasm.memory.buffer);
+        instanceWithExports = {
+          instance,
+          exports: { ${exportNames.join(", ")} },
+        };
+        return instanceWithExports;
+      } finally {
+        lastLoadPromise = null;
+      }
+    })();
+  }
+  return lastLoadPromise;
+}
+
+async function instantiateModule() {
+  switch (wasm_url.protocol) {
+    case "file:": {
+      if ("permissions" in Deno) Deno.permissions.request({ name: "read", path: wasm_url });
+      const wasmCode = await Deno.readFile(wasm_url);
+      return WebAssembly.instantiate(wasmCode, imports);
+    }
+    case "https:":
+    case "http:": {
+      if ("permissions" in Deno) Deno.permissions.request({ name: "net", host: wasm_url.host });
+      const wasmResponse = await fetch(wasm_url);
+      if (wasmResponse.headers.get("content-type")?.toLowerCase().startsWith("application/wasm")) {
+        return WebAssembly.instantiateStreaming(wasmResponse, imports);
+      } else {
+        return WebAssembly.instantiate(await wasmResponse.arrayBuffer(), imports);
+      }
+    }
+    default:
+      throw new Error(\`Unsupported protocol: \${wasm_url.protocol}\`);
+  }
+}
 `;
 
-const generatedJs = bindgenOutput.js;
 const bindingJs = `${copyrightHeader}
 // @generated file from build script, do not edit
 // deno-lint-ignore-file
-${generatedJs.replace(/let\swasmCode\s.+/ms, loader)}
-
-cachedInt32Memory0 = new Int32Array(wasm.memory.buffer);
-cachedUint8Memory0 = new Uint8Array(wasm.memory.buffer);
-
-/* for testing and debugging */
-export const _wasm = wasm;
-export const _wasmInstance = wasmInstance;
+let wasm;
+${bindgenOutput.js.replace(/\blet\swasmCode\s.+/ms, loader)}
 `;
 const libDenoJs = `./lib/${crate.libName}.generated.js`;
 console.log(`  write ${colors.yellow(libDenoJs)}`);
@@ -174,7 +211,7 @@ const denoFmtCmd = [
   "deno",
   "fmt",
   "--quiet",
-  `./lib/${crate.libName}.generated.js`,
+  libDenoJs,
 ];
 console.log(`  ${colors.bold(colors.gray(denoFmtCmd.join(" ")))}`);
 const denoFmtCmdStatus = Deno.run({ cmd: denoFmtCmd }).status();

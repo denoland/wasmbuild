@@ -26,8 +26,18 @@ $ deno task build --debug
 
 Bindings will be generated at `./lib/<crate-name>.generated.js`:
 
-```typescript
-import { greet } from "./lib/deno_test.generated.js";
+```ts
+import { instantiate } from "./lib/deno_test.generated.js";
 
+const { greet } = await instantiate();
+greet("Deno");
+```
+
+Or instantiate and use the exports:
+
+```ts
+import { greet, instantiate } from "./lib/deno_test.generated.js";
+
+await instantiate();
 greet("Deno");
 ```

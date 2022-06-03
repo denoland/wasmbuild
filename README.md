@@ -1,8 +1,8 @@
-## wasmbuild
+# wasmbuild
 
 A tiny build tool to generate wasm-bindgen glue for Deno.
 
-### Setup
+## Setup
 
 Add a build task to the _deno.json_ file in your project:
 
@@ -14,14 +14,12 @@ Add a build task to the _deno.json_ file in your project:
 }
 ```
 
-### Usage
+## Usage
 
 Now invoke `deno task build` in your project's root.
 
 ```bash
 $ deno task build
-# or build for debug
-$ deno task build --debug
 ```
 
 Bindings will be generated at `./lib/<crate-name>.generated.js`:
@@ -41,3 +39,14 @@ import { greet, instantiate } from "./lib/deno_test.generated.js";
 await instantiate();
 greet("Deno");
 ```
+
+### CLI Flags
+
+- `--debug` - Build without optimizations.
+- `--project <crate-name>` / `-p <crate-name>` - Specifies the crate to build
+  when using a Cargo workspace.
+- `--out <dir-path>` - Specifies the output directory. Defaults to `./lib`
+- `--all-features` - Build the crate with all features.
+- `--no-default-features` - Build the crate with no default features.
+- `--features` - Specify the features to create. Specify multiple features
+  quoted and with spaces (ex. `--features "wasm serialization"`).

@@ -1,10 +1,10 @@
 #!/usr/bin/env -S deno run --unstable --allow-run --allow-read --allow-write --allow-env
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
-import * as colors from "https://deno.land/std@0.140.0/fmt/colors.ts";
-import { emptyDir } from "https://deno.land/std@0.140.0/fs/empty_dir.ts";
-import { parse as parseFlags } from "https://deno.land/std@0.140.0/flags/mod.ts";
-import * as path from "https://deno.land/std@0.140.0/path/mod.ts";
+import * as colors from "https://deno.land/std@0.142.0/fmt/colors.ts";
+import { emptyDir } from "https://deno.land/std@0.142.0/fs/empty_dir.ts";
+import { parse as parseFlags } from "https://deno.land/std@0.142.0/flags/mod.ts";
+import * as path from "https://deno.land/std@0.142.0/path/mod.ts";
 import { getCargoWorkspace } from "./manifest.ts";
 import { generate_bindgen } from "./lib/wasmbuild.generated.js";
 
@@ -14,12 +14,25 @@ await Deno.permissions.request({ name: "read" });
 await Deno.permissions.request({ name: "write" });
 
 const flags = parseFlags(Deno.args);
+const cargoFlags = [];
+
+if (flags["default-features"] === false) {
+  cargoFlags.push("--no-default-features");
+}
+if (flags["features"]) {
+  cargoFlags.push(`--features`);
+  cargoFlags.push(flags["features"]);
+}
+if (flags["all-features"]) {
+  cargoFlags.push("--all-features");
+}
 
 const home = Deno.env.get("HOME");
 const profile = flags.debug ? "debug" : "release";
 const root = Deno.cwd();
-const workspace = await getCargoWorkspace(root);
+const workspace = await getCargoWorkspace(root, cargoFlags);
 const specifiedCrateName: string | undefined = flags.p ?? flags.project;
+const outDir = flags.out ?? "./lib";
 const crate = workspace.getWasmCrate(specifiedCrateName);
 const expectedWasmBindgenVersion = "0.2.80";
 
@@ -61,6 +74,7 @@ const cargoBuildCmd = [
   crate.name,
   "--target",
   "wasm32-unknown-unknown",
+  ...cargoFlags,
 ];
 
 if (profile === "release") {
@@ -96,10 +110,9 @@ const bindgenOutput = await generate_bindgen(crate.libName, wasmBytes) as {
   localModules: { [name: string]: string };
   wasmBytes: number[];
 };
-const wasmDest = `./lib/${crate.libName}_bg.wasm`;
-const snippetsDest = "./lib/snippets";
+const wasmDest = path.join(outDir, `${crate.libName}_bg.wasm`);
+const snippetsDest = path.join(outDir, "snippets");
 
-await Deno.mkdir("lib", { recursive: true });
 await Deno.mkdir(snippetsDest, { recursive: true });
 await Deno.writeFile(wasmDest, new Uint8Array(bindgenOutput.wasmBytes));
 
@@ -203,7 +216,7 @@ const bindingJs = `${copyrightHeader}
 let wasm;
 ${bindgenOutput.js.replace(/\blet\swasmCode\s.+/ms, loader)}
 `;
-const libDenoJs = `./lib/${crate.libName}.generated.js`;
+const libDenoJs = path.join(outDir, `${crate.libName}.generated.js`);
 console.log(`  write ${colors.yellow(libDenoJs)}`);
 await Deno.writeTextFile(libDenoJs, bindingJs);
 

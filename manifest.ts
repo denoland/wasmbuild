@@ -36,12 +36,14 @@ export interface CargoPackageTarget {
   crate_types?: string[];
 }
 
-export async function getCargoWorkspace(directory: string) {
+export async function getCargoWorkspace(
+  directory: string,
+  cargoFlags: string[],
+) {
   const p = Deno.run({
     cwd: directory,
-    cmd: ["cargo", "metadata", "--format-version", "1"],
+    cmd: ["cargo", "metadata", "--format-version", "1", ...cargoFlags],
     stdout: "piped",
-    stderr: "piped",
   });
   const [status, output] = await Promise.all([p.status(), p.output()]);
   if (!status.success) {

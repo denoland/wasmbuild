@@ -1,4 +1,8 @@
-import { greet, instantiate, isInstantiated } from "./lib/deno_test.generated.js";
+import {
+  greet,
+  instantiate,
+  isInstantiated,
+} from "./lib/deno_test.generated.js";
 import { assertEquals } from "https://deno.land/std@0.142.0/testing/asserts.ts";
 
 assertEquals(isInstantiated(), false);

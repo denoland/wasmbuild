@@ -165,7 +165,7 @@ let lastLoadPromise;
  */
 export function instantiateWithInstance() {
   if (instanceWithExports != null) {
-    return instanceWithExports;
+    return Promise.resolve(instanceWithExports);
   }
   if (lastLoadPromise == null) {
     lastLoadPromise = (async () => {
@@ -185,6 +185,11 @@ export function instantiateWithInstance() {
     })();
   }
   return lastLoadPromise;
+}
+
+/** Gets if the Wasm module has been instantiated. */
+export function isInstantiated() {
+  return instanceWithExports != null;
 }
 
 async function instantiateModule() {

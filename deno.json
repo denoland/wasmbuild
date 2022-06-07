@@ -10,6 +10,6 @@
   "tasks": {
     "fmt": "deno fmt && cargo fmt",
     "build": "deno run -A --unstable https://deno.land/x/wasmbuild@0.1.0/main.ts",
-    "test": "cd tests && deno run --unstable -A ../main.ts -p deno_test && deno test -A"
+    "test": "cd tests && deno run --unstable -A ../main.ts -p deno_test && deno run --unstable -A ../main.ts -p deno_test --sync --out lib_sync && deno test -A"
   }
 }

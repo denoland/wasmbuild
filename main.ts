@@ -121,8 +121,9 @@ const bindgenOutput = await generate_bindgen(
 
 await createSnippets(bindgenOutput);
 
+const wasmFileName = `${crate.libName}_bg.wasm`;
 if (!isSync) {
-  const wasmDest = path.join(outDir, `${crate.libName}_bg.wasm`);
+  const wasmDest = path.join(outDir, wasmFileName);
   await Deno.writeFile(wasmDest, new Uint8Array(bindgenOutput.wasmBytes));
 }
 
@@ -146,7 +147,7 @@ async function getBindingJsText(bindgenOutput: BindgenOutput) {
 let wasm;
 ${
     bindgenOutput.js.replace(
-      /\blet\swasmCode\s.+/ms,
+      /\bconst\swasm_url\s.+/ms,
       getLoaderText(bindgenOutput),
     )
   }
@@ -194,7 +195,7 @@ function getSyncLoaderText(bindgenOutput: BindgenOutput) {
  * loaded it will always return a reference to the same object.
  */
 export function instantiate() {
-  return instantiateWithInstanceSync().exports;
+  return instantiateWithInstance().exports;
 }
 
 let instanceWithExports;
@@ -207,7 +208,7 @@ let instanceWithExports;
  *   exports: { ${exportNames.map((n) => `${n}: typeof ${n}`).join("; ")} }
  * }}
  */
-export function instantiateWithInstanceSync() {
+export function instantiateWithInstance() {
   if (instanceWithExports == null) {
     const instance = instantiateInstance();
     wasm = instance.exports;
@@ -250,6 +251,8 @@ function base64decode(b64) {
 function getAsyncLoaderText(bindgenOutput: BindgenOutput) {
   const exportNames = getExportNames(bindgenOutput);
   return `
+const wasm_url = new URL("${wasmFileName}", import.meta.url);
+
 /** Instantiates an instance of the Wasm module returning its functions.
  * @remarks It is safe to call this multiple times and once successfully
  * loaded it will always return a reference to the same object.

@@ -107,14 +107,12 @@ const imports = {
   },
 };
 
-const wasm_url = new URL("deno_test_bg.wasm", import.meta.url);
-
 /** Instantiates an instance of the Wasm module returning its functions.
  * @remarks It is safe to call this multiple times and once successfully
  * loaded it will always return a reference to the same object.
  */
 export function instantiate() {
-  return instantiateWithInstanceSync().exports;
+  return instantiateWithInstance().exports;
 }
 
 let instanceWithExports;
@@ -127,7 +125,7 @@ let instanceWithExports;
  *   exports: { greet: typeof greet }
  * }}
  */
-export function instantiateWithInstanceSync() {
+export function instantiateWithInstance() {
   if (instanceWithExports == null) {
     const instance = instantiateInstance();
     wasm = instance.exports;

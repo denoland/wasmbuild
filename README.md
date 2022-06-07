@@ -50,3 +50,5 @@ greet("Deno");
 - `--no-default-features` - Build the crate with no default features.
 - `--features` - Specify the features to create. Specify multiple features
   quoted and with spaces (ex. `--features "wasm serialization"`).
+- `--sync` - Generate a synchronous module that stores the Wasm module inline as
+  base64 text.

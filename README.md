@@ -42,6 +42,9 @@ greet("Deno");
 
 ### CLI Flags
 
+- `--check` - Checks to ensure the output is up to date.
+  - This is useful to run on the CI in order to ensure the wasmbuild output is
+    up to date.
 - `--debug` - Build without optimizations.
 - `--project <crate-name>` / `-p <crate-name>` - Specifies the crate to build
   when using a Cargo workspace.

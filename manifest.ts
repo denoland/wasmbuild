@@ -1,5 +1,7 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
+import { expandGlob, path, Sha1 } from "./deps.ts";
+
 export interface CargoMetadata {
   packages: CargoPackageMetadata[];
   /** Identifiers in the `packages` array of the workspace members. */
@@ -55,12 +57,6 @@ export async function getCargoWorkspace(
   return new CargoWorkspace(JSON.parse(result!) as CargoMetadata);
 }
 
-export interface WasmCrate {
-  name: string;
-  libName: string;
-  wasmBindgenVersion: string | undefined;
-}
-
 export class CargoWorkspace {
   constructor(public readonly metadata: CargoMetadata) {
   }
@@ -97,40 +93,16 @@ export class CargoWorkspace {
     for (const pkg of this.getWorkspacePackages()) {
       const wasmLibName = getWasmLibName(pkg);
       if (wasmLibName != null) {
-        crates.push({
-          name: pkg.name,
-          libName: wasmLibName,
-          wasmBindgenVersion: getWasmBindgenVersion(pkg, this.metadata),
-        });
+        crates.push(
+          new WasmCrate({
+            metadata: this.metadata,
+            pkg,
+            libName: wasmLibName,
+          }),
+        );
       }
     }
     return crates;
-
-    function getWasmLibName(pkg: CargoPackageMetadata) {
-      // [lib]
-      // name = "deno_wasm"
-      // crate-type = ["cdylib"]
-      const wasmlib = pkg.targets?.find((p) =>
-        p.kind.includes("cdylib") && p.crate_types?.includes("cdylib")
-      );
-      // Hyphens are not allowed in crate names https://doc.rust-lang.org/reference/items/extern-crates.html
-      return wasmlib?.name?.replaceAll("-", "_");
-    }
-
-    function getWasmBindgenVersion(
-      pkg: CargoPackageMetadata,
-      metadata: CargoMetadata,
-    ) {
-      const wasmBindgenReq = metadata.resolve.nodes
-        .find((n) => n.id === pkg.id);
-      for (const depId of wasmBindgenReq?.dependencies ?? []) {
-        const pkg = metadata.packages.find((pkg) => pkg.id === depId);
-        if (pkg?.name === "wasm-bindgen") {
-          return pkg.version;
-        }
-      }
-      return undefined;
-    }
   }
 
   getWorkspacePackages() {
@@ -144,4 +116,87 @@ export class CargoWorkspace {
     }
     return pkgs;
   }
+}
+
+export class WasmCrate {
+  #metadata: CargoMetadata;
+  #pkg: CargoPackageMetadata;
+
+  libName: string;
+
+  constructor(opts: {
+    metadata: CargoMetadata;
+    pkg: CargoPackageMetadata;
+    libName: string;
+  }) {
+    this.#pkg = opts.pkg;
+    this.#metadata = opts.metadata;
+    this.libName = opts.libName;
+  }
+
+  get name() {
+    return this.#pkg.name;
+  }
+
+  get wasmBindgenVersion() {
+    return getWasmBindgenVersion(this.#pkg, this.#metadata);
+  }
+
+  get rootFolder() {
+    return path.dirname(this.#pkg.manifest_path);
+  }
+
+  async getSourcesHash() {
+    // simple for now...
+    const paths = await this.#getSourcePaths();
+    paths.sort();
+    const hasher = new Sha1();
+    for (const path of paths) {
+      const fileText = await Deno.readTextFile(path);
+      hasher.update(fileText);
+    }
+    return hasher.hex();
+  }
+
+  async #getSourcePaths() {
+    const paths = [];
+    for await (
+      const entry of expandGlob("**/{*.rs,Cargo.toml}", {
+        root: this.rootFolder,
+        exclude: ["./target"],
+      })
+    ) {
+      if (entry.isFile) {
+        console.log(entry.path);
+        paths.push(entry.path);
+      }
+    }
+    return paths;
+  }
+}
+
+function getWasmLibName(pkg: CargoPackageMetadata) {
+  // [lib]
+  // name = "deno_wasm"
+  // crate-type = ["cdylib"]
+  const wasmlib = pkg.targets?.find((p) =>
+    p.kind.includes("cdylib") && p.crate_types?.includes("cdylib")
+  );
+  // Hyphens are not allowed in crate names https://doc.rust-lang.org/reference/items/extern-crates.html
+  return wasmlib?.name?.replaceAll("-", "_");
+}
+
+function getWasmBindgenVersion(
+  pkg: CargoPackageMetadata,
+  metadata: CargoMetadata,
+) {
+  const wasmBindgenReq = metadata.resolve.nodes
+    .find((n) => n.id === pkg.id);
+  for (const depId of wasmBindgenReq?.dependencies ?? []) {
+    const pkg = metadata.packages.find((pkg) => pkg.id === depId);
+    if (pkg?.name === "wasm-bindgen") {
+      return pkg.version;
+    }
+  }
+  return undefined;
 }

@@ -46,8 +46,8 @@ greet("Deno");
 - `--project <crate_name>` / `-p <crate_name>` - Specifies the crate to build
   when using a Cargo workspace.
 - `--out <dir_path>` - Specifies the output directory. Defaults to `./lib`
-- `--out-js-ext <ext_no_period>` - Extension to use for the wasm bindgen JS file.
-  Defaults to `js`.
+- `--out-js-ext <ext_no_period>` - Extension to use for the wasm bindgen JS
+  file. Defaults to `js`.
 - `--all-features` - Build the crate with all features.
 - `--no-default-features` - Build the crate with no default features.
 - `--features` - Specify the features to create. Specify multiple features

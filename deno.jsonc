@@ -15,6 +15,6 @@
     "test:main": "cd tests && deno run --unstable -A ../main.ts -p deno_test",
     "test:sync": "deno task test:main --sync --out lib_sync",
     "test:js-ext": "rm -rf tests/lib_out_js_file && deno task test:main --js-ext mjs --out lib_out_js_file && cat tests/lib_out_js_file/deno_test.generated.mjs > /dev/null",
-    "test:check": "deno task test:main --check"
+    "test:check": "deno task test:main --check && deno task test:sync --check"
   }
 }

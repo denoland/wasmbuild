@@ -1,12 +1,7 @@
 #!/usr/bin/env -S deno run --unstable --allow-run --allow-read --allow-write --allow-env
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
-import * as colors from "https://deno.land/std@0.142.0/fmt/colors.ts";
-import * as base64 from "https://deno.land/std@0.142.0/encoding/base64.ts";
-import { emptyDir } from "https://deno.land/std@0.142.0/fs/empty_dir.ts";
-import { parse as parseFlags } from "https://deno.land/std@0.142.0/flags/mod.ts";
-import * as path from "https://deno.land/std@0.142.0/path/mod.ts";
-import { writeAll } from "https://deno.land/std@0.142.0/streams/conversion.ts";
+import { base64, colors, parseFlags, path, Sha1, writeAll } from "./deps.ts";
 import { getCargoWorkspace } from "./manifest.ts";
 import { instantiate } from "./lib/wasmbuild.generated.js";
 
@@ -42,6 +37,7 @@ const root = Deno.cwd();
 const workspace = await getCargoWorkspace(root, cargoFlags);
 const specifiedCrateName: string | undefined = flags.p ?? flags.project;
 const isSync: boolean = flags.sync ?? false;
+const isCheck: boolean = flags.check ?? false;
 const outDir = flags.out ?? "./lib";
 const crate = workspace.getWasmCrate(specifiedCrateName);
 const expectedWasmBindgenVersion = "0.2.81";
@@ -71,10 +67,6 @@ if (!(await rustupAddWasm).success) {
 console.log(
   `${colors.bold(colors.green("Building"))} ${crate.name} web assembly...`,
 );
-
-const copyrightHeader = `// Copyright 2018-${
-  new Date().getFullYear()
-} the Deno authors. All rights reserved. MIT license.`;
 
 const cargoBuildCmd = [
   "cargo",
@@ -121,36 +113,79 @@ const bindgenOutput = await generate_bindgen(
   originalWasmBytes,
 ) as BindgenOutput;
 
-await createSnippets(bindgenOutput);
-
-const wasmFileName = `${crate.libName}_bg.wasm`;
-if (!isSync) {
-  const wasmDest = path.join(outDir, wasmFileName);
-  await Deno.writeFile(wasmDest, new Uint8Array(bindgenOutput.wasmBytes));
-}
-
 console.log(
   `${colors.bold(colors.green("Generating"))} lib JS bindings...`,
 );
+const wasmFileName = `${crate.libName}_bg.wasm`;
+const bindingJsPath = path.join(outDir, `${crate.libName}.generated.js`);
+const bindingJsText = await getBindingJsText();
 
-const bindingJs = await getBindingJsText(bindgenOutput);
-const libDenoJs = path.join(outDir, `${crate.libName}.generated.js`);
-console.log(`  write ${colors.yellow(libDenoJs)}`);
-await Deno.writeTextFile(libDenoJs, bindingJs);
+if (isCheck) {
+  await checkOutputUpToDate();
+} else {
+  await writeOutput();
+}
 
-console.log(
-  `${colors.bold(colors.green("Finished"))} ${crate.name} web assembly.`,
-);
+async function checkOutputUpToDate() {
+  // The file text contains a hash of the source input,
+  // so we can verify the output is up to date by seeing
+  // if the output is the same of the binding js file.
+  const originalBindingJsText = await getOriginalBindingJsFileText();
+  if (originalBindingJsText === bindingJsText) {
+    console.log(
+      `${colors.bold(colors.green("Success"))} ` +
+        `wasmbuild output is up to date.`,
+    );
+  } else {
+    console.error(
+      `${colors.bold(colors.red("Error"))} ` +
+        `wasmbuild output is out of date.`,
+    );
+    Deno.exit(1);
+  }
 
-async function getBindingJsText(bindgenOutput: BindgenOutput) {
+  async function getOriginalBindingJsFileText() {
+    try {
+      return await Deno.readTextFile(bindingJsPath);
+    } catch (err) {
+      if (err instanceof Deno.errors.NotFound) {
+        return undefined;
+      } else {
+        throw err;
+      }
+    }
+  }
+}
+
+async function writeOutput() {
+  await writeSnippets();
+
+  if (!isSync) {
+    const wasmDest = path.join(outDir, wasmFileName);
+    await Deno.writeFile(wasmDest, new Uint8Array(bindgenOutput.wasmBytes));
+  }
+
+  console.log(`  write ${colors.yellow(bindingJsPath)}`);
+  await Deno.writeTextFile(bindingJsPath, bindingJsText);
+
+  console.log(
+    `${colors.bold(colors.green("Finished"))} ${crate.name} web assembly.`,
+  );
+}
+
+async function getBindingJsText() {
+  const copyrightHeader = `// Copyright 2018-${
+    new Date().getFullYear()
+  } the Deno authors. All rights reserved. MIT license.`;
   const bindingJs = `${copyrightHeader}
 // @generated file from build script, do not edit
 // deno-lint-ignore-file
+// ${await getHash()}
 let wasm;
 ${
     bindgenOutput.js.replace(
       /\bconst\swasm_url\s.+/ms,
-      getLoaderText(bindgenOutput),
+      getLoaderText(),
     )
   }
 `;
@@ -179,18 +214,37 @@ ${
     Deno.exit(1);
   }
   return new TextDecoder().decode(output);
-}
 
-function getLoaderText(bindgenOutput: BindgenOutput) {
-  if (isSync) {
-    return getSyncLoaderText(bindgenOutput);
-  } else {
-    return getAsyncLoaderText(bindgenOutput);
+  async function getHash() {
+    // Create a hash of all the sources, snippets, and local modules
+    // in order to tell when the output has changed.
+    const hasher = new Sha1();
+    const sourceHash = await crate.getSourcesHash();
+    hasher.update(sourceHash);
+    for (const [identifier, list] of Object.entries(bindgenOutput.snippets)) {
+      hasher.update(identifier);
+      for (const text of list) {
+        hasher.update(text);
+      }
+    }
+    for (const [name, text] of Object.entries(bindgenOutput.localModules)) {
+      hasher.update(name);
+      hasher.update(text);
+    }
+    return hasher.hex();
   }
 }
 
-function getSyncLoaderText(bindgenOutput: BindgenOutput) {
-  const exportNames = getExportNames(bindgenOutput);
+function getLoaderText() {
+  if (isSync) {
+    return getSyncLoaderText();
+  } else {
+    return getAsyncLoaderText();
+  }
+}
+
+function getSyncLoaderText() {
+  const exportNames = getExportNames();
   return `
 /** Instantiates an instance of the Wasm module returning its functions.
  * @remarks It is safe to call this multiple times and once successfully
@@ -250,8 +304,8 @@ function base64decode(b64) {
   `;
 }
 
-function getAsyncLoaderText(bindgenOutput: BindgenOutput) {
-  const exportNames = getExportNames(bindgenOutput);
+function getAsyncLoaderText() {
+  const exportNames = getExportNames();
   return `
 const wasm_url = new URL("${wasmFileName}", import.meta.url);
 
@@ -327,13 +381,13 @@ async function instantiateModule() {
   `;
 }
 
-function getExportNames(bindgenOutput: BindgenOutput) {
+function getExportNames() {
   return Array.from(bindgenOutput.js.matchAll(
     /export (function|class) ([^({]+)[({]/g,
   )).map((m) => m[2]);
 }
 
-async function createSnippets(bindgenOutput: BindgenOutput) {
+async function writeSnippets() {
   const localModules = Object.entries(bindgenOutput.localModules);
   const snippets = Object.entries(bindgenOutput.snippets);
 

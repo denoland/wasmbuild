@@ -2,7 +2,7 @@ use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(module = "/add.js")]
 extern "C" {
-    fn add(a: u32, b: u32) -> u32;
+  fn add(a: u32, b: u32) -> u32;
 }
 
 #[wasm_bindgen]

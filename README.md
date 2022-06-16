@@ -42,16 +42,18 @@ greet("Deno");
 
 ### CLI Flags
 
-- `--check` - Checks to ensure the output is up to date.
-  - This is useful to run on the CI in order to ensure the wasmbuild output is
-    up to date.
 - `--debug` - Build without optimizations.
-- `--project <crate-name>` / `-p <crate-name>` - Specifies the crate to build
+- `--project <crate_name>` / `-p <crate_name>` - Specifies the crate to build
   when using a Cargo workspace.
-- `--out <dir-path>` - Specifies the output directory. Defaults to `./lib`
+- `--out <dir_path>` - Specifies the output directory. Defaults to `./lib`
+- `--js-ext <ext_no_period>` - Extension to use for the wasm bindgen JS file.
+  Defaults to `js`.
 - `--all-features` - Build the crate with all features.
 - `--no-default-features` - Build the crate with no default features.
 - `--features` - Specify the features to create. Specify multiple features
   quoted and with spaces (ex. `--features "wasm serialization"`).
 - `--sync` - Generate a synchronous module that stores the Wasm module inline as
   base64 text.
+- `--check` - Checks to ensure the output is up to date.
+  - This is useful to run on the CI in order to ensure the wasmbuild output is
+    up to date.

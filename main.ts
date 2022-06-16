@@ -40,6 +40,8 @@ const isSync: boolean = flags.sync ?? false;
 const isCheck: boolean = flags.check ?? false;
 const outDir = flags.out ?? "./lib";
 const crate = workspace.getWasmCrate(specifiedCrateName);
+const bindingJsFileExt = flags["js-ext"] ?? `js`;
+const bindingJsFileName = `${crate.libName}.generated.${bindingJsFileExt}`;
 const expectedWasmBindgenVersion = "0.2.81";
 
 if (crate.wasmBindgenVersion !== expectedWasmBindgenVersion) {
@@ -117,7 +119,7 @@ console.log(
   `${colors.bold(colors.green("Generating"))} lib JS bindings...`,
 );
 const wasmFileName = `${crate.libName}_bg.wasm`;
-const bindingJsPath = path.join(outDir, `${crate.libName}.generated.js`);
+const bindingJsPath = path.join(outDir, bindingJsFileName);
 const bindingJsText = await getBindingJsText();
 
 if (isCheck) {

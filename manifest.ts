@@ -167,7 +167,6 @@ export class WasmCrate {
       })
     ) {
       if (entry.isFile) {
-        console.log(entry.path);
         paths.push(entry.path);
       }
     }

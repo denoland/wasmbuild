@@ -120,7 +120,7 @@ console.log(
 );
 const wasmFileName = `${crate.libName}_bg.wasm`;
 const bindingJsPath = path.join(outDir, bindingJsFileName);
-const bindingJsText = await getBindingJsText();
+const { bindingJsText, sourceHash } = await getBindingJsOutput();
 
 if (isCheck) {
   await checkOutputUpToDate();
@@ -129,11 +129,8 @@ if (isCheck) {
 }
 
 async function checkOutputUpToDate() {
-  // The file text contains a hash of the source input,
-  // so we can verify the output is up to date by seeing
-  // if the output is the same of the binding js file.
-  const originalBindingJsText = await getOriginalBindingJsFileText();
-  if (originalBindingJsText === bindingJsText) {
+  const originalHash = await getOriginalSourceHash();
+  if (originalHash === sourceHash) {
     console.log(
       `${colors.bold(colors.green("Success"))} ` +
         `wasmbuild output is up to date.`,
@@ -141,14 +138,14 @@ async function checkOutputUpToDate() {
   } else {
     console.error(
       `${colors.bold(colors.red("Error"))} ` +
-        `wasmbuild output is out of date.`,
+        `wasmbuild output is out of date (found hash ${sourceHash}, expected ${originalHash}).`,
     );
     Deno.exit(1);
   }
 
-  async function getOriginalBindingJsFileText() {
+  async function getOriginalSourceHash() {
     try {
-      return await Deno.readTextFile(bindingJsPath);
+      return getSourceHashFromText(await Deno.readTextFile(bindingJsPath));
     } catch (err) {
       if (err instanceof Deno.errors.NotFound) {
         return undefined;
@@ -156,6 +153,11 @@ async function checkOutputUpToDate() {
         throw err;
       }
     }
+  }
+
+  function getSourceHashFromText(text: string) {
+    const result = text.match(/source-hash: (.+)\b/);
+    return result?.[1];
   }
 }
 
@@ -175,14 +177,15 @@ async function writeOutput() {
   );
 }
 
-async function getBindingJsText() {
+async function getBindingJsOutput() {
+  const sourceHash = await getHash();
   const copyrightHeader = `// Copyright 2018-${
     new Date().getFullYear()
   } the Deno authors. All rights reserved. MIT license.`;
   const bindingJs = `${copyrightHeader}
 // @generated file from build script, do not edit
 // deno-lint-ignore-file
-// ${await getHash()}
+// source-hash: ${sourceHash}
 let wasm;
 ${
     bindgenOutput.js.replace(
@@ -215,7 +218,11 @@ ${
     console.error("deno fmt command failed");
     Deno.exit(1);
   }
-  return new TextDecoder().decode(output);
+
+  return {
+    bindingJsText: new TextDecoder().decode(output),
+    sourceHash,
+  };
 
   async function getHash() {
     // Create a hash of all the sources, snippets, and local modules

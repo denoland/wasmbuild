@@ -1,7 +1,7 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 // @generated file from build script, do not edit
 // deno-lint-ignore-file
-// source-hash: 30a5c71e9a72f3f3b278f8c0b1fc20945d9642c8
+// source-hash: 2f976c7d12d216181909942cd59a68a9487cf7a4
 let wasm;
 import { add } from "./snippets/deno_test-0783d0dd1a7e0cd8/add.js";
 

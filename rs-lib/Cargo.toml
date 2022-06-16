@@ -14,8 +14,8 @@ opt-level = "z"
 
 [dependencies]
 anyhow = "1.0.57"
-js-sys = "0.3.58"
+js-sys = { git = "https://github.com/dsherret/wasm-bindgen", branch = "add_back_types_getters_setters" }
 serde = { version = "1.0.130", features = ["derive", "rc"] }
 # make sure to update the version in main.ts to match this version
-wasm-bindgen = { version = "0.2.81", features = ["serde-serialize"] }
-wasm-bindgen-cli-support = { version = "0.2.81" }
+wasm-bindgen = { git = "https://github.com/dsherret/wasm-bindgen", branch = "add_back_types_getters_setters", features = ["serde-serialize"] }
+wasm-bindgen-cli-support = { git = "https://github.com/dsherret/wasm-bindgen", branch = "add_back_types_getters_setters" }

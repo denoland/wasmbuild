@@ -8,7 +8,7 @@ import { parse as parseFlags } from "https://deno.land/std@0.142.0/flags/mod.ts"
 import * as path from "https://deno.land/std@0.142.0/path/mod.ts";
 import { writeAll } from "https://deno.land/std@0.142.0/streams/conversion.ts";
 import { getCargoWorkspace } from "./manifest.ts";
-import { generate_bindgen } from "./lib/wasmbuild.generated.js";
+import { instantiate } from "./lib/wasmbuild.generated.js";
 
 interface BindgenOutput {
   js: string;
@@ -44,7 +44,7 @@ const specifiedCrateName: string | undefined = flags.p ?? flags.project;
 const isSync: boolean = flags.sync ?? false;
 const outDir = flags.out ?? "./lib";
 const crate = workspace.getWasmCrate(specifiedCrateName);
-const expectedWasmBindgenVersion = "0.2.80";
+const expectedWasmBindgenVersion = "0.2.81";
 
 if (crate.wasmBindgenVersion !== expectedWasmBindgenVersion) {
   throw new Error(
@@ -108,12 +108,14 @@ if (!(await cargoBuildReleaseCmdStatus).success) {
   Deno.exit(1);
 }
 
-await emptyDir("./target/wasm32-bindgen-deno-js");
-
 console.log(`  ${colors.bold(colors.gray("Running wasm-bindgen..."))}`);
 const originalWasmBytes = await Deno.readFile(
-  `./target/wasm32-unknown-unknown/${profile}/${crate.libName}.wasm`,
+  path.join(
+    workspace.metadata.target_directory,
+    `wasm32-unknown-unknown/${profile}/${crate.libName}.wasm`,
+  ),
 );
+const { generate_bindgen } = await instantiate();
 const bindgenOutput = await generate_bindgen(
   crate.libName,
   originalWasmBytes,

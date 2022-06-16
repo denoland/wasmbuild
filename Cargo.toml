@@ -1,8 +1,5 @@
 [workspace]
 members = [
   "rs-lib",
+  "tests",
 ]
-
-# temporarily excluded to enable using a git dependency
-# for wasm-bindgen in rs-lib
-exclude = ["tests"]

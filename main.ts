@@ -108,11 +108,12 @@ if (!(await cargoBuildReleaseCmdStatus).success) {
   Deno.exit(1);
 }
 
-await emptyDir("./target/wasm32-bindgen-deno-js");
-
 console.log(`  ${colors.bold(colors.gray("Running wasm-bindgen..."))}`);
 const originalWasmBytes = await Deno.readFile(
-  `./target/wasm32-unknown-unknown/${profile}/${crate.libName}.wasm`,
+  path.join(
+    workspace.metadata.target_directory,
+    `wasm32-unknown-unknown/${profile}/${crate.libName}.wasm`,
+  ),
 );
 const { generate_bindgen } = await instantiate();
 const bindgenOutput = await generate_bindgen(

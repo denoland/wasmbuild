@@ -6,6 +6,8 @@ export interface CargoMetadata {
   "workspace_members": string[];
   /** The absolute workspace root directory path. */
   "workspace_root": string;
+  /** Path to the target directory. */
+  "target_directory": string;
   resolve: {
     nodes: {
       id: string;

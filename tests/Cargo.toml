@@ -6,7 +6,7 @@ authors = ["the Deno authors"]
 license = "MIT"
 
 [dependencies]
-wasm-bindgen = { version = "0.2.81" }
+wasm-bindgen = { git = "https://github.com/dsherret/wasm-bindgen", branch = "add_back_types_getters_setters" }
 
 [lib]
 name = "deno_test"

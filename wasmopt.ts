@@ -70,7 +70,7 @@ async function fileExists(path: string) {
 
 async function downloadBinaryen(tempPath: string) {
   console.log(
-    `${colors.bold(colors.green("Ensuring"))} wasm-opt binary is cached...`,
+    `${colors.bold(colors.green("Caching"))} wasm-opt binary...`,
   );
 
   const response = await fetch(binaryenUrl());
@@ -83,12 +83,11 @@ async function downloadBinaryen(tempPath: string) {
 
   for await (const entry of untar) {
     const fileName = path.join(tempPath, entry.fileName);
-    console.log(fileName);
     if (entry.type === "directory") {
       await ensureDir(fileName);
     } else if (entry.type === "file") {
       await ensureFile(fileName);
-      const file = await Deno.open(fileName, { write: true, mode: 0o775 });
+      const file = await Deno.open(fileName, { write: true, mode: 0o755 });
       await copy(entry, file);
     }
   }

@@ -34,10 +34,6 @@ jobs:
       - name: Setup rust-cache
         uses: Swatinem/rust-cache@v1
 
-      - name: Install wasm32-unknown-unknown toolchain
-        run: |
-          rustup target add wasm32-unknown-unknown
-
       - name: Install deno
         uses: denoland/setup-deno@v1.0.0
         with:

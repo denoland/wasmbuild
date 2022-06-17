@@ -83,8 +83,8 @@ async function downloadBinaryen(tempPath: string) {
   const untar = new Untar(new Buffer(decompressed));
 
   for await (const entry of untar) {
-    if (entry.fileName.endsWith(wasmOptFileName)) {
-      const fileName = path.join(tempPath, wasmOptFileName);
+    if (entry.fileName.endsWith(wasmOptFileName) || entry.fileName.endsWith(".dylib")) {
+      const fileName = path.join(tempPath, path.basename(entry.fileName));
       await ensureDir(path.dirname(fileName));
       const file = await Deno.open(fileName, {
         create: true,
@@ -96,11 +96,8 @@ async function downloadBinaryen(tempPath: string) {
       } finally {
         file.close();
       }
-      return;
     }
   }
-
-  throw new Error(`Did not find ${wasmOptFileName} in archive.`);
 }
 
 function binaryenUrl() {

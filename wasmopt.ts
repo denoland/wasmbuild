@@ -41,6 +41,7 @@ async function getWasmOptBinaryPath() {
   const tempDirPath = path.join(cacheDirPath, "wasmbuild", tag);
   const wasmOptExePath = path.join(
     tempDirPath,
+    `binaryen-${tag}/bin`,
     wasmOptFileName,
   );
 
@@ -87,7 +88,7 @@ async function downloadBinaryen(tempPath: string) {
       entry.fileName.endsWith(wasmOptFileName) ||
       entry.fileName.endsWith(".dylib")
     ) {
-      const fileName = path.join(tempPath, path.basename(entry.fileName));
+      const fileName = path.join(tempPath, entry.fileName);
       await ensureDir(path.dirname(fileName));
       const file = await Deno.open(fileName, {
         create: true,

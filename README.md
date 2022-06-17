@@ -1,6 +1,6 @@
 # wasmbuild
 
-A build tool to generate wasm-bindgen glue code for Deno and the Browser.
+A build tool to generate wasm-bindgen glue code for Deno and the browser.
 
 ## Setup
 

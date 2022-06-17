@@ -166,6 +166,9 @@ async function checkOutputUpToDate() {
 async function writeOutput() {
   await writeSnippets();
 
+  console.log(`  write ${colors.yellow(bindingJsPath)}`);
+  await Deno.writeTextFile(bindingJsPath, bindingJsText);
+
   if (!isSync) {
     const wasmDest = path.join(outDir, wasmFileName);
     await Deno.writeFile(wasmDest, new Uint8Array(bindgenOutput.wasmBytes));
@@ -173,9 +176,6 @@ async function writeOutput() {
       await optimizeWasmFile(wasmDest);
     }
   }
-
-  console.log(`  write ${colors.yellow(bindingJsPath)}`);
-  await Deno.writeTextFile(bindingJsPath, bindingJsText);
 
   console.log(
     `${colors.bold(colors.green("Finished"))} ${crate.name} web assembly.`,

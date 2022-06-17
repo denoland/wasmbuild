@@ -10,6 +10,11 @@ import {
   Untar,
 } from "./deps.ts";
 
+const wasmOptFileName = Deno.build.os === "windows"
+  ? "wasm-opt.exe"
+  : "wasm-opt";
+const tag = "version_109";
+
 export async function runWasmOpt(filePath: string) {
   const binPath = await getWasmOptBinaryPath();
   const optimizedPath = filePath + ".temp";
@@ -33,14 +38,11 @@ async function getWasmOptBinaryPath() {
   if (!cacheDirPath) {
     throw new Error("Could not find cache directory.");
   }
-  const tempDirPath = path.join(cacheDirPath, "wasmbuild");
-  let wasmOptExePath = path.join(
+  const tempDirPath = path.join(cacheDirPath, "wasmbuild", tag);
+  const wasmOptExePath = path.join(
     tempDirPath,
-    "binaryen-version_97/bin/wasm-opt",
+    wasmOptFileName,
   );
-  if (Deno.build.os === "windows") {
-    wasmOptExePath += ".exe";
-  }
 
   if (!(await fileExists(wasmOptExePath))) {
     await downloadBinaryen(tempDirPath);
@@ -81,8 +83,8 @@ async function downloadBinaryen(tempPath: string) {
   const untar = new Untar(new Buffer(decompressed));
 
   for await (const entry of untar) {
-    const fileName = path.join(tempPath, entry.fileName);
-    if (entry.type === "file") {
+    if (entry.fileName.endsWith(wasmOptFileName)) {
+      const fileName = path.join(tempPath, wasmOptFileName);
       await ensureDir(path.dirname(fileName));
       const file = await Deno.open(fileName, {
         create: true,
@@ -94,8 +96,11 @@ async function downloadBinaryen(tempPath: string) {
       } finally {
         file.close();
       }
+      return;
     }
   }
+
+  throw new Error(`Did not find ${wasmOptFileName} in archive.`);
 }
 
 function binaryenUrl() {
@@ -104,7 +109,6 @@ function binaryenUrl() {
     "darwin": "x86_64-macos",
     "windows": "x86_64-windows",
   }[Deno.build.os];
-  const tag = "version_97";
   return new URL(
     `https://github.com/WebAssembly/binaryen/releases/download/${tag}/binaryen-${tag}-${target}.tar.gz`,
   );

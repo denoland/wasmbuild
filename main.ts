@@ -253,12 +253,12 @@ ${
     for (const [identifier, list] of Object.entries(bindgenOutput.snippets)) {
       hasher.update(identifier);
       for (const text of list) {
-        hasher.update(text);
+        hasher.update(text.replace(/\r?\n/, "\n"));
       }
     }
     for (const [name, text] of Object.entries(bindgenOutput.localModules)) {
       hasher.update(name);
-      hasher.update(text);
+      hasher.update(text.replace(/\r?\n/, "\n"));
     }
     return hasher.hex();
   }

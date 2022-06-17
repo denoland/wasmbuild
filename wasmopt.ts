@@ -5,7 +5,6 @@ import {
   colors,
   copy,
   ensureDir,
-  ensureFile,
   gunzip,
   path,
   Untar,
@@ -83,12 +82,14 @@ async function downloadBinaryen(tempPath: string) {
 
   for await (const entry of untar) {
     const fileName = path.join(tempPath, entry.fileName);
-    if (entry.type === "directory") {
-      await ensureDir(fileName);
-    } else if (entry.type === "file") {
-      await ensureFile(fileName);
-      const file = await Deno.open(fileName, { write: true, mode: 0o755 });
-      await copy(entry, file);
+    if (entry.type === "file") {
+      await ensureDir(path.dirname(fileName));
+      const file = await Deno.open(fileName, { create: true, write: true, mode: 0o755 });
+      try {
+        await copy(entry, file);
+      } finally {
+        file.close();
+      }
     }
   }
 }

@@ -191,7 +191,7 @@ async function optimizeWasmFile(wasmFilePath: string) {
   } catch (err) {
     console.error(
       `${colors.bold(colors.red("Error"))} ` +
-        `running wasmopt failed. Maybe skip with --skip-opt?\n\n${err}`,
+        `running wasm-opt failed. Maybe skip with --skip-opt?\n\n${err}`,
     );
     Deno.exit(1);
   }

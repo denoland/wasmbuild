@@ -1,0 +1,4 @@
+# exclude these from the language stats
+lib/wasmbuild.generated.js linguist-vendored
+tests/lib/deno_test.generated.js linguist-vendored
+tests/lib_sync/deno_test.generated.js linguist-vendored

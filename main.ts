@@ -389,13 +389,19 @@ export function isInstantiated() {
 async function instantiateModule() {
   switch (wasm_url.protocol) {
     case "file:": {
+      if (typeof Deno !== "object") {
+        throw new Error("file urls are not supported in this environment");
+      }
+
       if ("permissions" in Deno) Deno.permissions.request({ name: "read", path: wasm_url });
       const wasmCode = await Deno.readFile(wasm_url);
       return WebAssembly.instantiate(wasmCode, imports);
     }
     case "https:":
     case "http:": {
-      if ("permissions" in Deno) Deno.permissions.request({ name: "net", host: wasm_url.host });
+      if (typeof Deno === "object" && "permissions" in Deno) {
+        Deno.permissions.request({ name: "net", host: wasm_url.host });
+      }
       const wasmResponse = await fetch(wasm_url);
       if (wasmResponse.headers.get("content-type")?.toLowerCase().startsWith("application/wasm")) {
         return WebAssembly.instantiateStreaming(wasmResponse, imports);

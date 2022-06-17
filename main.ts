@@ -1,9 +1,56 @@
 #!/usr/bin/env -S deno run --unstable --allow-run --allow-read --allow-write --allow-env
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
-import { base64, colors, parseFlags, path, Sha1, writeAll } from "./deps.ts";
+import {
+  base64,
+  Buffer,
+  colors,
+  copy,
+  ensureDir,
+  ensureFile,
+  gunzip,
+  parseFlags,
+  path,
+  Sha1,
+  Untar,
+  writeAll,
+} from "./deps.ts";
 import { getCargoWorkspace } from "./manifest.ts";
 import { instantiate } from "./lib/wasmbuild.generated.js";
+
+function binaryenUrl(target: string) {
+  const tag = "version_97";
+  return new URL(
+    `https://github.com/WebAssembly/binaryen/releases/download/${tag}/binaryen-${tag}-${target}.tar.gz`,
+  );
+}
+
+const TARGET_MAP = {
+  "linux": "x86_64-linux",
+  "darwin": "x86_64-macos",
+  "windows": "x86_64-windows",
+};
+
+async function downloadBinaryen() {
+  const response = await fetch(binaryenUrl(TARGET_MAP[Deno.build.os]));
+  const buf = new Uint8Array(await response.arrayBuffer());
+  const decompressed = gunzip(buf);
+
+  const untar = new Untar(new Buffer(decompressed));
+  for await (const entry of untar) {
+    if (entry.type == "directory") {
+      await ensureDir(entry.fileName);
+      continue;
+    }
+    if (entry.type == "file") {
+      await ensureFile(entry.fileName);
+      const file = await Deno.open(entry.fileName, { write: true });
+      await copy(entry, file);
+    }
+  }
+}
+
+downloadBinaryen();
 
 interface BindgenOutput {
   js: string;

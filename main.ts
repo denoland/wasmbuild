@@ -1,72 +1,10 @@
 #!/usr/bin/env -S deno run --unstable --allow-run --allow-read --allow-write --allow-env
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
-import {
-  base64,
-  Buffer,
-  colors,
-  copy,
-  ensureDir,
-  ensureFile,
-  gunzip,
-  parseFlags,
-  path,
-  Sha1,
-  Untar,
-  cacheDir,
-  writeAll,
-} from "./deps.ts";
+import { base64, colors, parseFlags, path, Sha1, writeAll } from "./deps.ts";
 import { getCargoWorkspace } from "./manifest.ts";
 import { instantiate } from "./lib/wasmbuild.generated.js";
-
-function binaryenUrl(target: string) {
-  const tag = "version_97";
-  return new URL(
-    `https://github.com/WebAssembly/binaryen/releases/download/${tag}/binaryen-${tag}-${target}.tar.gz`,
-  );
-}
-
-const TARGET_MAP = {
-  "linux": "x86_64-linux",
-  "darwin": "x86_64-macos",
-  "windows": "x86_64-windows",
-};
-const cacheDirPath = cacheDir();
-if (!cacheDirPath) {
-  throw new Error("Could not find cache directory.");
-}
-const wasmOptTempPath = path.join(cacheDirPath, "wasmbuild");
-console.log(wasmOptTempPath);
-
-async function downloadBinaryen() {
-  const response = await fetch(binaryenUrl(TARGET_MAP[Deno.build.os]));
-  if (!response.ok) {
-    throw new Error(`Error downloading wasmopt: ${response.statusText}`);
-  }
-  const buf = new Uint8Array(await response.arrayBuffer());
-  const decompressed = gunzip(buf);
-
-  const untar = new Untar(new Buffer(decompressed));
-  for await (const entry of untar) {
-    const fileName = path.join(wasmOptTempPath, entry.fileName);
-    console.log(fileName);
-    if (entry.type === "directory") {
-      await ensureDir(fileName);
-    } else if (entry.type === "file") {
-      await ensureFile(fileName);
-      const file = await Deno.open(fileName, { write: true, mode: 0o775 });
-      await copy(entry, file);
-    }
-  }
-}
-
-await downloadBinaryen();
-let wasmOptExePath = path.join(wasmOptTempPath, "binaryen-version_97/bin/wasm-opt");
-if (Deno.build.os === "windows") {
-  wasmOptExePath += ".exe";
-}
-console.log(wasmOptExePath);
-throw "STOP";
+import { runWasmOpt } from "./wasmopt.ts";
 
 interface BindgenOutput {
   js: string;
@@ -101,6 +39,7 @@ const workspace = await getCargoWorkspace(root, cargoFlags);
 const specifiedCrateName: string | undefined = flags.p ?? flags.project;
 const isSync: boolean = flags.sync ?? false;
 const isCheck: boolean = flags.check ?? false;
+const isOpt: boolean = flags["skip-opt"] ?? true;
 const outDir = flags.out ?? "./lib";
 const crate = workspace.getWasmCrate(specifiedCrateName);
 const bindingJsFileExt = flags["js-ext"] ?? `js`;
@@ -230,6 +169,9 @@ async function writeOutput() {
   if (!isSync) {
     const wasmDest = path.join(outDir, wasmFileName);
     await Deno.writeFile(wasmDest, new Uint8Array(bindgenOutput.wasmBytes));
+    if (isOpt) {
+      await optimizeWasmFile(wasmDest);
+    }
   }
 
   console.log(`  write ${colors.yellow(bindingJsPath)}`);
@@ -238,6 +180,21 @@ async function writeOutput() {
   console.log(
     `${colors.bold(colors.green("Finished"))} ${crate.name} web assembly.`,
   );
+}
+
+async function optimizeWasmFile(wasmFilePath: string) {
+  try {
+    console.log(
+      `${colors.bold(colors.green("Optimizing"))} .wasm file...`,
+    );
+    await runWasmOpt(wasmFilePath);
+  } catch (err) {
+    console.error(
+      `${colors.bold(colors.red("Error"))} ` +
+        `running wasmopt failed. Maybe skip with --skip-opt?\n\n${err}`,
+    );
+    Deno.exit(1);
+  }
 }
 
 async function getBindingJsOutput() {

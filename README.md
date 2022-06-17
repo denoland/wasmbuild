@@ -57,3 +57,4 @@ greet("Deno");
 - `--check` - Checks to ensure the output is up to date.
   - This is useful to run on the CI in order to ensure the wasmbuild output is
     up to date.
+- `--skip-opt` - Skip running wasm-opt.

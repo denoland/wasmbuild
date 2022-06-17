@@ -4,6 +4,7 @@
 import { base64, colors, parseFlags, path, Sha1, writeAll } from "./deps.ts";
 import { getCargoWorkspace } from "./manifest.ts";
 import { instantiate } from "./lib/wasmbuild.generated.js";
+import { runWasmOpt } from "./wasmopt.ts";
 
 interface BindgenOutput {
   js: string;
@@ -38,6 +39,7 @@ const workspace = await getCargoWorkspace(root, cargoFlags);
 const specifiedCrateName: string | undefined = flags.p ?? flags.project;
 const isSync: boolean = flags.sync ?? false;
 const isCheck: boolean = flags.check ?? false;
+const isOpt: boolean = !(flags["skip-opt"] ?? false);
 const outDir = flags.out ?? "./lib";
 const crate = workspace.getWasmCrate(specifiedCrateName);
 const bindingJsFileExt = flags["js-ext"] ?? `js`;
@@ -167,6 +169,9 @@ async function writeOutput() {
   if (!isSync) {
     const wasmDest = path.join(outDir, wasmFileName);
     await Deno.writeFile(wasmDest, new Uint8Array(bindgenOutput.wasmBytes));
+    if (isOpt) {
+      await optimizeWasmFile(wasmDest);
+    }
   }
 
   console.log(`  write ${colors.yellow(bindingJsPath)}`);
@@ -175,6 +180,21 @@ async function writeOutput() {
   console.log(
     `${colors.bold(colors.green("Finished"))} ${crate.name} web assembly.`,
   );
+}
+
+async function optimizeWasmFile(wasmFilePath: string) {
+  try {
+    console.log(
+      `${colors.bold(colors.green("Optimizing"))} .wasm file...`,
+    );
+    await runWasmOpt(wasmFilePath);
+  } catch (err) {
+    console.error(
+      `${colors.bold(colors.red("Error"))} ` +
+        `running wasm-opt failed. Maybe skip with --skip-opt?\n\n${err}`,
+    );
+    Deno.exit(1);
+  }
 }
 
 async function getBindingJsOutput() {
@@ -233,12 +253,12 @@ ${
     for (const [identifier, list] of Object.entries(bindgenOutput.snippets)) {
       hasher.update(identifier);
       for (const text of list) {
-        hasher.update(text);
+        hasher.update(text.replace(/\r?\n/g, "\n"));
       }
     }
     for (const [name, text] of Object.entries(bindgenOutput.localModules)) {
       hasher.update(name);
-      hasher.update(text);
+      hasher.update(text.replace(/\r?\n/g, "\n"));
     }
     return hasher.hex();
   }

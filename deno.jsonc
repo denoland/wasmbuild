@@ -10,7 +10,7 @@
   "tasks": {
     "fmt": "deno fmt && cargo fmt",
     "build": "deno run -A --unstable ./main.ts -p wasmbuild",
-    "build:lkg": "deno run -A --unstable https://deno.land/x/wasmbuild@0.5.0/main.ts -p wasmbuild",
+    "build:lkg": "deno run -A --unstable https://deno.land/x/wasmbuild@0.6.1/main.ts -p wasmbuild",
     "test": "cd tests && deno task test:main && deno task test:sync && deno task test:js-ext && deno test -A && deno task test:check",
     "test:main": "cd tests && deno run --unstable -A ../main.ts -p deno_test",
     "test:sync": "deno task test:main --sync --out lib_sync",

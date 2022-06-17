@@ -12,3 +12,4 @@ export { Buffer } from "https://deno.land/std@0.144.0/io/mod.ts";
 export { ensureDir, ensureFile } from "https://deno.land/std@0.144.0/fs/mod.ts";
 export { expandGlob } from "https://deno.land/std@0.142.0/fs/expand_glob.ts";
 export { writeAll } from "https://deno.land/std@0.142.0/streams/conversion.ts";
+export { default as cacheDir } from "https://deno.land/x/dir@1.4.0/cache_dir/mod.ts";

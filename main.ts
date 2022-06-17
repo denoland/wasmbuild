@@ -13,6 +13,7 @@ import {
   path,
   Sha1,
   Untar,
+  cacheDir,
   writeAll,
 } from "./deps.ts";
 import { getCargoWorkspace } from "./manifest.ts";
@@ -30,27 +31,42 @@ const TARGET_MAP = {
   "darwin": "x86_64-macos",
   "windows": "x86_64-windows",
 };
+const cacheDirPath = cacheDir();
+if (!cacheDirPath) {
+  throw new Error("Could not find cache directory.");
+}
+const wasmOptTempPath = path.join(cacheDirPath, "wasmbuild");
+console.log(wasmOptTempPath);
 
 async function downloadBinaryen() {
   const response = await fetch(binaryenUrl(TARGET_MAP[Deno.build.os]));
+  if (!response.ok) {
+    throw new Error(`Error downloading wasmopt: ${response.statusText}`);
+  }
   const buf = new Uint8Array(await response.arrayBuffer());
   const decompressed = gunzip(buf);
 
   const untar = new Untar(new Buffer(decompressed));
   for await (const entry of untar) {
-    if (entry.type == "directory") {
-      await ensureDir(entry.fileName);
-      continue;
-    }
-    if (entry.type == "file") {
-      await ensureFile(entry.fileName);
-      const file = await Deno.open(entry.fileName, { write: true });
+    const fileName = path.join(wasmOptTempPath, entry.fileName);
+    console.log(fileName);
+    if (entry.type === "directory") {
+      await ensureDir(fileName);
+    } else if (entry.type === "file") {
+      await ensureFile(fileName);
+      const file = await Deno.open(fileName, { write: true, mode: 0o775 });
       await copy(entry, file);
     }
   }
 }
 
-downloadBinaryen();
+await downloadBinaryen();
+let wasmOptExePath = path.join(wasmOptTempPath, "binaryen-version_97/bin/wasm-opt");
+if (Deno.build.os === "windows") {
+  wasmOptExePath += ".exe";
+}
+console.log(wasmOptExePath);
+throw "STOP";
 
 interface BindgenOutput {
   js: string;

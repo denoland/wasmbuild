@@ -1,6 +1,6 @@
 # wasmbuild
 
-A tiny build tool to generate wasm-bindgen glue for Deno.
+A build tool to generate wasm-bindgen glue code for Deno and the browser.
 
 ## Setup
 
@@ -22,7 +22,8 @@ Now invoke `deno task build` in your project's root.
 $ deno task build
 ```
 
-Bindings will be generated at `./lib/<crate-name>.generated.js`:
+Bindings will be generated at `./lib/<crate-name>.generated.js`. Import the
+`instantiate` function and call it asynchronously to get the exports:
 
 ```ts
 import { instantiate } from "./lib/deno_test.generated.js";
@@ -59,7 +60,7 @@ Note, however, wasmbuild CLI does not compress the WASM file automatically.
 - `--project <crate_name>` / `-p <crate_name>` - Specifies the crate to build
   when using a Cargo workspace.
 - `--out <dir_path>` - Specifies the output directory. Defaults to `./lib`
-- `--js-ext <ext_no_period>` - Extension to use for the wasm bindgen JS file.
+- `--js-ext <ext_no_period>` - Extension to use for the wasm-bindgen JS file.
   Defaults to `js`.
 - `--all-features` - Build the crate with all features.
 - `--no-default-features` - Build the crate with no default features.
@@ -70,3 +71,4 @@ Note, however, wasmbuild CLI does not compress the WASM file automatically.
 - `--check` - Checks to ensure the output is up to date.
   - This is useful to run on the CI in order to ensure the wasmbuild output is
     up to date.
+- `--skip-opt` - Skip running wasm-opt.

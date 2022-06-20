@@ -1,56 +1,10 @@
 #!/usr/bin/env -S deno run --unstable --allow-run --allow-read --allow-write --allow-env
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
-import {
-  base64,
-  Buffer,
-  colors,
-  copy,
-  ensureDir,
-  ensureFile,
-  gunzip,
-  parseFlags,
-  path,
-  Sha1,
-  Untar,
-  writeAll,
-} from "./deps.ts";
+import { base64, colors, parseFlags, path, Sha1, writeAll } from "./deps.ts";
 import { getCargoWorkspace } from "./manifest.ts";
 import { instantiate } from "./lib/wasmbuild.generated.js";
-
-function binaryenUrl(target: string) {
-  const tag = "version_97";
-  return new URL(
-    `https://github.com/WebAssembly/binaryen/releases/download/${tag}/binaryen-${tag}-${target}.tar.gz`,
-  );
-}
-
-const TARGET_MAP = {
-  "linux": "x86_64-linux",
-  "darwin": "x86_64-macos",
-  "windows": "x86_64-windows",
-};
-
-async function downloadBinaryen() {
-  const response = await fetch(binaryenUrl(TARGET_MAP[Deno.build.os]));
-  const buf = new Uint8Array(await response.arrayBuffer());
-  const decompressed = gunzip(buf);
-
-  const untar = new Untar(new Buffer(decompressed));
-  for await (const entry of untar) {
-    if (entry.type == "directory") {
-      await ensureDir(entry.fileName);
-      continue;
-    }
-    if (entry.type == "file") {
-      await ensureFile(entry.fileName);
-      const file = await Deno.open(entry.fileName, { write: true });
-      await copy(entry, file);
-    }
-  }
-}
-
-downloadBinaryen();
+import { runWasmOpt } from "./wasmopt.ts";
 
 interface BindgenOutput {
   js: string;
@@ -85,6 +39,7 @@ const workspace = await getCargoWorkspace(root, cargoFlags);
 const specifiedCrateName: string | undefined = flags.p ?? flags.project;
 const isSync: boolean = flags.sync ?? false;
 const isCheck: boolean = flags.check ?? false;
+const isOpt: boolean = !(flags["skip-opt"] ?? false);
 const outDir = flags.out ?? "./lib";
 const crate = workspace.getWasmCrate(specifiedCrateName);
 const bindingJsFileExt = flags["js-ext"] ?? `js`;
@@ -211,17 +166,35 @@ async function checkOutputUpToDate() {
 async function writeOutput() {
   await writeSnippets();
 
+  console.log(`  write ${colors.yellow(bindingJsPath)}`);
+  await Deno.writeTextFile(bindingJsPath, bindingJsText);
+
   if (!isSync) {
     const wasmDest = path.join(outDir, wasmFileName);
     await Deno.writeFile(wasmDest, new Uint8Array(bindgenOutput.wasmBytes));
+    if (isOpt) {
+      await optimizeWasmFile(wasmDest);
+    }
   }
-
-  console.log(`  write ${colors.yellow(bindingJsPath)}`);
-  await Deno.writeTextFile(bindingJsPath, bindingJsText);
 
   console.log(
     `${colors.bold(colors.green("Finished"))} ${crate.name} web assembly.`,
   );
+}
+
+async function optimizeWasmFile(wasmFilePath: string) {
+  try {
+    console.log(
+      `${colors.bold(colors.green("Optimizing"))} .wasm file...`,
+    );
+    await runWasmOpt(wasmFilePath);
+  } catch (err) {
+    console.error(
+      `${colors.bold(colors.red("Error"))} ` +
+        `running wasm-opt failed. Maybe skip with --skip-opt?\n\n${err}`,
+    );
+    Deno.exit(1);
+  }
 }
 
 async function getBindingJsOutput() {
@@ -280,12 +253,12 @@ ${
     for (const [identifier, list] of Object.entries(bindgenOutput.snippets)) {
       hasher.update(identifier);
       for (const text of list) {
-        hasher.update(text);
+        hasher.update(text.replace(/\r?\n/g, "\n"));
       }
     }
     for (const [name, text] of Object.entries(bindgenOutput.localModules)) {
       hasher.update(name);
-      hasher.update(text);
+      hasher.update(text.replace(/\r?\n/g, "\n"));
     }
     return hasher.hex();
   }
@@ -416,14 +389,20 @@ export function isInstantiated() {
 async function instantiateModule(transform) {
   switch (wasm_url.protocol) {
     case "file:": {
+      if (typeof Deno !== "object") {
+        throw new Error("file urls are not supported in this environment");
+      }
+
       if ("permissions" in Deno) Deno.permissions.request({ name: "read", path: wasm_url });
       const wasmCode = await Deno.readFile(wasm_url);
       return WebAssembly.instantiate(!transform ? wasmCode : transform(wasmCode), imports);
     }
     case "https:":
     case "http:": {
-      if ("permissions" in Deno) Deno.permissions.request({ name: "net", host: wasm_url.host });
-      const wasmResponse = await fetch(wasm_url);     
+      if (typeof Deno === "object" && "permissions" in Deno) {
+        Deno.permissions.request({ name: "net", host: wasm_url.host });
+      }
+      const wasmResponse = await fetch(wasm_url);
       if (transform) {
         const wasmCode = new Uint8Array(await wasmResponse.arrayBuffer());
         return WebAssembly.instantiate(transform(wasmCode), imports);

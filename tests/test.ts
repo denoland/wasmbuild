@@ -5,6 +5,18 @@ import { assertEquals } from "https://deno.land/std@0.142.0/testing/asserts.ts";
 assertEquals(wasm.isInstantiated(), false);
 assertEquals(wasmSync.isInstantiated(), false);
 
+async function assertInstantiate() {
+  let init = false;
+  const module = await wasm.instantiate((wasm: Uint8Array) => {
+    init = true;
+    return wasm;
+  });
+  assertEquals(init, true);
+  return module;
+}
+
+await assertInstantiate();
+
 Deno.test("async - test works export", async () => {
   await wasm.instantiate();
   assertEquals(wasm.isInstantiated(), true);

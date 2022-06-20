@@ -338,9 +338,18 @@ function getAsyncLoaderText() {
   return `
 const wasm_url = new URL("${wasmFileName}", import.meta.url);
 
+/**
+ * Decompression callback
+ *
+ * @callback decompressCallback
+ * @param {Uint8Array} compressed
+ * @return {Uint8Array} decompressed
+ */
+
 /** Instantiates an instance of the Wasm module returning its functions.
  * @remarks It is safe to call this multiple times and once successfully
  * loaded it will always return a reference to the same object.
+ * @param {decompressCallback=} transform
  */
 export async function instantiate(transform) {
   return (await instantiateWithInstance(transform)).exports;
@@ -352,6 +361,7 @@ let lastLoadPromise;
 /** Instantiates an instance of the Wasm module along with its exports.
  * @remarks It is safe to call this multiple times and once successfully
  * loaded it will always return a reference to the same object.
+ * @param {decompressCallback=} transform
  * @returns {Promise<{
  *   instance: WebAssembly.Instance;
  *   exports: { ${exportNames.map((n) => `${n}: typeof ${n}`).join("; ")} }

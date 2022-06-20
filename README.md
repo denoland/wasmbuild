@@ -41,6 +41,19 @@ await instantiate();
 greet("Deno");
 ```
 
+### Compression
+
+When instantiating, you might want to decompress Wasm bytes.
+
+```ts
+import { instantiate } from "./lib/deno_test.generated.js";
+import { decompress } from "https://deno.land/x/lz4@v0.1.2/mod.ts";
+
+await instantiate(decompress);
+```
+
+Note, however, wasmbuild CLI does not compress the Wasm file automatically.
+
 ### CLI Flags
 
 - `--debug` - Build without optimizations.

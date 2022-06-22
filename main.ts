@@ -1,7 +1,15 @@
 #!/usr/bin/env -S deno run --unstable --allow-run --allow-read --allow-write --allow-env
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
-import { base64, colors, emptyDir, parseFlags, path, Sha1, writeAll } from "./deps.ts";
+import {
+  base64,
+  colors,
+  emptyDir,
+  parseFlags,
+  path,
+  Sha1,
+  writeAll,
+} from "./deps.ts";
 import { getCargoWorkspace } from "./manifest.ts";
 import { instantiate } from "./lib/wasmbuild.generated.js";
 import { runWasmOpt } from "./wasmopt.ts";

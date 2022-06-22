@@ -9,10 +9,11 @@ import {
   path,
   Sha1,
   writeAll,
-} from "./deps.ts";
-import { getCargoWorkspace } from "./manifest.ts";
+} from "./lib/deps.ts";
+import { getCargoWorkspace } from "./lib/manifest.ts";
+import { verifyVersions } from "./lib/versions.ts";
 import { instantiate } from "./lib/wasmbuild.generated.js";
-import { runWasmOpt } from "./wasmopt.ts";
+import { runWasmOpt } from "./lib/wasmopt.ts";
 
 interface BindgenOutput {
   js: string;
@@ -47,20 +48,13 @@ const workspace = await getCargoWorkspace(root, cargoFlags);
 const specifiedCrateName: string | undefined = flags.p ?? flags.project;
 const isSync: boolean = flags.sync ?? false;
 const isCheck: boolean = flags.check ?? false;
-const isOpt: boolean = !(flags["skip-opt"] ?? false);
+const isOpt = !(flags["skip-opt"] ?? false);
 const outDir = flags.out ?? "./lib";
 const crate = workspace.getWasmCrate(specifiedCrateName);
 const bindingJsFileExt = flags["js-ext"] ?? `js`;
 const bindingJsFileName = `${crate.libName}.generated.${bindingJsFileExt}`;
-const expectedWasmBindgenVersion = "0.2.81";
 
-if (crate.wasmBindgenVersion !== expectedWasmBindgenVersion) {
-  throw new Error(
-    `The crate '${crate.name}' must have a dependency on wasm-bindgen ` +
-      `${expectedWasmBindgenVersion} (found ` +
-      `${crate.wasmBindgenVersion ?? "<WASM-BINDGEN NOT FOUND>"})`,
-  );
-}
+verifyVersions(crate);
 
 console.log(
   `${

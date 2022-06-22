@@ -138,8 +138,16 @@ export class WasmCrate {
     return this.#pkg.name;
   }
 
-  get wasmBindgenVersion() {
-    return getWasmBindgenVersion(this.#pkg, this.#metadata);
+  getDependencyVersion(name: string) {
+    const node = this.#metadata.resolve.nodes
+      .find((n) => n.id === this.#pkg.id);
+    for (const depId of node?.dependencies ?? []) {
+      const pkg = this.#metadata.packages.find((pkg) => pkg.id === depId);
+      if (pkg?.name === name) {
+        return pkg.version;
+      }
+    }
+    return undefined;
   }
 
   get rootFolder() {
@@ -185,19 +193,4 @@ function getWasmLibName(pkg: CargoPackageMetadata) {
   );
   // Hyphens are not allowed in crate names https://doc.rust-lang.org/reference/items/extern-crates.html
   return wasmlib?.name?.replaceAll("-", "_");
-}
-
-function getWasmBindgenVersion(
-  pkg: CargoPackageMetadata,
-  metadata: CargoMetadata,
-) {
-  const wasmBindgenReq = metadata.resolve.nodes
-    .find((n) => n.id === pkg.id);
-  for (const depId of wasmBindgenReq?.dependencies ?? []) {
-    const pkg = metadata.packages.find((pkg) => pkg.id === depId);
-    if (pkg?.name === "wasm-bindgen") {
-      return pkg.version;
-    }
-  }
-  return undefined;
 }

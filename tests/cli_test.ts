@@ -1,5 +1,4 @@
 import { path } from "../lib/deps.ts";
-import { assertEquals } from "./test.deps.ts";
 
 const rootFolder = path.dirname(
   path.dirname(path.fromFileUrl(import.meta.url)),

@@ -1,7 +1,7 @@
 #!/usr/bin/env -S deno run --unstable --allow-run --allow-read --allow-write --allow-env
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
-import { base64, colors, parseFlags, path, Sha1, writeAll } from "./deps.ts";
+import { base64, colors, emptyDir, parseFlags, path, Sha1, writeAll } from "./deps.ts";
 import { getCargoWorkspace } from "./manifest.ts";
 import { instantiate } from "./lib/wasmbuild.generated.js";
 import { runWasmOpt } from "./wasmopt.ts";
@@ -440,12 +440,14 @@ async function writeSnippets() {
   const localModules = Object.entries(bindgenOutput.localModules);
   const snippets = Object.entries(bindgenOutput.snippets);
 
-  if (localModules.length === 0 && snippets.length === 0) {
+  if (localModules.length === 0 && !snippets.some((s) => s[1].length > 0)) {
     return; // don't create the snippets directory
   }
 
   const snippetsDest = path.join(outDir, "snippets");
-  await Deno.mkdir(snippetsDest, { recursive: true });
+  // start with a fresh directory in order to clear out any previously
+  // created snippets which might have a different name
+  await emptyDir(snippetsDest);
 
   for (const [name, text] of localModules) {
     const filePath = path.join(snippetsDest, name);

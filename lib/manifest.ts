@@ -139,12 +139,12 @@ export class WasmCrate {
   }
 
   getDependencyVersion(name: string) {
-    const wasmBindgenReq = this.#metadata.resolve.nodes
+    const node = this.#metadata.resolve.nodes
       .find((n) => n.id === this.#pkg.id);
-    for (const depId of wasmBindgenReq?.dependencies ?? []) {
+    for (const depId of node?.dependencies ?? []) {
       const pkg = this.#metadata.packages.find((pkg) => pkg.id === depId);
       if (pkg?.name === name) {
-        return this.#pkg.version;
+        return pkg.version;
       }
     }
     return undefined;

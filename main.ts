@@ -5,6 +5,7 @@ import {
   base64,
   colors,
   emptyDir,
+  ensureDir,
   parseFlags,
   path,
   Sha1,
@@ -14,6 +15,7 @@ import { getCargoWorkspace } from "./lib/manifest.ts";
 import { verifyVersions } from "./lib/versions.ts";
 import { instantiate } from "./lib/wasmbuild.generated.js";
 import { runWasmOpt } from "./lib/wasmopt.ts";
+import { runNewCommand } from "./lib/new_command.ts";
 
 interface BindgenOutput {
   js: string;
@@ -28,6 +30,11 @@ await Deno.permissions.request({ name: "read" });
 await Deno.permissions.request({ name: "write" });
 
 const flags = parseFlags(Deno.args);
+if (flags._[0] === "new") {
+  await runNewCommand();
+  Deno.exit(0);
+}
+
 const cargoFlags = [];
 
 if (flags["default-features"] === false) {
@@ -166,6 +173,7 @@ async function checkOutputUpToDate() {
 }
 
 async function writeOutput() {
+  await ensureDir(outDir);
   await writeSnippets();
 
   console.log(`  write ${colors.yellow(bindingJsPath)}`);
@@ -204,17 +212,18 @@ async function getBindingJsOutput() {
   const copyrightHeader = `// Copyright 2018-${
     new Date().getFullYear()
   } the Deno authors. All rights reserved. MIT license.`;
+  const footerJs = bindgenOutput.js.replace(
+    /\bconst\swasm_url\s.+/ms,
+    getLoaderText(),
+  );
   const bindingJs = `${copyrightHeader}
 // @generated file from build script, do not edit
 // deno-lint-ignore-file
 // source-hash: ${sourceHash}
 let wasm;
-${
-    bindgenOutput.js.replace(
-      /\bconst\swasm_url\s.+/ms,
-      getLoaderText(),
-    )
-  }
+${footerJs.includes("let cachedInt32Memory0;") ? "" : "let cachedInt32Memory0;"}
+${footerJs.includes("let cachedUint8Memory0;") ? "" : "let cachedUint8Memory0;"}
+${footerJs}
 `;
   const denoFmtCmdArgs = [
     "deno",

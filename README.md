@@ -4,22 +4,30 @@ A build tool to generate wasm-bindgen glue code for Deno and the browser.
 
 ## Setup
 
-Add a build task to the _deno.json_ file in your project:
+Add a task to the _deno.json_ file in your project:
 
 ```json
 {
   "tasks": {
-    "build": "deno run --unstable -A https://deno.land/x/wasmbuild@VERSION_GOES_HERE/main.ts"
+    "wasmbuild": "deno run --unstable -A https://deno.land/x/wasmbuild@VERSION_GOES_HERE/main.ts"
   }
 }
 ```
 
-## Usage
+## Scaffold Project (Optional)
 
-Now invoke `deno task build` in your project's root.
+To create a starter Rust crate in an `rs_lib` subfolder of your project, run:
 
 ```bash
-$ deno task build
+$ deno task wasmbuild new
+```
+
+## Building
+
+To build, invoke `deno task wasmbuild` in your project:
+
+```bash
+$ deno task wasmbuild
 ```
 
 Bindings will be generated at `./lib/<crate-name>.generated.js`. Import the

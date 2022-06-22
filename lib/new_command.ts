@@ -13,7 +13,7 @@ export async function runNewCommand() {
   }
 
   console.log(
-    `${colors.bold(colors.green("Creating"))} rs_lib folder...`,
+    `${colors.bold(colors.green("Creating"))} rs_lib...`,
   );
 
   if (!await pathExists("./Cargo.toml")) {

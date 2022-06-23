@@ -7,7 +7,7 @@ export async function runNewCommand() {
     console.log(
       `${
         colors.bold(colors.red("Error"))
-      } cannot scaffold new project because rs_lib folder already exists.`,
+      } cannot scaffold new project because the rs_lib folder already exists.`,
     );
     Deno.exit(1);
   }
@@ -29,16 +29,24 @@ members = [
   if (!await pathExists("./.rustfmt.toml")) {
     await Deno.writeTextFile(
       "./.rustfmt.toml",
-      `
-max_width = 80
+      `max_width = 80
 tab_spaces = 2
 edition = "2021"
 `,
     );
   }
 
+  let gitIgnoreText = await getFileTextIfExists("./.gitignore") ?? "";
+  if (!/^\/target$/m.test(gitIgnoreText)) {
+    gitIgnoreText = gitIgnoreText.trim();
+    if (gitIgnoreText.length > 0) {
+      gitIgnoreText = gitIgnoreText + "\n";
+    }
+    gitIgnoreText += "/target\n";
+    await Deno.writeTextFile("./.gitignore", gitIgnoreText);
+  }
+
   await ensureDir("./rs_lib/src");
-  await Deno.writeTextFile("./rs_lib/.gitignore", "/target\n");
   await Deno.writeTextFile(
     "./rs_lib/Cargo.toml",
     `[package]
@@ -80,4 +88,16 @@ mod tests {
 }
 `,
   );
+}
+
+async function getFileTextIfExists(path: string) {
+  try {
+    return await Deno.readTextFile(path);
+  } catch (err) {
+    if (err instanceof Deno.errors.NotFound) {
+      return undefined;
+    } else {
+      throw err;
+    }
+  }
 }

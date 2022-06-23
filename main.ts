@@ -212,16 +212,16 @@ async function getBindingJsOutput() {
   const header = `// @generated file from wasmbuild -- do not edit
 // deno-lint-ignore-file
 // deno-fmt-ignore-file`;
-  const bindgenText = bindgenOutput.js.replace(
+  const genText = bindgenOutput.js.replace(
     /\bconst\swasm_url\s.+/ms,
     getLoaderText(),
   );
   const bodyText = await getFormattedText(`
 // source-hash: ${sourceHash}
 let wasm;
-${bindgenText.includes("let cachedInt32Memory0;") ? "" : "let cachedInt32Memory0;"}
-${bindgenText.includes("let cachedUint8Memory0;") ? "" : "let cachedUint8Memory0;"}
-${bindgenText}
+${genText.includes("let cachedInt32Memory0;") ? "" : "let cachedInt32Memory0;"}
+${genText.includes("let cachedUint8Memory0;") ? "" : "let cachedUint8Memory0;"}
+${genText}
 `);
 
   return {

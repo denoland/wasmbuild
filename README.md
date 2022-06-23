@@ -66,17 +66,17 @@ Note, however, wasmbuild CLI does not compress the Wasm file automatically.
 
 It may occur that someone updates the Rust code, but forgets to build when
 submitting a PR. To ensure that the output is up-to-date, you can use the
-`check` subcommand:
+`--check` flag:
 
 ```shellsession
-$ deno task wasmbuild check
+$ deno task wasmbuild --check
 ```
 
 For example, in a GitHub action:
 
 ```yml
 - name: Check Wasm up-to-date
-  run: deno task wasmbuild check
+  run: deno task wasmbuild --check
 ```
 
 ### CLI flags
@@ -94,3 +94,4 @@ For example, in a GitHub action:
 - `--sync` - Generate a synchronous module that stores the Wasm module inline as
   base64 text.
 - `--skip-opt` - Skip running wasm-opt.
+- `--check` - Checks if the output is up-to-date.

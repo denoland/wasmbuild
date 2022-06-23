@@ -28,29 +28,25 @@ export interface CheckCommand extends CommonBuild {
 
 export function parseArgs(rawArgs: string[]): Command {
   const flags = parseFlags(rawArgs);
-  if (flags.check) {
-    throw new Error(
-      `The --check flag has been removed. Use the 'check' subcommand.`,
-    );
-  }
-
   switch (flags._[0]) {
     case "new":
       return {
         kind: "new",
       };
-    case "check":
-      return {
-        kind: "check",
-        ...getCommonBuild(),
-      };
     case "build":
     case undefined:
     case null:
-      return {
-        kind: "build",
-        ...getCommonBuild(),
-      };
+      if (flags.check) {
+        return {
+          kind: "check",
+          ...getCommonBuild(),
+        };
+      } else {
+        return {
+          kind: "build",
+          ...getCommonBuild(),
+        };
+      }
     default:
       throw new Error(`Unrecognized sub command: ${flags._[0]}`);
   }

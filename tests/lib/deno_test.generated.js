@@ -3,6 +3,7 @@
 // deno-lint-ignore-file
 // source-hash: 2f976c7d12d216181909942cd59a68a9487cf7a4
 let wasm;
+
 import { add } from "./snippets/deno_test-0783d0dd1a7e0cd8/add.js";
 
 let WASM_VECTOR_LEN = 0;

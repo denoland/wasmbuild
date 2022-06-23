@@ -3,7 +3,7 @@ interface WasmCrate {
   getDependencyVersion(name: string): string | undefined;
 }
 
-const expectedVersions = {
+export const versions = {
   wasmBindgen: "0.2.81",
   wasmBindgenFutures: "0.4.31",
   jsSys: "0.3.58",
@@ -11,14 +11,14 @@ const expectedVersions = {
 };
 
 export function verifyVersions(crate: WasmCrate) {
-  verifyVersion(crate, "wasm-bindgen", expectedVersions.wasmBindgen);
+  verifyVersion(crate, "wasm-bindgen", versions.wasmBindgen);
   verifyVersionAllowNone(
     crate,
     "wasm-bindgen-futures",
-    expectedVersions.wasmBindgenFutures,
+    versions.wasmBindgenFutures,
   );
-  verifyVersionAllowNone(crate, "js-sys", expectedVersions.jsSys);
-  verifyVersionAllowNone(crate, "web-sys", expectedVersions.webSys);
+  verifyVersionAllowNone(crate, "js-sys", versions.jsSys);
+  verifyVersionAllowNone(crate, "web-sys", versions.webSys);
 }
 
 function verifyVersionAllowNone(

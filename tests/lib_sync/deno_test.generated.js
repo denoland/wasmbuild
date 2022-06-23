@@ -1,6 +1,6 @@
-// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
-// @generated file from build script, do not edit
+// @generated file from wasmbuild -- do not edit
 // deno-lint-ignore-file
+// deno-fmt-ignore-file
 // source-hash: 2f976c7d12d216181909942cd59a68a9487cf7a4
 let wasm;
 

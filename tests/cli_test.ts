@@ -33,6 +33,7 @@ Deno.test("should add values", async () => {
 `,
     );
     await runCommand("deno", "test", "-A");
+    await runCommand("cargo", "test");
   } finally {
     await Deno.remove(tempDir, { recursive: true });
   }

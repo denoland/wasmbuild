@@ -14,7 +14,7 @@ Add a task to the _deno.json_ file in your project:
 }
 ```
 
-## Scaffold Project (Optional)
+## Scaffold project (Optional)
 
 To create a starter Rust crate in an `rs_lib` subfolder of your project, run:
 
@@ -62,7 +62,24 @@ await instantiate(decompress);
 
 Note, however, wasmbuild CLI does not compress the Wasm file automatically.
 
-### CLI Flags
+## Checking output is up-to-date
+
+It may occur that someone updates the Rust code, but forgets to build when
+submitting a PR. To ensure that the output is up-to-date, you can use the
+`check` subcommand:
+
+```shellsession
+$ deno task wasmbuild check
+```
+
+For example, in a GitHub action:
+
+```yml
+- name: Check Wasm up-to-date
+  run: deno task wasmbuild check
+```
+
+### CLI flags
 
 - `--debug` - Build without optimizations.
 - `--project <crate_name>` / `-p <crate_name>` - Specifies the crate to build
@@ -76,7 +93,4 @@ Note, however, wasmbuild CLI does not compress the Wasm file automatically.
   quoted and with spaces (ex. `--features "wasm serialization"`).
 - `--sync` - Generate a synchronous module that stores the Wasm module inline as
   base64 text.
-- `--check` - Checks to ensure the output is up to date.
-  - This is useful to run on the CI in order to ensure the wasmbuild output is
-    up to date.
 - `--skip-opt` - Skip running wasm-opt.

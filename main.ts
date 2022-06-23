@@ -19,11 +19,11 @@ switch (command.kind) {
     break;
   }
   case "build": {
-    await runBuildCommand(command)
+    await runBuildCommand(command);
     break;
   }
   case "check": {
-    await runCheckCommand(command)
+    await runCheckCommand(command);
     break;
   }
   default: {

@@ -32,7 +32,7 @@ export function parseArgs(rawArgs: string[]): Command {
   switch (flags._[0]) {
     case "new":
       return {
-        kind: "new"
+        kind: "new",
       };
     case "check":
       isCheck = true;
@@ -59,24 +59,24 @@ export function parseArgs(rawArgs: string[]): Command {
   }
 
   const base: CommonBuild = {
-    profile : flags.debug ? "debug" : "release",
+    profile: flags.debug ? "debug" : "release",
     project: flags.p ?? flags.project,
     isSync: flags.sync ?? false,
-    isOpt : !(flags["skip-opt"] ?? false),
-    outDir : flags.out ?? "./lib",
-    bindingJsFileExt : flags["js-ext"] ?? `js`,
+    isOpt: !(flags["skip-opt"] ?? false),
+    outDir: flags.out ?? "./lib",
+    bindingJsFileExt: flags["js-ext"] ?? `js`,
     cargoFlags,
   };
 
   if (isCheck) {
     return {
       kind: "check",
-      ...base
+      ...base,
     };
   } else {
     return {
       kind: "build",
-      ...base
+      ...base,
     };
   }
 }

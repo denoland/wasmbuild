@@ -22,7 +22,9 @@ export async function runCheckCommand(args: CheckCommand) {
 
   async function getOriginalSourceHash() {
     try {
-      return getSourceHashFromText(await Deno.readTextFile(output.bindingJsPath));
+      return getSourceHashFromText(
+        await Deno.readTextFile(output.bindingJsPath),
+      );
     } catch (err) {
       if (err instanceof Deno.errors.NotFound) {
         return undefined;

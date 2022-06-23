@@ -21,7 +21,9 @@ export interface BindgenOutput {
   wasmBytes: number[];
 }
 
-export async function runPreBuild(args: CheckCommand | BuildCommand): Promise<PreBuildOutput> {
+export async function runPreBuild(
+  args: CheckCommand | BuildCommand,
+): Promise<PreBuildOutput> {
   const home = Deno.env.get("HOME");
   const root = Deno.cwd();
   const workspace = await getCargoWorkspace(root, args.cargoFlags);
@@ -101,14 +103,15 @@ export async function runPreBuild(args: CheckCommand | BuildCommand): Promise<Pr
     crate,
     bindgenOutput,
   );
-  const bindingJsFileName = `${crate.libName}.generated.${args.bindingJsFileExt}`;
+  const bindingJsFileName =
+    `${crate.libName}.generated.${args.bindingJsFileExt}`;
 
   return {
     bindgen: bindgenOutput,
     bindingJsText,
     bindingJsPath: path.join(args.outDir, bindingJsFileName),
     sourceHash,
-    wasmFileName: args.isSync ? undefined: getWasmFileNameFromCrate(crate),
+    wasmFileName: args.isSync ? undefined : getWasmFileNameFromCrate(crate),
   };
 }
 
@@ -116,7 +119,7 @@ async function getBindingJsOutput(
   args: CheckCommand | BuildCommand,
   crate: WasmCrate,
   bindgenOutput: BindgenOutput,
-  ) {
+) {
   const sourceHash = await getHash();
   const header = `// @generated file from wasmbuild -- do not edit
 // deno-lint-ignore-file
@@ -186,7 +189,11 @@ ${genText}
   }
 }
 
-function getLoaderText(args: CheckCommand | BuildCommand, crate: WasmCrate, bindgenOutput: BindgenOutput) {
+function getLoaderText(
+  args: CheckCommand | BuildCommand,
+  crate: WasmCrate,
+  bindgenOutput: BindgenOutput,
+) {
   if (args.isSync) {
     return getSyncLoaderText(bindgenOutput);
   } else {

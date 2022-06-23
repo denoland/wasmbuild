@@ -39,5 +39,5 @@ jobs:
       - name: Test
         run: deno task test
 
-      - name: Ensure wasm output up to date
+      - name: Check Wasm up-to-date
         run: deno task build --check

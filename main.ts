@@ -209,51 +209,53 @@ async function optimizeWasmFile(wasmFilePath: string) {
 
 async function getBindingJsOutput() {
   const sourceHash = await getHash();
-  const copyrightHeader = `// Copyright 2018-${
-    new Date().getFullYear()
-  } the Deno authors. All rights reserved. MIT license.`;
-  const footerJs = bindgenOutput.js.replace(
+  const header = `// @generated file from wasmbuild -- do not edit
+// deno-lint-ignore-file
+// deno-fmt-ignore-file`;
+  const genText = bindgenOutput.js.replace(
     /\bconst\swasm_url\s.+/ms,
     getLoaderText(),
   );
-  const bindingJs = `${copyrightHeader}
-// @generated file from build script, do not edit
-// deno-lint-ignore-file
+  const bodyText = await getFormattedText(`
 // source-hash: ${sourceHash}
 let wasm;
-${footerJs.includes("let cachedInt32Memory0;") ? "" : "let cachedInt32Memory0;"}
-${footerJs.includes("let cachedUint8Memory0;") ? "" : "let cachedUint8Memory0;"}
-${footerJs}
-`;
-  const denoFmtCmdArgs = [
-    "deno",
-    "fmt",
-    "--quiet",
-    "--ext",
-    "js",
-    "-",
-  ];
-  console.log(`  ${colors.bold(colors.gray(denoFmtCmdArgs.join(" ")))}`);
-  const denoFmtCmd = Deno.run({
-    cmd: denoFmtCmdArgs,
-    stdin: "piped",
-    stdout: "piped",
-  });
-  await writeAll(denoFmtCmd.stdin, new TextEncoder().encode(bindingJs));
-  denoFmtCmd.stdin.close();
-  const [output, status] = await Promise.all([
-    denoFmtCmd.output(),
-    denoFmtCmd.status(),
-  ]);
-  if (!status.success) {
-    console.error("deno fmt command failed");
-    Deno.exit(1);
-  }
+${genText.includes("let cachedInt32Memory0;") ? "" : "let cachedInt32Memory0;"}
+${genText.includes("let cachedUint8Memory0;") ? "" : "let cachedUint8Memory0;"}
+${genText}
+`);
 
   return {
-    bindingJsText: new TextDecoder().decode(output),
+    bindingJsText: `${header}\n${bodyText}`,
     sourceHash,
   };
+
+  async function getFormattedText(inputText: string) {
+    const denoFmtCmdArgs = [
+      "deno",
+      "fmt",
+      "--quiet",
+      "--ext",
+      "js",
+      "-",
+    ];
+    console.log(`  ${colors.bold(colors.gray(denoFmtCmdArgs.join(" ")))}`);
+    const denoFmtCmd = Deno.run({
+      cmd: denoFmtCmdArgs,
+      stdin: "piped",
+      stdout: "piped",
+    });
+    await writeAll(denoFmtCmd.stdin, new TextEncoder().encode(inputText));
+    denoFmtCmd.stdin.close();
+    const [output, status] = await Promise.all([
+      denoFmtCmd.output(),
+      denoFmtCmd.status(),
+    ]);
+    if (!status.success) {
+      console.error("deno fmt command failed");
+      Deno.exit(1);
+    }
+    return new TextDecoder().decode(output);
+  }
 
   async function getHash() {
     // Create a hash of all the sources, snippets, and local modules

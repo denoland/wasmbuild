@@ -40,4 +40,4 @@ jobs:
         run: deno task test
 
       - name: Check Wasm up-to-date
-        run: deno task build check
+        run: deno task build --check

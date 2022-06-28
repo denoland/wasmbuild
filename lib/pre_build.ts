@@ -312,7 +312,7 @@ export function instantiateWithInstance(transform) {
         cachedUint8Memory0 = new Uint8Array(wasm.memory.buffer);
         instanceWithExports = {
           instance,
-          exports: { ${exportNames.join(", ")} },
+          exports: getWasmInstanceExports(),
         };
         return instanceWithExports;
       } finally {
@@ -321,6 +321,10 @@ export function instantiateWithInstance(transform) {
     })();
   }
   return lastLoadPromise;
+}
+
+function getWasmInstanceExports() {
+  return { ${exportNames.join(", ")} };
 }
 
 /** Gets if the Wasm module has been instantiated. */

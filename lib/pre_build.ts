@@ -143,7 +143,7 @@ ${genText}
 
   async function getFormattedText(inputText: string) {
     const denoFmtCmdArgs = [
-      "deno",
+      Deno.execPath(),
       "fmt",
       "--quiet",
       "--ext",

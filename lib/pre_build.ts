@@ -46,7 +46,7 @@ export async function runPreBuild(
   }
 
   console.log(
-    `${colors.bold(colors.green("Building"))} ${crate.name} web assembly...`,
+    `${colors.bold(colors.green("Building"))} ${crate.name} WebAssembly...`,
   );
 
   const cargoBuildCmd = [

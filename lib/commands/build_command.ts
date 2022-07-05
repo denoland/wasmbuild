@@ -23,7 +23,7 @@ export async function runBuildCommand(args: BuildCommand) {
   }
 
   console.log(
-    `${colors.bold(colors.green("Finished"))} web assembly output`,
+    `${colors.bold(colors.green("Finished"))} WebAssembly output`,
   );
 
   async function optimizeWasmFile(wasmFilePath: string) {

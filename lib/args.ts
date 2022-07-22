@@ -56,7 +56,7 @@ export function parseArgs(rawArgs: string[]): Command {
       profile: flags.debug ? "debug" : "release",
       project: flags.p ?? flags.project,
       isSync: flags.sync ?? false,
-      isOpt: !(flags["skip-opt"] ?? false),
+      isOpt: !(flags["skip-opt"] ?? flags.debug == "debug"),
       outDir: flags.out ?? "./lib",
       bindingJsFileExt: flags["js-ext"] ?? `js`,
       cargoFlags: getCargoFlags(),

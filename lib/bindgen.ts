@@ -27,22 +27,31 @@ async function generateForSelfBuild(filePath: string): Promise<BindgenOutput> {
   try {
     console.log(tempPath);
     const p = Deno.run({
-      cmd: ["wasm-bindgen", "--target", "deno", "--out-dir", tempPath, filePath]
+      cmd: [
+        "wasm-bindgen",
+        "--target",
+        "deno",
+        "--out-dir",
+        tempPath,
+        filePath,
+      ],
     });
     const status = await p.status();
     if (!status.success) {
       throw new Error("Failed.");
     }
-    const wasmBytes = await Deno.readFile(path.join(tempPath, "wasmbuild_bg.wasm"));
+    const wasmBytes = await Deno.readFile(
+      path.join(tempPath, "wasmbuild_bg.wasm"),
+    );
     return {
       js: await Deno.readTextFile(path.join(tempPath, "wasmbuild.js")),
       localModules: {},
       snippets: {},
       wasmBytes: Array.from(wasmBytes),
-    }
+    };
   } finally {
     await Deno.remove(tempPath, {
-      recursive: true
+      recursive: true,
     });
   }
 }

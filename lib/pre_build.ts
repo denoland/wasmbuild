@@ -4,7 +4,7 @@ import { BuildCommand, CheckCommand } from "./args.ts";
 import { base64, colors, path, Sha1, writeAll } from "./deps.ts";
 import { getCargoWorkspace, WasmCrate } from "./manifest.ts";
 import { verifyVersions } from "./versions.ts";
-import { generateBindgen, BindgenOutput } from "./bindgen.ts";
+import { BindgenOutput, generateBindgen } from "./bindgen.ts";
 export type { BindgenOutput } from "./bindgen.ts";
 
 export interface PreBuildOutput {
@@ -81,7 +81,7 @@ export async function runPreBuild(
     path.join(
       workspace.metadata.target_directory,
       `wasm32-unknown-unknown/${args.profile}/${crate.libName}.wasm`,
-    )
+    ),
   );
 
   console.log(

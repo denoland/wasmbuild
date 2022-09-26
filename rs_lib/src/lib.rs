@@ -19,7 +19,7 @@ pub fn generate_bindgen(
 ) -> Result<JsValue, JsValue> {
   let output = inner(name, wasm_bytes)
     .map_err(|err| JsValue::from(js_sys::Error::new(&err.to_string())))?;
-  let output = JsValue::from_serde(&output)
+  let output = serde_wasm_bindgen::to_value(&output)
     .map_err(|err| JsValue::from(js_sys::Error::new(&err.to_string())))?;
   Ok(output)
 }

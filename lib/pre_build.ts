@@ -4,7 +4,8 @@ import { BuildCommand, CheckCommand } from "./args.ts";
 import { base64, colors, path, Sha1, writeAll } from "./deps.ts";
 import { getCargoWorkspace, WasmCrate } from "./manifest.ts";
 import { verifyVersions } from "./versions.ts";
-import { instantiate } from "./wasmbuild.generated.js";
+import { BindgenOutput, generateBindgen } from "./bindgen.ts";
+export type { BindgenOutput } from "./bindgen.ts";
 
 export interface PreBuildOutput {
   bindgen: BindgenOutput;
@@ -12,13 +13,6 @@ export interface PreBuildOutput {
   bindingJsPath: string;
   sourceHash: string;
   wasmFileName: string | undefined;
-}
-
-export interface BindgenOutput {
-  js: string;
-  snippets: { [name: string]: string[] };
-  localModules: { [name: string]: string };
-  wasmBytes: number[];
 }
 
 export async function runPreBuild(
@@ -82,17 +76,13 @@ export async function runPreBuild(
   }
 
   console.log(`  ${colors.bold(colors.gray("Running wasm-bindgen..."))}`);
-  const originalWasmBytes = await Deno.readFile(
+  const bindgenOutput = await generateBindgen(
+    crate.libName,
     path.join(
       workspace.metadata.target_directory,
       `wasm32-unknown-unknown/${args.profile}/${crate.libName}.wasm`,
     ),
   );
-  const { generate_bindgen } = await instantiate();
-  const bindgenOutput = await generate_bindgen(
-    crate.libName,
-    originalWasmBytes,
-  ) as BindgenOutput;
 
   console.log(
     `${colors.bold(colors.green("Generating"))} lib JS bindings...`,
@@ -131,8 +121,8 @@ async function getBindingJsOutput(
   const bodyText = await getFormattedText(`
 // source-hash: ${sourceHash}
 let wasm;
-${genText.includes("let cachedInt32Memory0;") ? "" : "let cachedInt32Memory0;"}
-${genText.includes("let cachedUint8Memory0;") ? "" : "let cachedUint8Memory0;"}
+${genText.includes("let cachedInt32Memory0") ? "" : "let cachedInt32Memory0;"}
+${genText.includes("let cachedUint8Memory0") ? "" : "let cachedUint8Memory0;"}
 ${genText}
 `);
 

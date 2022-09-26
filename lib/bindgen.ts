@@ -10,7 +10,8 @@ export interface BindgenOutput {
 
 export async function generateBindgen(libName: string, filePath: string) {
   // if wasmbuild is building itself, then we need to use the wasm-bindgen-cli
-  if (Deno.env.get("WASMBUILD_SELF_BUILD") === "1") {
+  const hasEnvPerm = await Deno.permissions.query({ name: "env" });
+  if (hasEnvPerm && Deno.env.get("WASMBUILD_BINDGEN_UPGRADE") === "1") {
     return generateForSelfBuild(filePath);
   }
 
@@ -23,9 +24,14 @@ export async function generateBindgen(libName: string, filePath: string) {
 }
 
 async function generateForSelfBuild(filePath: string): Promise<BindgenOutput> {
+  // When upgrading wasm-bindgen within wasmbuild, we can't rely on
+  // using the .wasm file because it will be out of date and not build,
+  // so we revert to using the globally installed wasm-bindgen cli.
+  // See https://github.com/denoland/wasmbuild/issues/51 for more details
   const tempPath = await Deno.makeTempDir();
   try {
-    console.log(tempPath);
+    // note: ensure you have run `cargo install -f wasm-bindgen-cli` to upgrade
+    // to the latest version
     const p = Deno.run({
       cmd: [
         "wasm-bindgen",

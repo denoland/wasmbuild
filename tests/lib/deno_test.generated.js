@@ -188,23 +188,18 @@ async function instantiateModule(opts) {
   const wasmUrl = opts.url ?? new URL("deno_test_bg.wasm", import.meta.url);
   const decompress = opts.decompress;
   switch (wasmUrl.protocol) {
-    case "file:": {
-      if (typeof Deno !== "object") {
-        throw new Error("file urls are not supported in this environment");
-      }
-
-      if ("permissions" in Deno) {
-        await Deno.permissions.request({ name: "read", path: wasmUrl });
-      }
-      const wasmCode = await Deno.readFile(wasmUrl);
-      return WebAssembly.instantiate(
-        !decompress ? wasmCode : decompress(wasmCode),
-        imports,
-      );
-    }
+    case "file:":
     case "https:":
     case "http:": {
-      if (typeof Deno === "object" && "permissions" in Deno) {
+      const isFile = wasmUrl.protocol === "file:";
+      if (isFile) {
+        if (typeof Deno !== "object") {
+          throw new Error("file urls are not supported in this environment");
+        }
+        if ("permissions" in Deno) {
+          await Deno.permissions.request({ name: "read", path: wasmUrl });
+        }
+      } else if (typeof Deno === "object" && "permissions" in Deno) {
         await Deno.permissions.request({ name: "net", host: wasmUrl.host });
       }
       const wasmResponse = await fetch(wasmUrl);
@@ -213,9 +208,9 @@ async function instantiateModule(opts) {
         return WebAssembly.instantiate(decompress(wasmCode), imports);
       }
       if (
-        wasmResponse.headers.get("content-type")?.toLowerCase().startsWith(
-          "application/wasm",
-        )
+        isFile ||
+        wasmResponse.headers.get("content-type")?.toLowerCase()
+          .startsWith("application/wasm")
       ) {
         return WebAssembly.instantiateStreaming(wasmResponse, imports);
       } else {

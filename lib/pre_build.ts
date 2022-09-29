@@ -258,23 +258,29 @@ function getAsyncLoaderText(
 ) {
   const exportNames = getExportNames(bindgenOutput);
   return `
-const wasm_url = new URL("${getWasmFileNameFromCrate(crate)}", import.meta.url);
-
 /**
  * Decompression callback
  *
- * @callback decompressCallback
+ * @callback DecompressCallback
  * @param {Uint8Array} compressed
  * @return {Uint8Array} decompressed
  */
 
+ /**
+  * Options for instantiating a Wasm instance.
+  * @typedef {Object} InstantiateOptions
+  * @property {URL=} url - Optional url to the Wasm file to instantiate.
+  * @property {DecompressCallback=} decompress - Callback to decompress the
+  * raw Wasm file bytes before instantiating.
+  */
+
 /** Instantiates an instance of the Wasm module returning its functions.
  * @remarks It is safe to call this multiple times and once successfully
  * loaded it will always return a reference to the same object.
- * @param {decompressCallback=} transform
+ * @param {InstantiateOptions=} opts
  */
-export async function instantiate(transform) {
-  return (await instantiateWithInstance(transform)).exports;
+export async function instantiate(opts) {
+  return (await instantiateWithInstance(opts)).exports;
 }
 
 let instanceWithExports;
@@ -283,20 +289,20 @@ let lastLoadPromise;
 /** Instantiates an instance of the Wasm module along with its exports.
  * @remarks It is safe to call this multiple times and once successfully
  * loaded it will always return a reference to the same object.
- * @param {decompressCallback=} transform
+ * @param {InstantiateOptions=} opts
  * @returns {Promise<{
  *   instance: WebAssembly.Instance;
  *   exports: { ${exportNames.map((n) => `${n}: typeof ${n}`).join("; ")} }
  * }>}
  */
-export function instantiateWithInstance(transform) {
+export function instantiateWithInstance(opts) {
   if (instanceWithExports != null) {
     return Promise.resolve(instanceWithExports);
   }
   if (lastLoadPromise == null) {
     lastLoadPromise = (async () => {
       try {
-        const instance = (await instantiateModule(transform)).instance;
+        const instance = (await instantiateModule(opts ?? {})).instance;
         wasm = instance.exports;
         cachedInt32Memory0 = new Int32Array(wasm.memory.buffer);
         cachedUint8Memory0 = new Uint8Array(wasm.memory.buffer);
@@ -322,26 +328,33 @@ export function isInstantiated() {
   return instanceWithExports != null;
 }
 
-async function instantiateModule(transform) {
-  switch (wasm_url.protocol) {
+/**
+ * @param {InstantiateOptions} opts
+ */
+async function instantiateModule(opts) {
+  const wasmUrl = opts.url ?? new URL("${
+    getWasmFileNameFromCrate(crate)
+  }", import.meta.url);
+  const decompress = opts.decompress;
+  switch (wasmUrl.protocol) {
     case "file:": {
       if (typeof Deno !== "object") {
         throw new Error("file urls are not supported in this environment");
       }
 
-      if ("permissions" in Deno) await Deno.permissions.request({ name: "read", path: wasm_url });
-      const wasmCode = await Deno.readFile(wasm_url);
-      return WebAssembly.instantiate(!transform ? wasmCode : transform(wasmCode), imports);
+      if ("permissions" in Deno) await Deno.permissions.request({ name: "read", path: wasmUrl });
+      const wasmCode = await Deno.readFile(wasmUrl);
+      return WebAssembly.instantiate(!decompress ? wasmCode : decompress(wasmCode), imports);
     }
     case "https:":
     case "http:": {
       if (typeof Deno === "object" && "permissions" in Deno) {
-        await Deno.permissions.request({ name: "net", host: wasm_url.host });
+        await Deno.permissions.request({ name: "net", host: wasmUrl.host });
       }
-      const wasmResponse = await fetch(wasm_url);
-      if (transform) {
+      const wasmResponse = await fetch(wasmUrl);
+      if (decompress) {
         const wasmCode = new Uint8Array(await wasmResponse.arrayBuffer());
-        return WebAssembly.instantiate(transform(wasmCode), imports);
+        return WebAssembly.instantiate(decompress(wasmCode), imports);
       }
       if (wasmResponse.headers.get("content-type")?.toLowerCase().startsWith("application/wasm")) {
         return WebAssembly.instantiateStreaming(wasmResponse, imports);
@@ -350,7 +363,7 @@ async function instantiateModule(transform) {
       }
     }
     default:
-      throw new Error(\`Unsupported protocol: \${wasm_url.protocol}\`);
+      throw new Error(\`Unsupported protocol: \${wasmUrl.protocol}\`);
   }
 }
   `;

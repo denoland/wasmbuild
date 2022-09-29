@@ -1,14 +1,15 @@
 // @generated file from wasmbuild -- do not edit
 // deno-lint-ignore-file
 // deno-fmt-ignore-file
-// source-hash: 2f976c7d12d216181909942cd59a68a9487cf7a4
+// source-hash: 7c139afefaada2ae5a0d72c39a87a6a25765b19b
 let wasm;
 
 import { add } from "./snippets/deno_test-0783d0dd1a7e0cd8/add.js";
 
 let WASM_VECTOR_LEN = 0;
 
-let cachedUint8Memory0;
+let cachedUint8Memory0 = new Uint8Array();
+
 function getUint8Memory0() {
   if (cachedUint8Memory0.byteLength === 0) {
     cachedUint8Memory0 = new Uint8Array(wasm.memory.buffer);
@@ -59,7 +60,8 @@ function passStringToWasm0(arg, malloc, realloc) {
   return ptr;
 }
 
-let cachedInt32Memory0;
+let cachedInt32Memory0 = new Int32Array();
+
 function getInt32Memory0() {
   if (cachedInt32Memory0.byteLength === 0) {
     cachedInt32Memory0 = new Int32Array(wasm.memory.buffer);
@@ -102,7 +104,7 @@ export function greet(name) {
 
 const imports = {
   __wbindgen_placeholder__: {
-    __wbg_add_8e12d88ddc4fe78f: function (arg0, arg1) {
+    __wbg_add_b9e10ce4d6e25f61: function (arg0, arg1) {
       const ret = add(arg0 >>> 0, arg1 >>> 0);
       return ret;
     },
@@ -151,7 +153,7 @@ function instantiateInstance() {
 "\
 AGFzbQEAAAAB34CAgAAPYAAAYAABf2ABfwBgAX8Bf2ABfwF+YAJ/fwBgAn9/AX9gA39/fwBgA39/fw\
 F/YAR/f39/AGAEf39/fwF/YAV/f39/fwBgBX9/f39/AX9gBn9/f39/fwF/YAN+f38BfwK3gICAAAEY\
-X193YmluZGdlbl9wbGFjZWhvbGRlcl9fGl9fd2JnX2FkZF84ZTEyZDg4ZGRjNGZlNzhmAAYD+oCAgA\
+X193YmluZGdlbl9wbGFjZWhvbGRlcl9fGl9fd2JnX2FkZF9iOWUxMGNlNGQ2ZTI1ZjYxAAYD+oCAgA\
 B5AwYCCA0KCAUFBgYFCA4FAgEFBwsHBQcFBQkJBwsFBgUGCAgKBwUHAgAFAwUCAgUGCAcFAwUDBQYG\
 AwYKBQIDBgYGBgUDAgMGBwMDBQMGBgYDBQMDAwMFBQUFBQgIBgYGAwMABwMDAwMDBAQAAwEBAwwKCA\
 YDBAICAgSFgICAAAFwARoaBYOAgIAAAQARBomAgIAAAX8BQYCAwAALB++AgIAABgZtZW1vcnkCAAVn\
@@ -483,8 +485,8 @@ AAAAAAAkAhAAAgAAADAwMDEwMjAzMDQwNTA2MDcwODA5MTAxMTEyMTMxNDE1MTYxNzE4MTkyMDIxMj\
 IyMzI0MjUyNjI3MjgyOTMwMzEzMjMzMzQzNTM2MzczODM5NDA0MTQyNDM0NDQ1NDY0NzQ4NDk1MDUx\
 NTI1MzU0NTU1NjU3NTg1OTYwNjE2MjYzNjQ2NTY2Njc2ODY5NzA3MTcyNzM3NDc1NzY3Nzc4Nzk4MD\
 gxODI4Mzg0ODU4Njg3ODg4OTkwOTE5MjkzOTQ5NTk2OTc5ODk5RXJyb3IAtLaAgAAEbmFtZQGptoCA\
-AHoAPWRlbm9fdGVzdDo6YWRkOjpfX3diZ19hZGRfOGUxMmQ4OGRkYzRmZTc4Zjo6aDA4M2NmZGNlYz\
-NhMDg3MjkBOmRsbWFsbG9jOjpkbG1hbGxvYzo6RGxtYWxsb2M8QT46Om1hbGxvYzo6aGNlYzQ5NmEy\
+AHoAPWRlbm9fdGVzdDo6YWRkOjpfX3diZ19hZGRfYjllMTBjZTRkNmUyNWY2MTo6aGI0MTA0NjEwOW\
+U3MWYwZDIBOmRsbWFsbG9jOjpkbG1hbGxvYzo6RGxtYWxsb2M8QT46Om1hbGxvYzo6aGNlYzQ5NmEy\
 MTk4MTc5ZmUCM2NvcmU6OnN0cjo6Y291bnQ6OmRvX2NvdW50X2NoYXJzOjpoODA2OGU2Mjk5NWEwNj\
 BkNAM4ZGxtYWxsb2M6OmRsbWFsbG9jOjpEbG1hbGxvYzxBPjo6ZnJlZTo6aDVmYmEyODk3ODA3MjEy\
 YWEELGNvcmU6OmZtdDo6Rm9ybWF0dGVyOjpwYWQ6OmhjODRiZmNhMzgwNzkwZDliBTVjb3JlOjpmbX\
@@ -548,7 +550,7 @@ hmMWY0ZWE2NjA4OTMxYTI1PA5fX3J1c3RfcmVhbGxvYz0PX193YmluZGdlbl9mcmVlPklzdGQ6OnN5\
 c19jb21tb246OmJhY2t0cmFjZTo6X19ydXN0X2VuZF9zaG9ydF9iYWNrdHJhY2U6Omg2ZWZkNzMwMj\
 gzODc1ODA5PzBkbG1hbGxvYzo6ZGxtYWxsb2M6OmxlZnRfYml0czo6aDRjM2VlMWMwNGE5ZDk0OGNA\
 MDwmVCBhcyBjb3JlOjpmbXQ6OkRlYnVnPjo6Zm10OjpoZWE5NmFjZDU1OGIyODQ1N0EyPCZUIGFzIG\
-NvcmU6OmZtdDo6RGlzcGxheT46OmZtdDo6aGNjZjI1MzlhM2M0MjQwZmVCDF9fcnVzdF9hbGxvY0M7\
+NvcmU6OmZtdDo6RGlzcGxheT46OmZtdDo6aGRmMjYxNWZiNDk3YTk1MTdCDF9fcnVzdF9hbGxvY0M7\
 PCZtdXQgVyBhcyBjb3JlOjpmbXQ6OldyaXRlPjo6d3JpdGVfY2hhcjo6aDczNWJhMmUyMjU1YWMwN2\
 NEZjxzdGQ6OnBhbmlja2luZzo6YmVnaW5fcGFuaWNfaGFuZGxlcjo6U3RyUGFuaWNQYXlsb2FkIGFz\
 IGNvcmU6OnBhbmljOjpCb3hNZVVwPjo6Z2V0OjpoNDg2ZWNjZGUyMTlkNDQzZUU0ZGxtYWxsb2M6Om\
@@ -578,7 +580,7 @@ Vuazo6cGx1c19vZmZzZXQ6OmhmNTk0YTcxNjE3ZjI5NThjYDpkbG1hbGxvYzo6ZGxtYWxsb2M6OkNo\
 dW5rOjptaW51c19vZmZzZXQ6OmhhNjYwZTE0MzI3YWMzZTRjYTRkbG1hbGxvYzo6ZGxtYWxsb2M6Ok\
 NodW5rOjp0b19tZW06Omg0YjM4NmQ0ZTQ4ZDk2NWNmYjZkbG1hbGxvYzo6ZGxtYWxsb2M6OkNodW5r\
 Ojpmcm9tX21lbTo6aDc1YjZiNTA5NTU5NzAzMWFjNXdhc21fYmluZGdlbjo6X19ydDo6bWFsbG9jX2\
-ZhaWx1cmU6OmhiOGNiNzFjNGRhYzUyYjU0ZA1fX3JkbF9kZWFsbG9jZTZkbG1hbGxvYzo6ZGxtYWxs\
+ZhaWx1cmU6OmhiN2FmZjJkMjJhYmU1MzAyZA1fX3JkbF9kZWFsbG9jZTZkbG1hbGxvYzo6ZGxtYWxs\
 b2M6OlRyZWVDaHVuazo6bmV4dDo6aDZhM2Y2NTFjMDEwZTY5NzVmNmRsbWFsbG9jOjpkbG1hbGxvYz\
 o6VHJlZUNodW5rOjpwcmV2OjpoMDUyZTRkMmUwY2JjM2ZmMGc+Y29yZTo6cGFuaWM6OnBhbmljX2lu\
 Zm86OlBhbmljSW5mbzo6bWVzc2FnZTo6aDEwMmZkZGI2YmVjYjhlYWJoP2NvcmU6OnBhbmljOjpwYW\
@@ -601,10 +603,9 @@ OTFjMTc2NmMwYThlMjZid2ljb3JlOjpwdHI6OmRyb3BfaW5fcGxhY2U8Jm11dCBzdGQ6OmlvOjpXcm\
 l0ZTo6d3JpdGVfZm10OjpBZGFwdGVyPGFsbG9jOjp2ZWM6OlZlYzx1OD4+Pjo6aGE1MjEzNjA2YmZi\
 YjFjYTJ4MGNvcmU6OnB0cjo6ZHJvcF9pbl9wbGFjZTwmdTg+OjpoNTJhZDJkMTEyYzdlMmNlM3lvY2\
 9yZTo6cHRyOjpkcm9wX2luX3BsYWNlPCZjb3JlOjppdGVyOjphZGFwdGVyczo6Y29waWVkOjpDb3Bp\
-ZWQ8Y29yZTo6c2xpY2U6Oml0ZXI6Okl0ZXI8dTg+Pj46OmgwZTJiY2Q1MzU4OGY2Mzk1APuAgIAACX\
+ZWQ8Y29yZTo6c2xpY2U6Oml0ZXI6Okl0ZXI8dTg+Pj46OmgwZTJiY2Q1MzU4OGY2Mzk1AO+AgIAACX\
 Byb2R1Y2VycwIIbGFuZ3VhZ2UBBFJ1c3QADHByb2Nlc3NlZC1ieQMFcnVzdGMdMS42MS4wIChmZTVi\
-MTNkNjggMjAyMi0wNS0xOCkGd2FscnVzBjAuMTkuMAx3YXNtLWJpbmRnZW4SMC4yLjgxICgzODdlOD\
-IxYzgp\
+MTNkNjggMjAyMi0wNS0xOCkGd2FscnVzBjAuMTkuMAx3YXNtLWJpbmRnZW4GMC4yLjgz\
 ",
   );
   const wasmModule = new WebAssembly.Module(wasmBytes);

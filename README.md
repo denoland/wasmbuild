@@ -57,10 +57,24 @@ When instantiating, you might want to decompress Wasm bytes.
 import { instantiate } from "./lib/deno_test.generated.js";
 import { decompress } from "https://deno.land/x/lz4@v0.1.2/mod.ts";
 
-await instantiate(decompress);
+await instantiate({
+  decompress,
+});
 ```
 
 Note, however, wasmbuild CLI does not compress the Wasm file automatically.
+
+### Custom URL to .wasm file
+
+A custom URL to the .wasm file may be provided by specifying the `url` option:
+
+```ts
+import { instantiate } from "./lib/deno_test.generated.js";
+
+await instantiate({
+  url: new URL("./custom_path_to_url.wasm", import.meta),
+});
+```
 
 ## Checking output is up-to-date
 

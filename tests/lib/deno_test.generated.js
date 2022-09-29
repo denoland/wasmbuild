@@ -1,14 +1,15 @@
 // @generated file from wasmbuild -- do not edit
 // deno-lint-ignore-file
 // deno-fmt-ignore-file
-// source-hash: 2f976c7d12d216181909942cd59a68a9487cf7a4
+// source-hash: 7c139afefaada2ae5a0d72c39a87a6a25765b19b
 let wasm;
 
 import { add } from "./snippets/deno_test-0783d0dd1a7e0cd8/add.js";
 
 let WASM_VECTOR_LEN = 0;
 
-let cachedUint8Memory0;
+let cachedUint8Memory0 = new Uint8Array();
+
 function getUint8Memory0() {
   if (cachedUint8Memory0.byteLength === 0) {
     cachedUint8Memory0 = new Uint8Array(wasm.memory.buffer);
@@ -59,7 +60,8 @@ function passStringToWasm0(arg, malloc, realloc) {
   return ptr;
 }
 
-let cachedInt32Memory0;
+let cachedInt32Memory0 = new Int32Array();
+
 function getInt32Memory0() {
   if (cachedInt32Memory0.byteLength === 0) {
     cachedInt32Memory0 = new Int32Array(wasm.memory.buffer);
@@ -102,30 +104,36 @@ export function greet(name) {
 
 const imports = {
   __wbindgen_placeholder__: {
-    __wbg_add_8e12d88ddc4fe78f: function (arg0, arg1) {
+    __wbg_add_b9e10ce4d6e25f61: function (arg0, arg1) {
       const ret = add(arg0 >>> 0, arg1 >>> 0);
       return ret;
     },
   },
 };
 
-const wasm_url = new URL("deno_test_bg.wasm", import.meta.url);
-
 /**
  * Decompression callback
  *
- * @callback decompressCallback
+ * @callback DecompressCallback
  * @param {Uint8Array} compressed
  * @return {Uint8Array} decompressed
+ */
+
+/**
+ * Options for instantiating a Wasm instance.
+ * @typedef {Object} InstantiateOptions
+ * @property {URL=} url - Optional url to the Wasm file to instantiate.
+ * @property {DecompressCallback=} decompress - Callback to decompress the
+ * raw Wasm file bytes before instantiating.
  */
 
 /** Instantiates an instance of the Wasm module returning its functions.
  * @remarks It is safe to call this multiple times and once successfully
  * loaded it will always return a reference to the same object.
- * @param {decompressCallback=} transform
+ * @param {InstantiateOptions=} opts
  */
-export async function instantiate(transform) {
-  return (await instantiateWithInstance(transform)).exports;
+export async function instantiate(opts) {
+  return (await instantiateWithInstance(opts)).exports;
 }
 
 let instanceWithExports;
@@ -134,20 +142,20 @@ let lastLoadPromise;
 /** Instantiates an instance of the Wasm module along with its exports.
  * @remarks It is safe to call this multiple times and once successfully
  * loaded it will always return a reference to the same object.
- * @param {decompressCallback=} transform
+ * @param {InstantiateOptions=} opts
  * @returns {Promise<{
  *   instance: WebAssembly.Instance;
  *   exports: { greet: typeof greet }
  * }>}
  */
-export function instantiateWithInstance(transform) {
+export function instantiateWithInstance(opts) {
   if (instanceWithExports != null) {
     return Promise.resolve(instanceWithExports);
   }
   if (lastLoadPromise == null) {
     lastLoadPromise = (async () => {
       try {
-        const instance = (await instantiateModule(transform)).instance;
+        const instance = (await instantiateModule(opts ?? {})).instance;
         wasm = instance.exports;
         cachedInt32Memory0 = new Int32Array(wasm.memory.buffer);
         cachedUint8Memory0 = new Uint8Array(wasm.memory.buffer);
@@ -173,36 +181,36 @@ export function isInstantiated() {
   return instanceWithExports != null;
 }
 
-async function instantiateModule(transform) {
-  switch (wasm_url.protocol) {
-    case "file:": {
-      if (typeof Deno !== "object") {
-        throw new Error("file urls are not supported in this environment");
-      }
-
-      if ("permissions" in Deno) {
-        Deno.permissions.request({ name: "read", path: wasm_url });
-      }
-      const wasmCode = await Deno.readFile(wasm_url);
-      return WebAssembly.instantiate(
-        !transform ? wasmCode : transform(wasmCode),
-        imports,
-      );
-    }
+/**
+ * @param {InstantiateOptions} opts
+ */
+async function instantiateModule(opts) {
+  const wasmUrl = opts.url ?? new URL("deno_test_bg.wasm", import.meta.url);
+  const decompress = opts.decompress;
+  switch (wasmUrl.protocol) {
+    case "file:":
     case "https:":
     case "http:": {
-      if (typeof Deno === "object" && "permissions" in Deno) {
-        Deno.permissions.request({ name: "net", host: wasm_url.host });
+      const isFile = wasmUrl.protocol === "file:";
+      if (isFile) {
+        if (typeof Deno !== "object") {
+          throw new Error("file urls are not supported in this environment");
+        }
+        if ("permissions" in Deno) {
+          await Deno.permissions.request({ name: "read", path: wasmUrl });
+        }
+      } else if (typeof Deno === "object" && "permissions" in Deno) {
+        await Deno.permissions.request({ name: "net", host: wasmUrl.host });
       }
-      const wasmResponse = await fetch(wasm_url);
-      if (transform) {
+      const wasmResponse = await fetch(wasmUrl);
+      if (decompress) {
         const wasmCode = new Uint8Array(await wasmResponse.arrayBuffer());
-        return WebAssembly.instantiate(transform(wasmCode), imports);
+        return WebAssembly.instantiate(decompress(wasmCode), imports);
       }
       if (
-        wasmResponse.headers.get("content-type")?.toLowerCase().startsWith(
-          "application/wasm",
-        )
+        isFile ||
+        wasmResponse.headers.get("content-type")?.toLowerCase()
+          .startsWith("application/wasm")
       ) {
         return WebAssembly.instantiateStreaming(wasmResponse, imports);
       } else {
@@ -213,6 +221,6 @@ async function instantiateModule(transform) {
       }
     }
     default:
-      throw new Error(`Unsupported protocol: ${wasm_url.protocol}`);
+      throw new Error(`Unsupported protocol: ${wasmUrl.protocol}`);
   }
 }

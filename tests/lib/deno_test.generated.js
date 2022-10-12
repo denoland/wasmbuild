@@ -187,11 +187,23 @@ export function isInstantiated() {
 async function instantiateModule(opts) {
   const wasmUrl = opts.url ?? new URL("deno_test_bg.wasm", import.meta.url);
   const decompress = opts.decompress;
+  const isFile = wasmUrl.protocol === "file:";
+
+  // make file urls work with dnt
+  const isNode = globalThis.process?.versions?.node != null;
+  if (isNode && isFile) {
+    // the deno global will be shimmed by dnt
+    const wasmCode = await Deno.readFile(wasm_url);
+    return WebAssembly.instantiate(
+      transform ? transform(wasmCode) : wasmCode,
+      imports,
+    );
+  }
+
   switch (wasmUrl.protocol) {
     case "file:":
     case "https:":
     case "http:": {
-      const isFile = wasmUrl.protocol === "file:";
       if (isFile) {
         if (typeof Deno !== "object") {
           throw new Error("file urls are not supported in this environment");

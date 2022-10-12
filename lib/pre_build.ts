@@ -343,7 +343,7 @@ async function instantiateModule(opts) {
   if (isNode && isFile) {
     // the deno global will be shimmed by dnt
     const wasmCode = await Deno.readFile(wasmUrl);
-    return WebAssembly.instantiate(transform ? transform(wasmCode) : wasmCode, imports);
+    return WebAssembly.instantiate(decompress ? decompress(wasmCode) : wasmCode, imports);
   }
 
   switch (wasmUrl.protocol) {

@@ -19,7 +19,7 @@ Add a task to the _deno.json_ file in your project:
 To create a starter Rust crate in an `rs_lib` subfolder of your project, run:
 
 ```bash
-$ deno task wasmbuild new
+deno task wasmbuild new
 ```
 
 ## Building
@@ -27,7 +27,7 @@ $ deno task wasmbuild new
 To build, invoke `deno task wasmbuild` in your project:
 
 ```bash
-$ deno task wasmbuild
+deno task wasmbuild
 ```
 
 Bindings will be generated at `./lib/<crate-name>.generated.js`. Import the
@@ -83,7 +83,7 @@ submitting a PR. To ensure that the output is up-to-date, you can use the
 `--check` flag:
 
 ```shellsession
-$ deno task wasmbuild --check
+deno task wasmbuild --check
 ```
 
 For example, in a GitHub action:

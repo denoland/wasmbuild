@@ -28,8 +28,8 @@ In addition to that, you can also generate a helper to cache wasm files
 deno task wasmbuild --generate-wasm-cache
 ```
 
-This will create a `wasm_cache.ts` that exprots an `instantiateWithCaching` method.
-It will cache the wasm file as hash of the current module url.
+This will create a `wasm_cache.ts` that exprots an `instantiateWithCaching`
+method. It will cache the wasm file as hash of the current module url.
 
 ## Building
 

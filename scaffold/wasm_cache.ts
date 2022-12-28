@@ -4,11 +4,11 @@ import { default as localDataDir } from "https://deno.land/x/dir@1.5.1/data_loca
 import { instantiate } from "./lib/rs_lib.generated.js";
 
 export async function instantiateWithCaching() {
-    let url = new URL("./lib/rs_lib_bg.wasm", import.meta.url);
-    if (url.protocol !== "file:") {
-      url = (await cacheLocalDir(url)) ?? url;
-    }
-    return await instantiate({ url });
+  let url = new URL("./lib/rs_lib_bg.wasm", import.meta.url);
+  if (url.protocol !== "file:") {
+    url = (await cacheLocalDir(url)) ?? url;
+  }
+  return await instantiate({ url });
 }
 
 async function cacheLocalDir(url: URL) {
@@ -43,15 +43,19 @@ async function getInitializedLocalDataDirPath() {
   return dirPath;
 }
 
-
 async function getUrlHash(url: URL) {
   // Taken from MDN: https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest
-  const hashBuffer = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(url.href))
+  const hashBuffer = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(url.href),
+  );
   // convert buffer to byte array
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   // convert bytes to hex string
-  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
-  return hashHex
+  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join(
+    "",
+  );
+  return hashHex;
 }
 
 async function getUrlBytes(url: URL) {
@@ -61,4 +65,3 @@ async function getUrlBytes(url: URL) {
   }
   return await response.arrayBuffer();
 }
-

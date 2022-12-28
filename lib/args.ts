@@ -6,6 +6,7 @@ export type Command = NewCommand | BuildCommand | CheckCommand;
 
 export interface NewCommand {
   kind: "new";
+  generateWasmCache: boolean;
 }
 
 export interface CommonBuild {
@@ -32,6 +33,7 @@ export function parseArgs(rawArgs: string[]): Command {
     case "new":
       return {
         kind: "new",
+        generateWasmCache: flags["generate-wasm-cache"],
       };
     case "build":
     case undefined:

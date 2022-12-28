@@ -15,7 +15,7 @@ const command = parseArgs(Deno.args);
 
 switch (command.kind) {
   case "new": {
-    await runNewCommand();
+    await runNewCommand(command.generateWasmCache);
     break;
   }
   case "build": {

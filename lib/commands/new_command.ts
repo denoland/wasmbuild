@@ -4,7 +4,7 @@ import { colors, ensureDir } from "../deps.ts";
 import { versions } from "../versions.ts";
 import { pathExists } from "../helpers.ts";
 
-export async function runNewCommand() {
+export async function runNewCommand(generateWasmCache: boolean) {
   if (await pathExists("./rs_lib")) {
     console.log(
       `${
@@ -90,6 +90,18 @@ mod tests {
 }
 `,
   );
+
+  if (generateWasmCache) {
+    console.log(
+      `${colors.bold(colors.green("Creating"))} wasm_cache.ts...`,
+    );
+    Deno.writeTextFileSync(
+      "wasm_cache.ts",
+      await fetch(
+        new URL("../../scaffold/wasm_cache.ts", import.meta.url),
+      ).then((r) => r.text()),
+    );
+  }
 }
 
 async function getFileTextIfExists(path: string) {

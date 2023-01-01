@@ -102,12 +102,16 @@ async function downloadBinaryen(tempPath: string) {
 }
 
 function binaryenUrl() {
-  const target = {
-    "linux": "x86_64-linux",
-    "darwin": "x86_64-macos",
-    "windows": "x86_64-windows",
+  const os = {
+    "linux": "linux",
+    "darwin": "macos",
+    "windows": "windows",
   }[Deno.build.os];
+  const arch = {
+    "x86_64": "x86_64",
+    "aarch64": "arm64",
+  }[Deno.build.arch];
   return new URL(
-    `https://github.com/WebAssembly/binaryen/releases/download/${tag}/binaryen-${tag}-${target}.tar.gz`,
+    `https://github.com/WebAssembly/binaryen/releases/download/${tag}/binaryen-${tag}-${arch}-${os}.tar.gz`,
   );
 }

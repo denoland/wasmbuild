@@ -6,12 +6,6 @@ edition = "2021"
 [lib]
 crate_type = ["cdylib"]
 
-[profile.release]
-codegen-units = 1
-incremental = true
-lto = true
-opt-level = "z"
-
 [dependencies]
 anyhow = "1.0.57"
 js-sys = "0.3.60"

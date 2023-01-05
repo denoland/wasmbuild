@@ -12,9 +12,3 @@ wasm-bindgen = "0.2.83"
 name = "deno_test"
 crate_type = ["cdylib"]
 path = "lib.rs"
-
-[profile.release]
-codegen-units = 1
-incremental = true
-lto = true
-opt-level = "z"

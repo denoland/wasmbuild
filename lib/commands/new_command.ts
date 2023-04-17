@@ -25,6 +25,7 @@ export async function runNewCommand() {
 members = [
   "rs_lib",
 ]
+edition = "2021"
 `,
     );
   }

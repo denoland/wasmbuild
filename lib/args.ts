@@ -27,7 +27,7 @@ export interface CheckCommand extends CommonBuild {
 }
 
 export function parseArgs(rawArgs: string[]): Command {
-  const flags = parseFlags(rawArgs);
+  const flags = parseFlags(rawArgs, { "--": true });
   switch (flags._[0]) {
     case "new":
       return {
@@ -75,6 +75,9 @@ export function parseArgs(rawArgs: string[]): Command {
     }
     if (flags["all-features"]) {
       cargoFlags.push("--all-features");
+    }
+    if (flags["--"]) {
+      cargoFlags.push(...flags["--"]);
     }
 
     return cargoFlags;

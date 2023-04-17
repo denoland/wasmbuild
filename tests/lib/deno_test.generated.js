@@ -1,7 +1,7 @@
 // @generated file from wasmbuild -- do not edit
 // deno-lint-ignore-file
 // deno-fmt-ignore-file
-// source-hash: 7c139afefaada2ae5a0d72c39a87a6a25765b19b
+// source-hash: 32adb27ffd08ee307b367a58fb1cfe05fd2395c4
 let wasm;
 
 import { add } from "./snippets/deno_test-0783d0dd1a7e0cd8/add.js";
@@ -189,13 +189,13 @@ async function instantiateModule(opts) {
   const decompress = opts.decompress;
   const isFile = wasmUrl.protocol === "file:";
 
-  // make file urls work with dnt
+  // make file urls work in Node via dnt
   const isNode = globalThis.process?.versions?.node != null;
   if (isNode && isFile) {
     // the deno global will be shimmed by dnt
-    const wasmCode = await Deno.readFile(wasm_url);
+    const wasmCode = await Deno.readFile(wasmUrl);
     return WebAssembly.instantiate(
-      transform ? transform(wasmCode) : wasmCode,
+      decompress ? decompress(wasmCode) : wasmCode,
       imports,
     );
   }

@@ -31,10 +31,11 @@ export async function runPreBuild(
     } wasm32-unknown-unknown target installed...`,
   );
 
-  const rustupAddWasm = Deno.run({
-    cmd: ["rustup", "target", "add", "wasm32-unknown-unknown"],
-  }).status();
-  if (!(await rustupAddWasm).success) {
+  const rustupAddWasm = new Deno.Command("rustup", {
+    args: ["target", "add", "wasm32-unknown-unknown"],
+  });
+  const rustupAddWasmOutput = await rustupAddWasm.output();
+  if (!rustupAddWasmOutput.success) {
     console.error(`adding wasm32-unknown-unknown target failed`);
     Deno.exit(1);
   }
@@ -44,7 +45,6 @@ export async function runPreBuild(
   );
 
   const cargoBuildCmd = [
-    "cargo",
     "build",
     "--lib",
     "-p",
@@ -61,16 +61,17 @@ export async function runPreBuild(
   const RUSTFLAGS = Deno.env.get("RUSTFLAGS") ||
     "" + `--remap-path-prefix=${root}=. --remap-path-prefix=${home}=~`;
   console.log(`  ${colors.bold(colors.gray(cargoBuildCmd.join(" ")))}`);
-  const cargoBuildReleaseCmdStatus = Deno.run({
-    cmd: cargoBuildCmd,
+  const cargoBuildReleaseCmdProcess = new Deno.Command("cargo", {
+    args: cargoBuildCmd,
     env: {
       "SOURCE_DATE_EPOCH": "1600000000",
       "TZ": "UTC",
       "LC_ALL": "C",
       RUSTFLAGS,
     },
-  }).status();
-  if (!(await cargoBuildReleaseCmdStatus).success) {
+  });
+  const cargoBuildReleaseCmdOutput = await cargoBuildReleaseCmdProcess.output();
+  if (!cargoBuildReleaseCmdOutput.success) {
     console.error(`cargo build failed`);
     Deno.exit(1);
   }
@@ -133,7 +134,6 @@ ${genText}
 
   async function getFormattedText(inputText: string) {
     const denoFmtCmdArgs = [
-      Deno.execPath(),
       "fmt",
       "--quiet",
       "--ext",
@@ -141,22 +141,21 @@ ${genText}
       "-",
     ];
     console.log(`  ${colors.bold(colors.gray(denoFmtCmdArgs.join(" ")))}`);
-    const denoFmtCmd = Deno.run({
-      cmd: denoFmtCmdArgs,
+    const denoFmtCmd = new Deno.Command(Deno.execPath(), {
+      args: denoFmtCmdArgs,
       stdin: "piped",
       stdout: "piped",
     });
-    await writeAll(denoFmtCmd.stdin, new TextEncoder().encode(inputText));
-    denoFmtCmd.stdin.close();
-    const [output, status] = await Promise.all([
-      denoFmtCmd.output(),
-      denoFmtCmd.status(),
-    ]);
-    if (!status.success) {
+    const denoFmtChild = denoFmtCmd.spawn();
+    const stdin = denoFmtChild.stdin.getWriter();
+    await stdin.write(new TextEncoder().encode(inputText));
+
+    const output = await denoFmtChild.output();
+    if (!output.success) {
       console.error("deno fmt command failed");
       Deno.exit(1);
     }
-    return new TextDecoder().decode(output);
+    return new TextDecoder().decode(output.stdout);
   }
 
   async function getHash() {

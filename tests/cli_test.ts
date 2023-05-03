@@ -38,14 +38,13 @@ Deno.test("should add values", async () => {
     await Deno.remove(tempDir, { recursive: true });
   }
 
-  async function runCommand(...args: string[]) {
-    const p = Deno.run({
-      cmd: args,
+  async function runCommand(cmd: string, ...args: string[]) {
+    const p = new Deno.Command(cmd, {
+      args,
       cwd: tempDir,
     });
-    const status = await p.status();
-    p.close();
-    if (!status.success) {
+    const output = await p.output();
+    if (!output.success) {
       throw new Error("FAILED");
     }
   }

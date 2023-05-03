@@ -44,16 +44,16 @@ export async function getCargoWorkspace(
   directory: string,
   cargoFlags: string[],
 ) {
-  const p = Deno.run({
+  const p = new Deno.Command("cargo", {
     cwd: directory,
-    cmd: ["cargo", "metadata", "--format-version", "1", ...cargoFlags],
+    args: ["metadata", "--format-version", "1", ...cargoFlags],
     stdout: "piped",
   });
-  const [status, output] = await Promise.all([p.status(), p.output()]);
-  if (!status.success) {
+  const output = await p.output();
+  if (!output.success) {
     throw new Error("Error retrieving cargo metadata.");
   }
-  const result = new TextDecoder().decode(output);
+  const result = new TextDecoder().decode(output.stdout);
   return new CargoWorkspace(JSON.parse(result!) as CargoMetadata);
 }
 

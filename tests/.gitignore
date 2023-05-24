@@ -1,3 +1,4 @@
 target/
-lib/deno_test_bg.wasm
-
+lib_out_js_file
+lib
+lib_sync

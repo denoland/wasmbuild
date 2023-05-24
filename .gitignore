@@ -1,3 +1,5 @@
 .vscode
 target/
 tests/lib_out_js_file
+tests/lib
+tests/lib_sync

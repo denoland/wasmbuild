@@ -273,7 +273,7 @@ function getAsyncLoaderText(
   loaderText += `
 const loader = new Loader({
   imports,
-  cache: ${useCache ? "cacheLocalDir" : "undefined"},
+  cache: ${useCache ? "cacheToLocalDir" : "undefined"},
 })
 `;
 
@@ -312,9 +312,11 @@ export async function instantiate(opts) {
  * }>}
  */
 export async function instantiateWithInstance(opts) {
-  const instance = loader.load({
-    url: opts?.url ?? new URL("${getWasmFileNameFromCrate(crate)}", import.meta.url),
-  }).instance;
+  const {instance } = await loader.load(
+    opts?.url ?? new URL("${getWasmFileNameFromCrate(crate)}", import.meta.url),
+    opts?.decompress,
+  );
+  wasm = wasm ?? instance.exports;
   cachedInt32Memory0 = cachedInt32Memory0 ?? new Int32Array(wasm.memory.buffer);
   cachedUint8Memory0 = cachedUint8Memory0 ?? new Uint8Array(wasm.memory.buffer);
   return {

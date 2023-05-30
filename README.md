@@ -37,7 +37,7 @@ Bindings will be generated at `./lib/<crate-name>.generated.js`. Import the
 import { instantiate } from "./lib/rs_lib.generated.js";
 
 const { add } = await instantiate();
-add(1, 1);
+console.log(add(1, 1));
 ```
 
 Or instantiate and use the exports:
@@ -46,7 +46,7 @@ Or instantiate and use the exports:
 import { add, instantiate } from "./lib/rs_lib.generated.js";
 
 await instantiate();
-add(1, 1);
+console.log(add(1, 1));
 ```
 
 ### Compression

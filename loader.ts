@@ -8,12 +8,17 @@ export interface LoaderOptions {
   /** A function that caches the Wasm module to a local path so that
    * so that a network request isn't required on every load.
    */
-  cache?: (url: URL, decompress: DecompressCallback | undefined) => Promise<URL>;
+  cache?: (
+    url: URL,
+    decompress: DecompressCallback | undefined,
+  ) => Promise<URL>;
 }
 
 export class Loader {
   #options: LoaderOptions;
-  #lastLoadPromise: Promise<WebAssembly.WebAssemblyInstantiatedSource> | undefined;
+  #lastLoadPromise:
+    | Promise<WebAssembly.WebAssemblyInstantiatedSource>
+    | undefined;
   #instantiated: WebAssembly.WebAssemblyInstantiatedSource | undefined;
 
   constructor(options: LoaderOptions) {
@@ -28,13 +33,16 @@ export class Loader {
     return this.#instantiated?.module;
   }
 
-  load(url: URL, decompress: DecompressCallback | undefined): Promise<WebAssembly.WebAssemblyInstantiatedSource> {
+  load(
+    url: URL,
+    decompress: DecompressCallback | undefined,
+  ): Promise<WebAssembly.WebAssemblyInstantiatedSource> {
     if (this.#instantiated) {
       return Promise.resolve(this.#instantiated);
     } else if (this.#lastLoadPromise == null) {
       this.#lastLoadPromise = (async () => {
         try {
-          this.#instantiated = (await this.#instantiate(url, decompress));
+          this.#instantiated = await this.#instantiate(url, decompress);
           return this.#instantiated;
         } finally {
           this.#lastLoadPromise = undefined;

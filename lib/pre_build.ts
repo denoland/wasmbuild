@@ -101,7 +101,9 @@ export async function runPreBuild(
     bindingJsText,
     bindingJsPath: path.join(args.outDir, bindingJsFileName),
     sourceHash,
-    wasmFileName: args.loaderKind === "sync" ? undefined : getWasmFileNameFromCrate(crate),
+    wasmFileName: args.loaderKind === "sync"
+      ? undefined
+      : getWasmFileNameFromCrate(crate),
   };
 }
 

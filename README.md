@@ -22,15 +22,6 @@ To create a starter Rust crate in an `rs_lib` subfolder of your project, run:
 deno task wasmbuild new
 ```
 
-In addition to that, you can also generate a helper to cache wasm files
-
-```bash
-deno task wasmbuild --generate-wasm-cache
-```
-
-This will create a `wasm_cache.ts` that exports an `instantiateWithCaching`
-method. It will cache the wasm file as hash of the current module url.
-
 ## Building
 
 To build, invoke `deno task wasmbuild` in your project:
@@ -118,3 +109,4 @@ For example, in a GitHub action:
   base64 text.
 - `--skip-opt` - Skip running wasm-opt.
 - `--check` - Checks if the output is up-to-date.
+- `--no-cache` - Do not generate the code to cache the Wasm file locally.

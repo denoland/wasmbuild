@@ -91,18 +91,6 @@ mod tests {
 }
 `,
   );
-
-  if (generateWasmCache) {
-    console.log(
-      `${colors.bold(colors.green("Creating"))} wasm_cache.ts...`,
-    );
-    Deno.writeTextFileSync(
-      "wasm_cache.ts",
-      await fetch(
-        new URL("../../scaffold/wasm_cache.ts", import.meta.url),
-      ).then((r) => r.text()),
-    );
-  }
 }
 
 async function getFileTextIfExists(path: string) {

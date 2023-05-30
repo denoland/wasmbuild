@@ -1,12 +1,8 @@
 {
-  "fmt": {
-    "files": {
-      "exclude": [
-        "./tests/target",
-        "./target"
-      ]
-    }
-  },
+  "exclude": [
+    "./tests/target",
+    "./target"
+  ],
   "tasks": {
     "fmt": "deno fmt && cargo fmt",
     "build": "deno run -A ./main.ts -p wasmbuild",

@@ -42,8 +42,8 @@ export async function runBuildCommand(args: BuildCommand) {
   }
 
   async function writeSnippets() {
-    const localModules = Object.entries(output.bindgen.localModules);
-    const snippets = Object.entries(output.bindgen.snippets);
+    const localModules = Array.from(output.bindgen.localModules);
+    const snippets = Array.from(output.bindgen.snippets);
 
     if (localModules.length === 0 && !snippets.some((s) => s[1].length > 0)) {
       return; // don't create the snippets directory

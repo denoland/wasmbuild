@@ -19,7 +19,7 @@ Add a task to the _deno.json_ file in your project:
 To create a starter Rust crate in an `rs_lib` subfolder of your project, run:
 
 ```bash
-$ deno task wasmbuild new
+deno task wasmbuild new
 ```
 
 In addition to that, you can also generate a helper to cache wasm files
@@ -36,26 +36,26 @@ method. It will cache the wasm file as hash of the current module url.
 To build, invoke `deno task wasmbuild` in your project:
 
 ```bash
-$ deno task wasmbuild
+deno task wasmbuild
 ```
 
 Bindings will be generated at `./lib/<crate-name>.generated.js`. Import the
 `instantiate` function and call it asynchronously to get the exports:
 
 ```ts
-import { instantiate } from "./lib/deno_test.generated.js";
+import { instantiate } from "./lib/rs_lib.generated.js";
 
-const { greet } = await instantiate();
-greet("Deno");
+const { add } = await instantiate();
+add(1, 1);
 ```
 
 Or instantiate and use the exports:
 
 ```ts
-import { greet, instantiate } from "./lib/deno_test.generated.js";
+import { add, instantiate } from "./lib/rs_lib.generated.js";
 
 await instantiate();
-greet("Deno");
+add(1, 1);
 ```
 
 ### Compression
@@ -63,7 +63,7 @@ greet("Deno");
 When instantiating, you might want to decompress Wasm bytes.
 
 ```ts
-import { instantiate } from "./lib/deno_test.generated.js";
+import { instantiate } from "./lib/rs_lib.generated.js";
 import { decompress } from "https://deno.land/x/lz4@v0.1.2/mod.ts";
 
 await instantiate({
@@ -78,10 +78,10 @@ Note, however, wasmbuild CLI does not compress the Wasm file automatically.
 A custom URL to the .wasm file may be provided by specifying the `url` option:
 
 ```ts
-import { instantiate } from "./lib/deno_test.generated.js";
+import { instantiate } from "./lib/rs_lib.generated.js";
 
 await instantiate({
-  url: new URL("./custom_path_to_url.wasm", import.meta),
+  url: new URL("./custom_path_to_url.wasm", import.meta.url),
 });
 ```
 
@@ -92,7 +92,7 @@ submitting a PR. To ensure that the output is up-to-date, you can use the
 `--check` flag:
 
 ```shellsession
-$ deno task wasmbuild --check
+deno task wasmbuild --check
 ```
 
 For example, in a GitHub action:

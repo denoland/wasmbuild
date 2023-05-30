@@ -25,6 +25,7 @@ export async function runNewCommand(generateWasmCache: boolean) {
 members = [
   "rs_lib",
 ]
+edition = "2021"
 `,
     );
   }

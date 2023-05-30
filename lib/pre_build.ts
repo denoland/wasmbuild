@@ -23,7 +23,7 @@ export async function runPreBuild(
   const root = Deno.cwd();
   if (!await pathExists(path.join(root, "Cargo.toml"))) {
     console.error(
-      "%cConsider running `wasmbuild new` to get started",
+      "%cConsider running `deno task wasmbuild new` to get started",
       "color: yellow",
     );
     throw `Cargo.toml not found in ${root}`;

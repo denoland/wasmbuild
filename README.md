@@ -109,3 +109,4 @@ For example, in a GitHub action:
   base64 text.
 - `--skip-opt` - Skip running wasm-opt.
 - `--check` - Checks if the output is up-to-date.
+- `--no-cache` - Do not generate the code to cache the Wasm file locally.

@@ -1,4 +1,5 @@
 target/
 lib_out_js_file
 lib
+lib_no_cache
 lib_sync

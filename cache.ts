@@ -24,7 +24,7 @@ export async function cacheToLocalDir(
 async function getUrlLocalPath(url: URL) {
   try {
     const dataDirPath = await getInitializedLocalDataDirPath();
-    const hash = getUrlHash(url);
+    const hash = await getUrlHash(url);
     return `${dataDirPath}/${hash}.wasm`;
   } catch {
     return undefined;

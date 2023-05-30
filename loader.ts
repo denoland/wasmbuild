@@ -14,7 +14,7 @@ export interface LoaderOptions {
   cache?: (
     url: URL,
     decompress: DecompressCallback | undefined,
-  ) => Promise<URL | ArrayBuffer>;
+  ) => Promise<URL | Uint8Array>;
 }
 
 export class Loader {
@@ -66,7 +66,7 @@ export class Loader {
         if (result instanceof URL) {
           url = result;
           decompress = undefined; // already decompressed
-        } else if (result instanceof ArrayBuffer) {
+        } else if (result != null) {
           return WebAssembly.instantiate(result, imports);
         }
       } catch {

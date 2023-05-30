@@ -4,7 +4,7 @@ import { colors, ensureDir } from "../deps.ts";
 import { versions } from "../versions.ts";
 import { pathExists } from "../helpers.ts";
 
-export async function runNewCommand(generateWasmCache: boolean) {
+export async function runNewCommand() {
   if (await pathExists("./rs_lib")) {
     console.log(
       `${

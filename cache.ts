@@ -11,7 +11,11 @@ export async function cacheToLocalDir(
   }
   if (!await exists(localPath)) {
     const fileBytes = await getUrlBytes(url);
-    await Deno.writeFile(localPath, decompress(new Uint8Array(fileBytes)));
+    try {
+      await Deno.writeFile(localPath, decompress(new Uint8Array(fileBytes)));
+    } catch {
+      return fileBytes;
+    }
   }
   return toFileUrl(localPath);
 }

@@ -30,6 +30,8 @@ To build, invoke `deno task wasmbuild` in your project:
 deno task wasmbuild
 ```
 
+You can now try it out with `deno run mod.ts`
+
 Bindings will be generated at `./lib/<crate-name>.generated.js`. Import the
 `instantiate` function and call it asynchronously to get the exports:
 

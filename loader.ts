@@ -7,11 +7,14 @@ export interface LoaderOptions {
   imports: WebAssembly.Imports | undefined;
   /** A function that caches the Wasm module to a local path so that
    * so that a network request isn't required on every load.
+   *
+   * Returns an ArrayBuffer with the bytes on download success, but
+   * cache save failure.
    */
   cache?: (
     url: URL,
     decompress: DecompressCallback | undefined,
-  ) => Promise<URL>;
+  ) => Promise<URL | Uint8Array>;
 }
 
 export class Loader {
@@ -55,13 +58,19 @@ export class Loader {
   async #instantiate(url: URL, decompress: DecompressCallback | undefined) {
     const imports = this.#options.imports;
     if (this.#options.cache != null && url.protocol !== "file:") {
-      const cachedUrl = await this.#options.cache(
-        url,
-        decompress ?? ((bytes) => bytes),
-      );
-      if (cachedUrl != null) {
-        url = cachedUrl;
-        decompress = undefined; // already decompressed
+      try {
+        const result = await this.#options.cache(
+          url,
+          decompress ?? ((bytes) => bytes),
+        );
+        if (result instanceof URL) {
+          url = result;
+          decompress = undefined; // already decompressed
+        } else if (result != null) {
+          return WebAssembly.instantiate(result, imports);
+        }
+      } catch {
+        // ignore if caching ever fails (ex. when on deploy)
       }
     }
 

@@ -37,7 +37,17 @@ switch (command.kind) {
 }
 
 function showHelp() {
-  console.log("WasmBuild");
+  console.log("%cWasmBuild", "font-weight: bold");
+  console.log();
+  console.log(
+    "%cnew %c- Scaffold a new project",
+    "color: green",
+    "color: reset",
+  );
+  console.log();
+  console.log("%cbuild %c- Build the project", "color: green", "color: reset");
+  console.log();
+  console.log("%cBuild options:", "font-style: italic");
   console.log();
   console.log(
     "%c--debug %c- Build without optimizations.",

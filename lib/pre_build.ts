@@ -5,6 +5,7 @@ import { base64, colors, path, Sha1, writeAll } from "./deps.ts";
 import { getCargoWorkspace, WasmCrate } from "./manifest.ts";
 import { verifyVersions } from "./versions.ts";
 import { BindgenOutput, generateBindgen } from "./bindgen.ts";
+import { pathExists } from "./helpers.ts";
 export type { BindgenOutput } from "./bindgen.ts";
 
 export interface PreBuildOutput {
@@ -20,6 +21,13 @@ export async function runPreBuild(
 ): Promise<PreBuildOutput> {
   const home = Deno.env.get("HOME");
   const root = Deno.cwd();
+  if (!await pathExists(path.join(root, "Cargo.toml"))) {
+    console.error(
+      "%cConsider running `deno task wasmbuild new` to get started",
+      "color: yellow",
+    );
+    throw `Cargo.toml not found in ${root}`;
+  }
   const workspace = await getCargoWorkspace(root, args.cargoFlags);
   const crate = workspace.getWasmCrate(args.project);
 

@@ -28,7 +28,7 @@ jobs:
         uses: Swatinem/rust-cache@v1
 
       - name: Install deno
-        uses: denoland/setup-deno@v1.0.0
+        uses: denoland/setup-deno@v1
         with:
           deno-version: 1.x
 

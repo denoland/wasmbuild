@@ -25,7 +25,12 @@ export async function runNewCommand() {
 members = [
   "rs_lib",
 ]
-edition = "2021"
+
+[profile.release]
+codegen-units = 1
+incremental = true
+lto = true
+opt-level = "z"
 `,
     );
   }
@@ -60,12 +65,6 @@ edition = "2021"
 [lib]
 crate_type = ["cdylib"]
 
-[profile.release]
-codegen-units = 1
-incremental = true
-lto = true
-opt-level = "z"
-
 [dependencies]
 wasm-bindgen = "=${versions.wasmBindgen}"
 `,
@@ -91,6 +90,19 @@ mod tests {
 }
 `,
   );
+  if (!await pathExists("./mod.ts")) {
+    await Deno.writeTextFile(
+      "./mod.ts",
+      `import { instantiate } from "./lib/rs_lib.generated.js";
+
+const { add } = await instantiate();
+console.log(add(1, 1));
+`,
+    );
+  }
+  console.log("%cTo get started run:", "color:yellow");
+  console.log("deno task wasmbuild");
+  console.log("deno run mod.ts");
 }
 
 async function getFileTextIfExists(path: string) {

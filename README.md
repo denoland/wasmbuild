@@ -30,6 +30,8 @@ To build, invoke `deno task wasmbuild` in your project:
 deno task wasmbuild
 ```
 
+You can now try it out with `deno run mod.ts`
+
 Bindings will be generated at `./lib/<crate-name>.generated.js`. Import the
 `instantiate` function and call it asynchronously to get the exports:
 
@@ -37,7 +39,7 @@ Bindings will be generated at `./lib/<crate-name>.generated.js`. Import the
 import { instantiate } from "./lib/rs_lib.generated.js";
 
 const { add } = await instantiate();
-add(1, 1);
+console.log(add(1, 1));
 ```
 
 Or instantiate and use the exports:
@@ -46,7 +48,7 @@ Or instantiate and use the exports:
 import { add, instantiate } from "./lib/rs_lib.generated.js";
 
 await instantiate();
-add(1, 1);
+console.log(add(1, 1));
 ```
 
 ### Compression
@@ -109,3 +111,4 @@ For example, in a GitHub action:
   base64 text.
 - `--skip-opt` - Skip running wasm-opt.
 - `--check` - Checks if the output is up-to-date.
+- `--no-cache` - Do not generate the code to cache the Wasm file locally.

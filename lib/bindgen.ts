@@ -3,8 +3,8 @@ import { path } from "./deps.ts";
 
 export interface BindgenOutput {
   js: string;
-  snippets: { [name: string]: string[] };
-  localModules: { [name: string]: string };
+  snippets: Map<string, string[]>;
+  localModules: Map<string, string>;
   wasmBytes: number[];
 }
 
@@ -50,8 +50,8 @@ async function generateForSelfBuild(filePath: string): Promise<BindgenOutput> {
     );
     return {
       js: await Deno.readTextFile(path.join(tempPath, "wasmbuild.js")),
-      localModules: {},
-      snippets: {},
+      localModules: new Map(),
+      snippets: new Map(),
       wasmBytes: Array.from(wasmBytes),
     };
   } finally {

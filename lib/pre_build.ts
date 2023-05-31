@@ -5,6 +5,7 @@ import { base64, colors, path, Sha1, writeAll } from "./deps.ts";
 import { getCargoWorkspace, WasmCrate } from "./manifest.ts";
 import { verifyVersions } from "./versions.ts";
 import { BindgenOutput, generateBindgen } from "./bindgen.ts";
+import { pathExists } from "./helpers.ts";
 export type { BindgenOutput } from "./bindgen.ts";
 
 export interface PreBuildOutput {
@@ -20,6 +21,13 @@ export async function runPreBuild(
 ): Promise<PreBuildOutput> {
   const home = Deno.env.get("HOME");
   const root = Deno.cwd();
+  if (!await pathExists(path.join(root, "Cargo.toml"))) {
+    console.error(
+      "%cConsider running `deno task wasmbuild new` to get started",
+      "color: yellow",
+    );
+    throw `Cargo.toml not found in ${root}`;
+  }
   const workspace = await getCargoWorkspace(root, args.cargoFlags);
   const crate = workspace.getWasmCrate(args.project);
 
@@ -102,7 +110,9 @@ export async function runPreBuild(
     bindingJsText,
     bindingJsPath: path.join(args.outDir, bindingJsFileName),
     sourceHash,
-    wasmFileName: args.isSync ? undefined : getWasmFileNameFromCrate(crate),
+    wasmFileName: args.loaderKind === "sync"
+      ? undefined
+      : getWasmFileNameFromCrate(crate),
   };
 }
 
@@ -184,10 +194,13 @@ function getLoaderText(
   crate: WasmCrate,
   bindgenOutput: BindgenOutput,
 ) {
-  if (args.isSync) {
-    return getSyncLoaderText(bindgenOutput);
-  } else {
-    return getAsyncLoaderText(crate, bindgenOutput);
+  switch (args.loaderKind) {
+    case "sync":
+      return getSyncLoaderText(bindgenOutput);
+    case "async":
+      return getAsyncLoaderText(crate, bindgenOutput, false);
+    case "async-with-cache":
+      return getAsyncLoaderText(crate, bindgenOutput, true);
   }
 }
 
@@ -255,10 +268,26 @@ function base64decode(b64) {
 function getAsyncLoaderText(
   crate: WasmCrate,
   bindgenOutput: BindgenOutput,
+  useCache: boolean,
 ) {
   const exportNames = getExportNames(bindgenOutput);
-  return `
-/**
+  const loaderUrl = import.meta.resolve("../loader.ts");
+
+  let loaderText = `import { Loader } from "${loaderUrl}";\n`;
+
+  if (useCache) {
+    const cacheUrl = import.meta.resolve("../cache.ts");
+    loaderText += `import { cacheToLocalDir } from "${cacheUrl}";\n`;
+  }
+
+  loaderText += `
+const loader = new Loader({
+  imports,
+  cache: ${useCache ? "cacheToLocalDir" : "undefined"},
+})
+`;
+
+  loaderText += `/**
  * Decompression callback
  *
  * @callback DecompressCallback
@@ -283,9 +312,6 @@ export async function instantiate(opts) {
   return (await instantiateWithInstance(opts)).exports;
 }
 
-let instanceWithExports;
-let lastLoadPromise;
-
 /** Instantiates an instance of the Wasm module along with its exports.
  * @remarks It is safe to call this multiple times and once successfully
  * loaded it will always return a reference to the same object.
@@ -295,28 +321,18 @@ let lastLoadPromise;
  *   exports: { ${exportNames.map((n) => `${n}: typeof ${n}`).join("; ")} }
  * }>}
  */
-export function instantiateWithInstance(opts) {
-  if (instanceWithExports != null) {
-    return Promise.resolve(instanceWithExports);
-  }
-  if (lastLoadPromise == null) {
-    lastLoadPromise = (async () => {
-      try {
-        const instance = (await instantiateModule(opts ?? {})).instance;
-        wasm = instance.exports;
-        cachedInt32Memory0 = new Int32Array(wasm.memory.buffer);
-        cachedUint8Memory0 = new Uint8Array(wasm.memory.buffer);
-        instanceWithExports = {
-          instance,
-          exports: getWasmInstanceExports(),
-        };
-        return instanceWithExports;
-      } finally {
-        lastLoadPromise = null;
-      }
-    })();
-  }
-  return lastLoadPromise;
+export async function instantiateWithInstance(opts) {
+  const {instance } = await loader.load(
+    opts?.url ?? new URL("${getWasmFileNameFromCrate(crate)}", import.meta.url),
+    opts?.decompress,
+  );
+  wasm = wasm ?? instance.exports;
+  cachedInt32Memory0 = cachedInt32Memory0 ?? new Int32Array(wasm.memory.buffer);
+  cachedUint8Memory0 = cachedUint8Memory0 ?? new Uint8Array(wasm.memory.buffer);
+  return {
+    instance,
+    exports: getWasmInstanceExports(),
+  };
 }
 
 function getWasmInstanceExports() {
@@ -325,61 +341,11 @@ function getWasmInstanceExports() {
 
 /** Gets if the Wasm module has been instantiated. */
 export function isInstantiated() {
-  return instanceWithExports != null;
+  return loader.instance != null;
 }
+`;
 
-/**
- * @param {InstantiateOptions} opts
- */
-async function instantiateModule(opts) {
-  const wasmUrl = opts.url ?? new URL("${
-    getWasmFileNameFromCrate(crate)
-  }", import.meta.url);
-  const decompress = opts.decompress;
-  const isFile = wasmUrl.protocol === "file:";
-
-  // make file urls work in Node via dnt
-  const isNode = globalThis.process?.versions?.node != null;
-  if (isNode && isFile) {
-    // the deno global will be shimmed by dnt
-    const wasmCode = await Deno.readFile(wasmUrl);
-    return WebAssembly.instantiate(decompress ? decompress(wasmCode) : wasmCode, imports);
-  }
-
-  switch (wasmUrl.protocol) {
-    case "file:":
-    case "https:":
-    case "http:": {
-      if (isFile) {
-        if (typeof Deno !== "object") {
-          throw new Error("file urls are not supported in this environment");
-        }
-        if ("permissions" in Deno) {
-          await Deno.permissions.request({ name: "read", path: wasmUrl });
-        }
-      } else if (typeof Deno === "object" && "permissions" in Deno) {
-        await Deno.permissions.request({ name: "net", host: wasmUrl.host });
-      }
-      const wasmResponse = await fetch(wasmUrl);
-      if (decompress) {
-        const wasmCode = new Uint8Array(await wasmResponse.arrayBuffer());
-        return WebAssembly.instantiate(decompress(wasmCode), imports);
-      }
-      if (
-        isFile ||
-        wasmResponse.headers.get("content-type")?.toLowerCase()
-          .startsWith("application/wasm")
-      ) {
-        return WebAssembly.instantiateStreaming(wasmResponse, imports);
-      } else {
-        return WebAssembly.instantiate(await wasmResponse.arrayBuffer(), imports);
-      }
-    }
-    default:
-      throw new Error(\`Unsupported protocol: \${wasmUrl.protocol}\`);
-  }
-}
-  `;
+  return loaderText;
 }
 
 function getExportNames(bindgenOutput: BindgenOutput) {

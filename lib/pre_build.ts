@@ -149,6 +149,7 @@ ${genText}
     const denoFmtChild = denoFmtCmd.spawn();
     const stdin = denoFmtChild.stdin.getWriter();
     await stdin.write(new TextEncoder().encode(inputText));
+    await stdin.close();
 
     const output = await denoFmtChild.output();
     if (!output.success) {

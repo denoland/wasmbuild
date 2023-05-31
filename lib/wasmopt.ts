@@ -17,15 +17,14 @@ const tag = "version_109";
 
 export async function runWasmOpt(filePath: string) {
   const binPath = await getWasmOptBinaryPath();
-  const p = Deno.run({
-    cmd: [binPath, "-Oz", filePath, "-o", filePath],
+  const p = new Deno.Command(binPath, {
+    args: ["-Oz", filePath, "-o", filePath],
     stderr: "inherit",
     stdout: "inherit",
   });
-  const status = await p.status();
-  p.close();
+  const output = await p.output();
 
-  if (!status.success) {
+  if (!output.success) {
     throw new Error(`error executing wasmopt`);
   }
 }

@@ -185,6 +185,7 @@ ${genText}
       hasher.update(name);
       hasher.update(text.replace(/\r?\n/g, "\n"));
     }
+    hasher.update(bindgenOutput.js.replace(/\r?\n/g, "\n"));
     return hasher.hex();
   }
 }

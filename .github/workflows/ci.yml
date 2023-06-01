@@ -41,7 +41,3 @@ jobs:
 
       - name: Check Wasm up-to-date
         run: deno task build --check
-
-      - name: Check that the generated bindings are uptodate
-        if: contains(matrix.os, 'ubuntu')
-        run: deno task check

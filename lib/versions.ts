@@ -4,10 +4,10 @@ interface WasmCrate {
 }
 
 export const versions = {
-  wasmBindgen: "0.2.84",
-  wasmBindgenFutures: "0.4.34",
-  jsSys: "0.3.61",
-  webSys: "0.3.61",
+  wasmBindgen: "0.2.86",
+  wasmBindgenFutures: "0.5.0",
+  jsSys: "0.3.63",
+  webSys: "0.3.63",
 };
 
 export function verifyVersions(crate: WasmCrate) {

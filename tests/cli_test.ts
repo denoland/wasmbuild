@@ -42,8 +42,8 @@ Deno.test("should add values", async () => {
     const p = new Deno.Command(cmd, {
       args,
       cwd: tempDir,
-    });
-    const output = await p.output();
+    }).spawn();
+    const output = await p.status;
     if (!output.success) {
       throw new Error("FAILED");
     }

@@ -40,8 +40,8 @@ async function generateForSelfBuild(filePath: string): Promise<BindgenOutput> {
         tempPath,
         filePath,
       ],
-    });
-    const output = await p.output();
+    }).spawn();
+    const output = await p.status;
     if (!output.success) {
       throw new Error("Failed.");
     }

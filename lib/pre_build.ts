@@ -77,8 +77,8 @@ export async function runPreBuild(
       "LC_ALL": "C",
       RUSTFLAGS,
     },
-  });
-  const cargoBuildReleaseCmdOutput = await cargoBuildReleaseCmdProcess.output();
+  }).spawn();
+  const cargoBuildReleaseCmdOutput = await cargoBuildReleaseCmdProcess.status;
   if (!cargoBuildReleaseCmdOutput.success) {
     console.error(`cargo build failed`);
     Deno.exit(1);

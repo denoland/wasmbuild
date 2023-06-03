@@ -21,8 +21,8 @@ export async function runWasmOpt(filePath: string) {
     args: ["-Oz", filePath, "-o", filePath],
     stderr: "inherit",
     stdout: "inherit",
-  });
-  const output = await p.output();
+  }).spawn();
+  const output = await p.status;
 
   if (!output.success) {
     throw new Error(`error executing wasmopt`);

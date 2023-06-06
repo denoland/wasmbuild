@@ -138,5 +138,8 @@ async function checkIfRequiredToolsExist() {
       }
     }
   }
-  throw "Some required tools were not found: " + notInstalled;
+
+  if (notInstalled.length !== 0) {
+    throw "Some required tools were not found: " + notInstalled;
+  }
 }

@@ -5,6 +5,8 @@ import { versions } from "../versions.ts";
 import { pathExists } from "../helpers.ts";
 
 export async function runNewCommand() {
+  await checkIfRequiredToolsExist();
+
   if (await pathExists("./rs_lib")) {
     console.log(
       `${
@@ -115,4 +117,26 @@ async function getFileTextIfExists(path: string) {
       throw err;
     }
   }
+}
+
+async function checkIfRequiredToolsExist() {
+  const requiredTools = ["deno", "cargo", "rustup", "wasm-bindgen"];
+  const notInstalled: string[] = [];
+
+  for (const tool of requiredTools) {
+    try {
+      await new Deno.Command(tool, {
+        args: ["--version"], // the current needed tools all have this arg
+        stdout: "null",
+        stderr: "null",
+      })
+        .spawn()
+        .status;
+    } catch (e) {
+      if (e instanceof Deno.errors.NotFound) {
+        notInstalled.push(tool);
+      }
+    }
+  }
+  throw "Some required tools were not found: " + notInstalled;
 }

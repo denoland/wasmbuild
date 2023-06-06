@@ -120,26 +120,38 @@ async function getFileTextIfExists(path: string) {
 }
 
 async function checkIfRequiredToolsExist() {
-  const requiredTools = ["deno", "cargo", "rustup", "wasm-bindgen"];
-  const notInstalled: string[] = [];
+  const requiredTools = ["deno", "cargo", "rustup"];
+  const optionalTools = ["wasm-bindgen"];
+  const notInstalled: { name: string; optional: boolean }[] = [];
 
-  for (const tool of requiredTools) {
-    try {
-      await new Deno.Command(tool, {
-        args: ["--version"], // the current needed tools all have this arg
-        stdout: "null",
-        stderr: "null",
-      })
-        .spawn()
-        .status;
-    } catch (e) {
-      if (e instanceof Deno.errors.NotFound) {
-        notInstalled.push(tool);
+  const f = async (tools: string[], optional: boolean) => {
+    for (const tool of tools) {
+      try {
+        await new Deno.Command(tool, {
+          args: ["--version"], // the current needed tools all have this arg
+          stdout: "null",
+          stderr: "null",
+        })
+          .spawn()
+          .status;
+      } catch (e) {
+        if (e instanceof Deno.errors.NotFound) {
+          notInstalled.push({ name: tool, optional });
+        }
       }
     }
-  }
+  };
+  await f(requiredTools, false);
+  await f(optionalTools, true);
 
-  if (notInstalled.length !== 0) {
-    throw "Some required tools were not found: " + notInstalled;
+  if (notInstalled.find((tool) => !tool.optional)) {
+    throw "Some required tools are missing: " +
+      notInstalled.filter((tool) => !tool.optional).map((tool) => tool.name);
+  }
+  if (notInstalled.find((tool) => tool.optional)) {
+    console.warn(
+      "Some optional tools are missing: " +
+        notInstalled.filter((tool) => tool.optional).map((tool) => tool.name),
+    );
   }
 }

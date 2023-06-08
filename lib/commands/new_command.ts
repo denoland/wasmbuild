@@ -140,6 +140,8 @@ async function checkIfRequiredToolsExist() {
   }
 
   if (notInstalled.length > 0) {
-    throw new Error("Some required tools are missing: " + notInstalled.join(", "));
+    throw new Error(
+      "Some required tools are missing: " + notInstalled.join(", "),
+    );
   }
 }

@@ -7,7 +7,6 @@ const rootFolder = path.dirname(
 Deno.test("should create a new wasmbuild project, build it, and run it", async () => {
   const tempDir = await Deno.makeTempDir();
   try {
-    console.log(tempDir);
     await Deno.writeTextFile(
       path.join(tempDir, "deno.json"),
       `{ "tasks": { "wasmbuild": "${

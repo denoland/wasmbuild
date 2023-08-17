@@ -1,11 +1,11 @@
-import { assertThrows } from "https://deno.land/std@0.142.0/testing/asserts.ts";
+import { assertThrows } from "https://deno.land/std@0.198.0/assert/assert_throws.ts";
 import { verifyVersions } from "./versions.ts";
 
 const correctMap: { [name: string]: string } = {
-  "wasm-bindgen": "0.2.86",
-  "wasm-bindgen-futures": "0.4.36",
-  "js-sys": "0.3.63",
-  "web-sys": "0.3.63",
+  "wasm-bindgen": "0.2.87",
+  "wasm-bindgen-futures": "0.4.37",
+  "js-sys": "0.3.64",
+  "web-sys": "0.3.64",
 };
 
 Deno.test("should verify when all correct", () => {

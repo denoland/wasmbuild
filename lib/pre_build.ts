@@ -272,6 +272,8 @@ function getAsyncLoaderText(
 ) {
   const exportNames = getExportNames(bindgenOutput);
   const loaderUrl = import.meta.resolve("../loader.ts");
+  console.log(loaderUrl);
+  console.log(import.meta.url);
 
   let loaderText = `import { Loader } from "${loaderUrl}";\n`;
 

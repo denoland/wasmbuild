@@ -8,7 +8,7 @@
     "build": "deno run -A ./main.ts -p wasmbuild",
     "build:bindgen-upgrade": "WASMBUILD_BINDGEN_UPGRADE=1 deno task build",
     "build:lkg": "deno run -A https://deno.land/x/wasmbuild@0.8.5/main.ts -p wasmbuild",
-    "test": "cd tests && rm -rf lib lib_out_js_file lib_sync lib_no_cache && deno task test:main && deno task test:no-cache && deno task test:sync && deno task test:js-ext && deno test -A && deno task test:check",
+    "test": "echo $pwd && cd tests && rm -rf lib lib_out_js_file lib_sync lib_no_cache && deno task test:main && deno task test:no-cache && deno task test:sync && deno task test:js-ext && deno test -A && deno task test:check",
     "test:main": "cd tests && deno run -A ../main.ts -p deno_test",
     "test:sync": "deno task test:main --sync --out lib_sync",
     "test:no-cache": "deno task test:main --no-cache --out lib_no_cache",

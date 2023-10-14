@@ -68,7 +68,7 @@ async function fileExists(path: string) {
 
 async function downloadBinaryen(tempPath: string) {
   console.log(
-    `${colors.bold(colors.green("Caching"))} wasm-opt binary...`,
+    `${colors.bold(colors.green("Downloading"))} wasm-opt binary...`,
   );
 
   const response = await fetch(binaryenUrl());

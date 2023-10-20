@@ -1,4 +1,5 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
+import { fetchWithRetries } from "../cache.ts";
 import {
   Buffer,
   cacheDir,
@@ -71,10 +72,7 @@ async function downloadBinaryen(tempPath: string) {
     `${colors.bold(colors.green("Downloading"))} wasm-opt binary...`,
   );
 
-  const response = await fetch(binaryenUrl());
-  if (!response.ok) {
-    throw new Error(`Error downloading wasmopt: ${response.statusText}`);
-  }
+  const response = await fetchWithRetries(binaryenUrl());
   const buf = new Uint8Array(await response.arrayBuffer());
   const decompressed = gunzip(buf);
   const untar = new Untar(new Buffer(decompressed));

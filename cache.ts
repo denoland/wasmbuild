@@ -85,10 +85,7 @@ async function getUrlHash(url: URL) {
 }
 
 async function getUrlBytes(url: URL) {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Error downloading ${url}: ${response.statusText}`);
-  }
+  const response = await fetchWithRetries(url);
   return await response.arrayBuffer();
 }
 
@@ -136,4 +133,25 @@ function windowsToFileUrl(path: string): URL {
     }
   }
   return url;
+}
+
+export async function fetchWithRetries(url: URL | string, maxRetries = 5) {
+  let sleepMs = 250;
+  let iterationCount = 0;
+  while (true) {
+    iterationCount++;
+    try {
+      const res = await fetch(url);
+      if (res.ok || iterationCount > maxRetries) {
+        return res;
+      }
+    } catch (err) {
+      if (iterationCount > maxRetries) {
+        throw err;
+      }
+    }
+    console.warn(`Failed fetching. Retrying in ${sleepMs}ms...`);
+    await new Promise((resolve) => setTimeout(resolve, sleepMs));
+    sleepMs = Math.min(sleepMs * 2, 10_000);
+  }
 }

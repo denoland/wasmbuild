@@ -1,4 +1,5 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
+import { fetchWithRetries } from "./cache.ts"
 
 export type DecompressCallback = (bytes: Uint8Array) => Uint8Array;
 
@@ -96,7 +97,7 @@ export class Loader {
       case "file:":
       case "https:":
       case "http:": {
-        const wasmResponse = await fetch(url);
+        const wasmResponse = await fetchWithRetries(url);
         if (decompress) {
           const wasmCode = new Uint8Array(await wasmResponse.arrayBuffer());
           return WebAssembly.instantiate(decompress(wasmCode), imports);

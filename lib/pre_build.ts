@@ -67,7 +67,7 @@ export async function runPreBuild(
   }
 
   const RUSTFLAGS = Deno.env.get("RUSTFLAGS") ||
-    "" + `--remap-path-prefix=${root}=. --remap-path-prefix=${home}=~`;
+    "" + `--remap-path-prefix='${root}'=. --remap-path-prefix='${home}'=~`;
   console.log(`  ${colors.bold(colors.gray(cargoBuildCmd.join(" ")))}`);
   const cargoBuildReleaseCmdProcess = new Deno.Command("cargo", {
     args: cargoBuildCmd,

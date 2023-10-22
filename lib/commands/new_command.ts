@@ -24,6 +24,7 @@ export async function runNewCommand() {
     await Deno.writeTextFile(
       "./Cargo.toml",
       `[workspace]
+resolver = "2"
 members = [
   "rs_lib",
 ]

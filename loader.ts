@@ -108,7 +108,10 @@ export class Loader {
           wasmResponse.headers.get("content-type")?.toLowerCase()
             .startsWith("application/wasm")
         ) {
-          return WebAssembly.instantiateStreaming(wasmResponse, imports);
+          // Cast to any so there's no type checking issues with dnt
+          // (https://github.com/denoland/wasmbuild/issues/92)
+          // deno-lint-ignore no-explicit-any
+          return WebAssembly.instantiateStreaming(wasmResponse as any, imports);
         } else {
           return WebAssembly.instantiate(
             await wasmResponse.arrayBuffer(),

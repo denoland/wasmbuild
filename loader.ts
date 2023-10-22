@@ -1,4 +1,5 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
+import { fetchWithRetries } from "./cache.ts";
 
 export type DecompressCallback = (bytes: Uint8Array) => Uint8Array;
 
@@ -77,6 +78,7 @@ export class Loader {
     const isFile = url.protocol === "file:";
 
     // make file urls work in Node via dnt
+    // deno-lint-ignore no-explicit-any
     const isNode = (globalThis as any).process?.versions?.node != null;
     if (isFile && typeof Deno !== "object") {
       throw new Error(
@@ -96,7 +98,7 @@ export class Loader {
       case "file:":
       case "https:":
       case "http:": {
-        const wasmResponse = await fetch(url);
+        const wasmResponse = await fetchWithRetries(url);
         if (decompress) {
           const wasmCode = new Uint8Array(await wasmResponse.arrayBuffer());
           return WebAssembly.instantiate(decompress(wasmCode), imports);

@@ -6,7 +6,7 @@ authors = ["the Deno authors"]
 license = "MIT"
 
 [dependencies]
-wasm-bindgen = "0.2.87"
+wasm-bindgen = "0.2.88"
 
 [lib]
 name = "deno_test"

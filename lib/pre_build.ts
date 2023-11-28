@@ -278,9 +278,7 @@ function parseRelativePath(from: string, to: string): string {
   to = path.fromFileUrl(specifier);
   const result = path.relative(from, to).replace(/\\/g, "/");
 
-  return path.isAbsolute(result)
-    ? import.meta.resolve(result)
-    : result;
+  return path.isAbsolute(result) ? import.meta.resolve(result) : result;
 }
 
 function getAsyncLoaderText(

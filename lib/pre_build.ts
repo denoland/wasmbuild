@@ -270,15 +270,6 @@ function base64decode(b64) {
   `;
 }
 
-// Taken from Fresh
-function toImportSpecifier(file: string) {
-  let specifier = path.normalize(file).replace(/\\/g, "/");
-  if (!specifier.startsWith(".")) {
-    specifier = "./" + specifier;
-  }
-  return specifier;
-}
-
 function parseRelativePath(from: string, to: string): string {
   const specifier = import.meta.resolve(to);
   if (!specifier.startsWith("file:")) return specifier;
@@ -301,16 +292,12 @@ function getAsyncLoaderText(
   bindingJsFileName: string,
 ) {
   const exportNames = getExportNames(bindgenOutput);
-  const loaderUrl = toImportSpecifier(
-    parseRelativePath(bindingJsFileName, "../loader.ts"),
-  );
+  const loaderUrl = parseRelativePath(bindingJsFileName, "../loader.ts");
 
   let loaderText = `import { Loader } from "${loaderUrl}";\n`;
 
   if (useCache) {
-    const cacheUrl = toImportSpecifier(
-      parseRelativePath(bindingJsFileName, "../cache.ts"),
-    );
+    const cacheUrl = parseRelativePath(bindingJsFileName, "../cache.ts");
     loaderText += `import { cacheToLocalDir } from "${cacheUrl}";\n`;
   }
 

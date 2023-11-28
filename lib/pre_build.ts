@@ -285,7 +285,7 @@ function parseRelativePath(from: string, to: string): string {
 
   from = path.join(Deno.cwd(), path.dirname(from));
   to = path.fromFileUrl(specifier);
-  const result = path.normalize(path.relative(from, to));
+  const result = path.relative(from, to);
 
   console.log(from);
   console.log(to);

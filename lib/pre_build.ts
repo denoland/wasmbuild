@@ -265,18 +265,24 @@ function base64decode(b64) {
   `;
 }
 
+function toImportSpecifier(file: string): string {
+  const specifier = import.meta.resolve(file);
+  if (specifier.startsWith("https://")) return specifier;
+  return path.posix.relative(path.posix.dirname(import.meta.url), specifier);
+}
+
 function getAsyncLoaderText(
   crate: WasmCrate,
   bindgenOutput: BindgenOutput,
   useCache: boolean,
 ) {
   const exportNames = getExportNames(bindgenOutput);
-  const loaderUrl = import.meta.resolve("../loader.ts");
+  const loaderUrl = toImportSpecifier("../loader.ts");
 
   let loaderText = `import { Loader } from "${loaderUrl}";\n`;
 
   if (useCache) {
-    const cacheUrl = import.meta.resolve("../cache.ts");
+    const cacheUrl = toImportSpecifier("../cache.ts");
     loaderText += `import { cacheToLocalDir } from "${cacheUrl}";\n`;
   }
 

@@ -274,7 +274,10 @@ function toImportSpecifier(from: string, to: string): string {
   const specifier = import.meta.resolve(to);
   if (!specifier.startsWith("file:")) return specifier;
 
-  return path.posix.relative(from, specifier);
+  from = path.dirname(path.join(Deno.cwd(), from));
+  to = path.fromFileUrl(specifier);
+
+  return path.relative(from, to);
 }
 
 function getAsyncLoaderText(

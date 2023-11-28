@@ -283,7 +283,7 @@ function parseRelativePath(from: string, to: string): string {
   console.log(to);
   console.log(result);
 
-  return result;
+  return import.meta.resolve(result);
 }
 
 function getAsyncLoaderText(

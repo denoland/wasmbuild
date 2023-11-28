@@ -276,13 +276,13 @@ function parseRelativePath(from: string, to: string): string {
 
   from = path.join(Deno.cwd(), path.dirname(from));
   to = path.fromFileUrl(specifier);
-  const result = path.relative(from, to);
+  const result = path.relative(from, to).replace(/\\/g, "/");
 
   console.log(from);
   console.log(to);
   console.log(result);
 
-  return JSON.stringify(result);
+  return result;
 }
 
 function getAsyncLoaderText(
@@ -294,11 +294,11 @@ function getAsyncLoaderText(
   const exportNames = getExportNames(bindgenOutput);
   const loaderUrl = parseRelativePath(bindingJsFileName, "../loader.ts");
 
-  let loaderText = `import { Loader } from ${loaderUrl};\n`;
+  let loaderText = `import { Loader } from "${loaderUrl}";\n`;
 
   if (useCache) {
     const cacheUrl = parseRelativePath(bindingJsFileName, "../cache.ts");
-    loaderText += `import { cacheToLocalDir } from ${cacheUrl};\n`;
+    loaderText += `import { cacheToLocalDir } from "${cacheUrl}";\n`;
   }
 
   loaderText += `

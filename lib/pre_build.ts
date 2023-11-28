@@ -272,7 +272,6 @@ function base64decode(b64) {
 
 function parseRelativePath(from: string, to: string): string {
   const specifier = import.meta.resolve(to);
-  console.log(import.meta.resolve(to));
   if (!specifier.startsWith("file:")) return specifier;
 
   from = path.join(Deno.cwd(), path.dirname(from));
@@ -283,7 +282,7 @@ function parseRelativePath(from: string, to: string): string {
   console.log(to);
   console.log(result);
 
-  return import.meta.resolve(result);
+  return result.replace(/\\/g, "/");
 }
 
 function getAsyncLoaderText(

@@ -270,15 +270,17 @@ function base64decode(b64) {
   `;
 }
 
-function parseRelativePath(from: string, to: string): string {
-  const specifier = import.meta.resolve(to);
+function parseRelativePath(fromFilePath: string, toRelativeSpecifier: string): string {
+  const specifier = import.meta.resolve(toRelativeSpecifier);
   if (!specifier.startsWith("file:")) return specifier;
 
-  from = path.join(Deno.cwd(), path.dirname(from));
-  to = path.fromFileUrl(specifier);
-  const result = path.relative(from, to).replace(/\\/g, "/");
-
-  return path.isAbsolute(result) ? import.meta.resolve(result) : result;
+  const fromDirPath = path.join(Deno.cwd(), path.dirname(fromFilePath));
+  const toFilePath = path.fromFileUrl(specifier);
+  const relativeFromTo = path.relative(fromDirPath, toFilePath).replace(/\\/g, "/");
+  // The path might be absolute on the Windows CI because it uses a
+  // different drive for the temp dir. In that case, just use the resolved
+  // specifier.
+  return path.isAbsolute(relativeFromTo) ? specifier : relativeFromTo;
 }
 
 function getAsyncLoaderText(

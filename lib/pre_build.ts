@@ -282,7 +282,7 @@ function parseRelativePath(from: string, to: string): string {
   console.log(to);
   console.log(result);
 
-  return result.replace(/\\/g, "/");
+  return result;
 }
 
 function getAsyncLoaderText(

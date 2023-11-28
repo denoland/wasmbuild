@@ -97,18 +97,21 @@ export async function runPreBuild(
     `${colors.bold(colors.green("Generating"))} lib JS bindings...`,
   );
 
+  const bindingJsFileName =
+    `${crate.libName}.generated.${args.bindingJsFileExt}`;
+  const bindingJsPath = path.join(args.outDir, bindingJsFileName);
+
   const { bindingJsText, sourceHash } = await getBindingJsOutput(
     args,
     crate,
     bindgenOutput,
+    bindingJsPath,
   );
-  const bindingJsFileName =
-    `${crate.libName}.generated.${args.bindingJsFileExt}`;
 
   return {
     bindgen: bindgenOutput,
     bindingJsText,
-    bindingJsPath: path.join(args.outDir, bindingJsFileName),
+    bindingJsPath,
     sourceHash,
     wasmFileName: args.loaderKind === "sync"
       ? undefined
@@ -120,6 +123,7 @@ async function getBindingJsOutput(
   args: CheckCommand | BuildCommand,
   crate: WasmCrate,
   bindgenOutput: BindgenOutput,
+  bindingJsPath: string,
 ) {
   const sourceHash = await getHash();
   const header = `// @generated file from wasmbuild -- do not edit
@@ -127,7 +131,7 @@ async function getBindingJsOutput(
 // deno-fmt-ignore-file`;
   const genText = bindgenOutput.js.replace(
     /\bconst\swasm_url\s.+/ms,
-    getLoaderText(args, crate, bindgenOutput),
+    getLoaderText(args, crate, bindgenOutput, bindingJsPath),
   );
   const bodyText = await getFormattedText(`
 // source-hash: ${sourceHash}
@@ -193,14 +197,15 @@ function getLoaderText(
   args: CheckCommand | BuildCommand,
   crate: WasmCrate,
   bindgenOutput: BindgenOutput,
+  bindingJsPath: string,
 ) {
   switch (args.loaderKind) {
     case "sync":
       return getSyncLoaderText(bindgenOutput);
     case "async":
-      return getAsyncLoaderText(crate, bindgenOutput, false);
+      return getAsyncLoaderText(crate, bindgenOutput, false, bindingJsPath);
     case "async-with-cache":
-      return getAsyncLoaderText(crate, bindgenOutput, true);
+      return getAsyncLoaderText(crate, bindgenOutput, true, bindingJsPath);
   }
 }
 
@@ -265,24 +270,26 @@ function base64decode(b64) {
   `;
 }
 
-function toImportSpecifier(file: string): string {
-  const specifier = import.meta.resolve(file);
-  if (specifier.startsWith("https://")) return specifier;
-  return path.posix.relative(path.posix.dirname(import.meta.url), specifier);
+function toImportSpecifier(from: string, to: string): string {
+  const specifier = import.meta.resolve(to);
+  if (!specifier.startsWith("file:")) return specifier;
+
+  return path.posix.relative(from, specifier);
 }
 
 function getAsyncLoaderText(
   crate: WasmCrate,
   bindgenOutput: BindgenOutput,
   useCache: boolean,
+  bindingJsFileName: string,
 ) {
   const exportNames = getExportNames(bindgenOutput);
-  const loaderUrl = toImportSpecifier("../loader.ts");
+  const loaderUrl = toImportSpecifier(bindingJsFileName, "../loader.ts");
 
   let loaderText = `import { Loader } from "${loaderUrl}";\n`;
 
   if (useCache) {
-    const cacheUrl = toImportSpecifier("../cache.ts");
+    const cacheUrl = toImportSpecifier(bindingJsFileName, "../cache.ts");
     loaderText += `import { cacheToLocalDir } from "${cacheUrl}";\n`;
   }
 

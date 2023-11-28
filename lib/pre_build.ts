@@ -270,13 +270,17 @@ function base64decode(b64) {
   `;
 }
 
-function parseRelativePath(fromFilePath: string, toRelativeSpecifier: string): string {
+function parseRelativePath(
+  fromFilePath: string,
+  toRelativeSpecifier: string,
+): string {
   const specifier = import.meta.resolve(toRelativeSpecifier);
   if (!specifier.startsWith("file:")) return specifier;
 
   const fromDirPath = path.join(Deno.cwd(), path.dirname(fromFilePath));
   const toFilePath = path.fromFileUrl(specifier);
-  const relativeFromTo = path.relative(fromDirPath, toFilePath).replace(/\\/g, "/");
+  const relativeFromTo = path.relative(fromDirPath, toFilePath)
+    .replace(/\\/g, "/");
   // The path might be absolute on the Windows CI because it uses a
   // different drive for the temp dir. In that case, just use the resolved
   // specifier.

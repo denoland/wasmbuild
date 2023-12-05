@@ -77,7 +77,7 @@ export function parseArgs(rawArgs: string[]): Command {
   function getCargoFlags() {
     const cargoFlags = [];
 
-    if (flags["default-features"] === false) {
+    if (flags["no-default-features"]) {
       cargoFlags.push("--no-default-features");
     }
     if (flags["features"]) {

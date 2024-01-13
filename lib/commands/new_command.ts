@@ -77,6 +77,23 @@ wasm-bindgen = "=${versions.wasmBindgen}"
     `use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
+pub struct Greeter {
+  name: String,
+}
+
+#[wasm_bindgen]
+impl Greeter {
+  #[wasm_bindgen(constructor)]
+  pub fn new(name: String) -> Self {
+    Self { name }
+  }
+
+  pub fn greet(&self) -> String {
+    format!("hello {}!", self.name)
+  }
+}
+
+#[wasm_bindgen]
 pub fn add(a: i32, b: i32) -> i32 {
   return a + b;
 }
@@ -87,6 +104,8 @@ mod tests {
 
   #[test]
   fn it_works() {
+    let greeter = Greeter::new("world".into());
+    assert_eq!(greeter.greet(), "hello world!");
     let result = add(1, 2);
     assert_eq!(result, 3);
   }
@@ -98,8 +117,11 @@ mod tests {
       "./mod.ts",
       `import { instantiate } from "./lib/rs_lib.generated.js";
 
-const { add } = await instantiate();
+const { Greeter, add } = await instantiate();
+
 console.log(add(1, 1));
+const greeter = new Greeter("world");
+console.log(greeter.greet());
 `,
     );
   }

@@ -307,9 +307,11 @@ async function getAsyncLoaderText(
 ) {
   const exportNames = getExportNames(bindgenOutput);
 
-  const fetchContents = await fetchModuleContents("../loader/fetch.js");
+  const fetchContents = (await fetchModuleContents("../loader/fetch.js"))
+    .replaceAll("export async function", "async function");
   const loaderContents = (await fetchModuleContents("../loader/mod.js"))
-    .replace(`import { fetchWithRetries } from "./fetch.js";`, "");
+    .replace(`import { fetchWithRetries } from "./fetch.js";`, "")
+    .replaceAll("export class", "class");
 
   let loaderText = fetchContents + "\n" + loaderContents + "\n";
 
@@ -328,7 +330,7 @@ async function getAsyncLoaderText(
   }
 
   loaderText += `
-const loader = new Loader({
+const loader = new WasmBuildLoader({
   imports,
   cache: ${cacheText},
 })

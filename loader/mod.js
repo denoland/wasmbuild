@@ -2,36 +2,36 @@
 import { fetchWithRetries } from "./fetch.js";
 
 /**
- * @callback DecompressCallback
+ * @callback WasmBuildDecompressCallback
  * @param {Uint8Array} compressed
  * @returns {Uint8Array} decompressed
  */
 
 /**
- * @callback CacheCallback
+ * @callback WasmBuildCacheCallback
  * @param {URL} url
- * @param {DecompressCallback | undefined} decompress
+ * @param {WasmBuildDecompressCallback | undefined} decompress
  * @returns {Promise<URL |Uint8Array>}
  */
 
 /**
- * @typedef LoaderOptions
+ * @typedef WasmBuildLoaderOptions
  * @property {WebAssembly.Imports | undefined} imports - The Wasm module's imports.
- * @property {CacheCallback} [cache] - A function that caches the Wasm module to
+ * @property {WasmBuildCacheCallback} [cache] - A function that caches the Wasm module to
  * a local path so that a network request isn't required on every load.
  *
  * Returns an ArrayBuffer with the bytes on download success, but cache save failure.
  */
 
-export class Loader {
-  /** @type {LoaderOptions} */
+export class WasmBuildLoader {
+  /** @type {WasmBuildLoaderOptions} */
   #options;
   /** @type {Promise<WebAssembly.WebAssemblyInstantiatedSource> | undefined} */
   #lastLoadPromise;
   /** @type {WebAssembly.WebAssemblyInstantiatedSource | undefined} */
   #instantiated;
 
-  /** @param {LoaderOptions} options */
+  /** @param {WasmBuildLoaderOptions} options */
   constructor(options) {
     this.#options = options;
   }
@@ -48,7 +48,7 @@ export class Loader {
 
   /**
    * @param {URL} url
-   * @param {DecompressCallback | undefined} decompress
+   * @param {WasmBuildDecompressCallback | undefined} decompress
    * @returns {Promise<WebAssembly.WebAssemblyInstantiatedSource>}
    */
   load(
@@ -72,7 +72,7 @@ export class Loader {
 
   /**
    * @param {URL} url
-   * @param {DecompressCallback | undefined} decompress
+   * @param {WasmBuildDecompressCallback | undefined} decompress
    */
   async #instantiate(url, decompress) {
     const imports = this.#options.imports;

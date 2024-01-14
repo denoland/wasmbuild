@@ -117,6 +117,7 @@ mod tests {
 `,
   );
   if (!await pathExists("./mod.js")) {
+    // use a .js file for the most compatibility out of the box (ex. browsers)
     await Deno.writeTextFile(
       "./mod.js",
       `import { instantiate } from "./lib/rs_lib.generated.js";

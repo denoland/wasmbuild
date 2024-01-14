@@ -303,11 +303,13 @@ async function getAsyncLoaderText(
 
   let loaderText = fetchContents + "\n" + loaderContents + "\n";
 
-  let cacheText = "undefined";
+  let cacheText = "";
   if (useCache) {
     loaderText += `const isNodeOrDeno = typeof Deno === "object" || (typeof process !== "undefined" && process.versions != null && process.versions.node != null);\n`;
     const cacheUrl = parseRelativePath(bindingJsFileName, "../loader/cache.ts");
-    cacheText += `isNodeOrDeno ? (await import("${cacheUrl}").cacheToLocalDir : undefined`;
+    cacheText += `isNodeOrDeno ? (await import("${cacheUrl}")).cacheToLocalDir : undefined`;
+  } else {
+    cacheText = "undefined";
   }
 
   loaderText += `

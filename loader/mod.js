@@ -17,8 +17,8 @@ import { fetchWithRetries } from "./fetch.js";
 /**
  * @typedef LoaderOptions
  * @property {WebAssembly.Imports | undefined} imports - The Wasm module's imports.
- * @property {CacheCallback} cache - A function
- * that caches the Wasm module to a local path so that a network request isn't required on every load.
+ * @property {CacheCallback} [cache] - A function that caches the Wasm module to
+ * a local path so that a network request isn't required on every load.
  *
  * Returns an ArrayBuffer with the bytes on download success, but cache save failure.
  */

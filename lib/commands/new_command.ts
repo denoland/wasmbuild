@@ -94,7 +94,7 @@ impl Greeter {
   }
 
   pub fn greet(&self) -> String {
-    format!("hello {}!", self.name)
+    format!("Hello {}!", self.name)
   }
 }
 
@@ -111,7 +111,7 @@ mod tests {
   #[test]
   fn it_greets() {
     let greeter = Greeter::new("world".into());
-    assert_eq!(greeter.greet(), "hello world!");
+    assert_eq!(greeter.greet(), "Hello world!");
   }
 }
 `,

@@ -305,6 +305,9 @@ async function getAsyncLoaderText(
 
   let cacheText = "";
   if (useCache) {
+    // If it's Deno or Node (via dnt), then use the cache.
+    // It's ok that the Node path is importing a .ts file because
+    // it will be transformed by dnt.
     loaderText += `const isNodeOrDeno = typeof Deno === "object" || (typeof process !== "undefined" && process.versions != null && process.versions.node != null);\n`;
     const cacheUrl = parseRelativePath(bindingJsFileName, "../loader/cache.ts");
     cacheText += `isNodeOrDeno ? (await import("${cacheUrl}")).cacheToLocalDir : undefined`;

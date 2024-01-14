@@ -205,9 +205,19 @@ async function getLoaderText(
     case "sync":
       return getSyncLoaderText(bindgenOutput);
     case "async":
-      return await getAsyncLoaderText(crate, bindgenOutput, false, bindingJsPath);
+      return await getAsyncLoaderText(
+        crate,
+        bindgenOutput,
+        false,
+        bindingJsPath,
+      );
     case "async-with-cache":
-      return await getAsyncLoaderText(crate, bindgenOutput, true, bindingJsPath);
+      return await getAsyncLoaderText(
+        crate,
+        bindgenOutput,
+        true,
+        bindingJsPath,
+      );
   }
 }
 
@@ -296,7 +306,7 @@ async function getAsyncLoaderText(
   bindingJsFileName: string,
 ) {
   const exportNames = getExportNames(bindgenOutput);
-  
+
   const fetchContents = await fetchModuleContents("../loader/fetch.js");
   const loaderContents = (await fetchModuleContents("../loader/mod.js"))
     .replace(`import { fetchWithRetries } from "./fetch.js";`, "");
@@ -308,9 +318,11 @@ async function getAsyncLoaderText(
     // If it's Deno or Node (via dnt), then use the cache.
     // It's ok that the Node path is importing a .ts file because
     // it will be transformed by dnt.
-    loaderText += `const isNodeOrDeno = typeof Deno === "object" || (typeof process !== "undefined" && process.versions != null && process.versions.node != null);\n`;
+    loaderText +=
+      `const isNodeOrDeno = typeof Deno === "object" || (typeof process !== "undefined" && process.versions != null && process.versions.node != null);\n`;
     const cacheUrl = parseRelativePath(bindingJsFileName, "../loader/cache.ts");
-    cacheText += `isNodeOrDeno ? (await import("${cacheUrl}")).cacheToLocalDir : undefined`;
+    cacheText +=
+      `isNodeOrDeno ? (await import("${cacheUrl}")).cacheToLocalDir : undefined`;
   } else {
     cacheText = "undefined";
   }
@@ -379,10 +391,16 @@ async function fetchModuleContents(path: string) {
   const url = import.meta.resolve(path);
   const dataResponse = await fetchWithRetries(url);
   if (!dataResponse.ok) {
-    throw new Error(`Failed fetching ${url}: ${dataResponse.statusText} - ${await dataResponse.text()}`)
+    throw new Error(
+      `Failed fetching ${url}: ${dataResponse.statusText} - ${await dataResponse
+        .text()}`,
+    );
   }
   return (await dataResponse.text())
-    .replace("// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.\n", "");
+    .replace(
+      "// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.\n",
+      "",
+    );
 }
 
 function getExportNames(bindgenOutput: BindgenOutput) {

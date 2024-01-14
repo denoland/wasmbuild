@@ -77,6 +77,11 @@ wasm-bindgen = "=${versions.wasmBindgen}"
     `use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
+pub fn add(a: i32, b: i32) -> i32 {
+  return a + b;
+}
+
+#[wasm_bindgen]
 pub struct Greeter {
   name: String,
 }
@@ -93,21 +98,20 @@ impl Greeter {
   }
 }
 
-#[wasm_bindgen]
-pub fn add(a: i32, b: i32) -> i32 {
-  return a + b;
-}
-
 #[cfg(test)]
 mod tests {
   use super::*;
 
   #[test]
-  fn it_works() {
-    let greeter = Greeter::new("world".into());
-    assert_eq!(greeter.greet(), "hello world!");
+  fn it_adds() {
     let result = add(1, 2);
     assert_eq!(result, 3);
+  }
+
+  #[test]
+  fn it_greets() {
+    let greeter = Greeter::new("world".into());
+    assert_eq!(greeter.greet(), "hello world!");
   }
 }
 `,

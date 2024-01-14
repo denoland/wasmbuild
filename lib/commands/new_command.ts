@@ -116,9 +116,9 @@ mod tests {
 }
 `,
   );
-  if (!await pathExists("./mod.ts")) {
+  if (!await pathExists("./mod.js")) {
     await Deno.writeTextFile(
-      "./mod.ts",
+      "./mod.js",
       `import { instantiate } from "./lib/rs_lib.generated.js";
 
 const { Greeter, add } = await instantiate();
@@ -134,7 +134,7 @@ console.log(greeter.greet());
   }
   console.log("%cTo get started run:", "color:yellow");
   console.log("deno task wasmbuild");
-  console.log("deno run mod.ts");
+  console.log("deno run mod.js");
 }
 
 async function getFileTextIfExists(path: string) {

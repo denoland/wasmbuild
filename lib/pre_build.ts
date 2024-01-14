@@ -320,14 +320,6 @@ const loader = new Loader({
 `;
 
   loaderText += `/**
- * Decompression callback
- *
- * @callback DecompressCallback
- * @param {Uint8Array} compressed
- * @return {Uint8Array} decompressed
- */
-
- /**
   * Options for instantiating a Wasm instance.
   * @typedef {Object} InstantiateOptions
   * @property {URL=} url - Optional url to the Wasm file to instantiate.
@@ -386,7 +378,8 @@ async function fetchModuleContents(path: string) {
   if (!dataResponse.ok) {
     throw new Error(`Failed fetching ${url}: ${dataResponse.statusText} - ${await dataResponse.text()}`)
   }
-  return await dataResponse.text();
+  return (await dataResponse.text())
+    .replace("// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.\n", "");
 }
 
 function getExportNames(bindgenOutput: BindgenOutput) {

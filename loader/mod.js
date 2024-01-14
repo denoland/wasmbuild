@@ -1,46 +1,60 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
-import { fetchWithRetries } from "./cache.ts";
+import { fetchWithRetries } from "./fetch.js";
 
-export type DecompressCallback = (bytes: Uint8Array) => Uint8Array;
+/**
+ * @callback DecompressCallback
+ * @param {Uint8Array} compressed
+ * @returns {Uint8Array} decompressed
+ */
 
-export interface LoaderOptions {
-  /** The Wasm module's imports. */
-  imports: WebAssembly.Imports | undefined;
-  /** A function that caches the Wasm module to a local path so that
-   * so that a network request isn't required on every load.
-   *
-   * Returns an ArrayBuffer with the bytes on download success, but
-   * cache save failure.
-   */
-  cache?: (
-    url: URL,
-    decompress: DecompressCallback | undefined,
-  ) => Promise<URL | Uint8Array>;
-}
+/**
+ * @callback CacheCallback
+ * @param {URL} url
+ * @param {DecompressCallback | undefined} decompress
+ * @returns {Promise<URL |Uint8Array>}
+ */
+
+/**
+ * @typedef LoaderOptions
+ * @property {WebAssembly.Imports | undefined} imports - The Wasm module's imports.
+ * @property {CacheCallback} [cache] - A function that caches the Wasm module to
+ * a local path so that a network request isn't required on every load.
+ *
+ * Returns an ArrayBuffer with the bytes on download success, but cache save failure.
+ */
 
 export class Loader {
-  #options: LoaderOptions;
-  #lastLoadPromise:
-    | Promise<WebAssembly.WebAssemblyInstantiatedSource>
-    | undefined;
-  #instantiated: WebAssembly.WebAssemblyInstantiatedSource | undefined;
+  /** @type {LoaderOptions} */
+  #options;
+  /** @type {Promise<WebAssembly.WebAssemblyInstantiatedSource> | undefined} */
+  #lastLoadPromise;
+  /** @type {WebAssembly.WebAssemblyInstantiatedSource | undefined} */
+  #instantiated;
 
-  constructor(options: LoaderOptions) {
+  /** @param {LoaderOptions} options */
+  constructor(options) {
     this.#options = options;
   }
 
+  /** @returns {WebAssembly.Instance | undefined} */
   get instance() {
     return this.#instantiated?.instance;
   }
 
+  /** @returns {WebAssembly.Module | undefined} */
   get module() {
     return this.#instantiated?.module;
   }
 
+  /**
+   * @param {URL} url
+   * @param {DecompressCallback | undefined} decompress
+   * @returns {Promise<WebAssembly.WebAssemblyInstantiatedSource>}
+   */
   load(
-    url: URL,
-    decompress: DecompressCallback | undefined,
-  ): Promise<WebAssembly.WebAssemblyInstantiatedSource> {
+    url,
+    decompress,
+  ) {
     if (this.#instantiated) {
       return Promise.resolve(this.#instantiated);
     } else if (this.#lastLoadPromise == null) {
@@ -56,7 +70,11 @@ export class Loader {
     return this.#lastLoadPromise;
   }
 
-  async #instantiate(url: URL, decompress: DecompressCallback | undefined) {
+  /**
+   * @param {URL} url
+   * @param {DecompressCallback | undefined} decompress
+   */
+  async #instantiate(url, decompress) {
     const imports = this.#options.imports;
     if (this.#options.cache != null && url.protocol !== "file:") {
       try {
@@ -78,8 +96,8 @@ export class Loader {
     const isFile = url.protocol === "file:";
 
     // make file urls work in Node via dnt
-    // deno-lint-ignore no-explicit-any
-    const isNode = (globalThis as any).process?.versions?.node != null;
+    const isNode =
+      (/** @type {any} */ (globalThis)).process?.versions?.node != null;
     if (isFile && typeof Deno !== "object") {
       throw new Error(
         "Loading local files are not supported in this environment",
@@ -108,10 +126,12 @@ export class Loader {
           wasmResponse.headers.get("content-type")?.toLowerCase()
             .startsWith("application/wasm")
         ) {
-          // Cast to any so there's no type checking issues with dnt
-          // (https://github.com/denoland/wasmbuild/issues/92)
-          // deno-lint-ignore no-explicit-any
-          return WebAssembly.instantiateStreaming(wasmResponse as any, imports);
+          return WebAssembly.instantiateStreaming(
+            // Cast to any so there's no type checking issues with dnt
+            // (https://github.com/denoland/wasmbuild/issues/92)
+            /** @type {any} */ (wasmResponse),
+            imports,
+          );
         } else {
           return WebAssembly.instantiate(
             await wasmResponse.arrayBuffer(),

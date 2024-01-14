@@ -1,5 +1,5 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
-import { fetchWithRetries } from "../cache.ts";
+import { fetchWithRetries } from "../loader/fetch.js";
 import {
   Buffer,
   cacheDir,
@@ -99,11 +99,20 @@ async function downloadBinaryen(tempPath: string) {
 }
 
 function binaryenUrl() {
-  const os = {
-    "linux": "linux",
-    "darwin": "macos",
-    "windows": "windows",
-  }[Deno.build.os];
+  function getOs() {
+    switch (Deno.build.os) {
+      case "linux":
+        return "linux";
+      case "darwin":
+        return "macos";
+      case "windows":
+        return "windows";
+      default:
+        throw new Error("Unsupported OS");
+    }
+  }
+
+  const os = getOs();
   const arch = {
     "x86_64": "x86_64",
     "aarch64": "arm64",

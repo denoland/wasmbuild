@@ -33,6 +33,17 @@ Deno.test("should add values", async () => {
     );
     await runCommand("deno", "test", "-A");
     await runCommand("cargo", "test");
+
+    // ensure the generated wasm module has no import statements
+    const fileText = Deno.readTextFileSync(
+      path.join(tempDir, "./lib/rs_lib.generated.js"),
+    );
+    if (fileText.includes("import ")) {
+      console.log(fileText);
+      // don't allow import statements because it should be self
+      // contained and work in browser environments
+      throw new Error("Generated wasm module had an import statement.");
+    }
   } finally {
     await Deno.remove(tempDir, { recursive: true });
   }

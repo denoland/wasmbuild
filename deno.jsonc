@@ -3,6 +3,9 @@
     "./tests/target",
     "./target"
   ],
+  "compilerOptions": {
+    "checkJs": true
+  },
   "tasks": {
     "fmt": "deno fmt && cargo fmt",
     "build": "deno run -A ./main.ts -p wasmbuild",

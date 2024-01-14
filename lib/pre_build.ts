@@ -6,6 +6,7 @@ import { getCargoWorkspace, WasmCrate } from "./manifest.ts";
 import { verifyVersions } from "./versions.ts";
 import { BindgenOutput, generateBindgen } from "./bindgen.ts";
 import { pathExists } from "./helpers.ts";
+import { fetchWithRetries } from "../loader/fetch.js";
 export type { BindgenOutput } from "./bindgen.ts";
 
 export interface PreBuildOutput {
@@ -127,11 +128,12 @@ async function getBindingJsOutput(
 ) {
   const sourceHash = await getHash();
   const header = `// @generated file from wasmbuild -- do not edit
+// @ts-nocheck: generated
 // deno-lint-ignore-file
 // deno-fmt-ignore-file`;
   const genText = bindgenOutput.js.replace(
     /\bconst\swasm_url\s.+/ms,
-    getLoaderText(args, crate, bindgenOutput, bindingJsPath),
+    await getLoaderText(args, crate, bindgenOutput, bindingJsPath),
   );
   const bodyText = await getFormattedText(`
 // source-hash: ${sourceHash}
@@ -193,7 +195,7 @@ ${genText}
   }
 }
 
-function getLoaderText(
+async function getLoaderText(
   args: CheckCommand | BuildCommand,
   crate: WasmCrate,
   bindgenOutput: BindgenOutput,
@@ -203,9 +205,19 @@ function getLoaderText(
     case "sync":
       return getSyncLoaderText(bindgenOutput);
     case "async":
-      return getAsyncLoaderText(crate, bindgenOutput, false, bindingJsPath);
+      return await getAsyncLoaderText(
+        crate,
+        bindgenOutput,
+        false,
+        bindingJsPath,
+      );
     case "async-with-cache":
-      return getAsyncLoaderText(crate, bindgenOutput, true, bindingJsPath);
+      return await getAsyncLoaderText(
+        crate,
+        bindgenOutput,
+        true,
+        bindingJsPath,
+      );
   }
 }
 
@@ -287,38 +299,42 @@ function parseRelativePath(
   return path.isAbsolute(relativeFromTo) ? specifier : relativeFromTo;
 }
 
-function getAsyncLoaderText(
+async function getAsyncLoaderText(
   crate: WasmCrate,
   bindgenOutput: BindgenOutput,
   useCache: boolean,
   bindingJsFileName: string,
 ) {
   const exportNames = getExportNames(bindgenOutput);
-  const loaderUrl = parseRelativePath(bindingJsFileName, "../loader.ts");
 
-  let loaderText = `import { Loader } from "${loaderUrl}";\n`;
+  const fetchContents = await fetchModuleContents("../loader/fetch.js");
+  const loaderContents = (await fetchModuleContents("../loader/mod.js"))
+    .replace(`import { fetchWithRetries } from "./fetch.js";`, "");
 
+  let loaderText = fetchContents + "\n" + loaderContents + "\n";
+
+  let cacheText = "";
   if (useCache) {
-    const cacheUrl = parseRelativePath(bindingJsFileName, "../cache.ts");
-    loaderText += `import { cacheToLocalDir } from "${cacheUrl}";\n`;
+    // If it's Deno or Node (via dnt), then use the cache.
+    // It's ok that the Node path is importing a .ts file because
+    // it will be transformed by dnt.
+    loaderText +=
+      `const isNodeOrDeno = typeof Deno === "object" || (typeof process !== "undefined" && process.versions != null && process.versions.node != null);\n`;
+    const cacheUrl = parseRelativePath(bindingJsFileName, "../loader/cache.ts");
+    cacheText +=
+      `isNodeOrDeno ? (await import("${cacheUrl}")).cacheToLocalDir : undefined`;
+  } else {
+    cacheText = "undefined";
   }
 
   loaderText += `
 const loader = new Loader({
   imports,
-  cache: ${useCache ? "cacheToLocalDir" : "undefined"},
+  cache: ${cacheText},
 })
 `;
 
   loaderText += `/**
- * Decompression callback
- *
- * @callback DecompressCallback
- * @param {Uint8Array} compressed
- * @return {Uint8Array} decompressed
- */
-
- /**
   * Options for instantiating a Wasm instance.
   * @typedef {Object} InstantiateOptions
   * @property {URL=} url - Optional url to the Wasm file to instantiate.
@@ -369,6 +385,22 @@ export function isInstantiated() {
 `;
 
   return loaderText;
+}
+
+async function fetchModuleContents(path: string) {
+  const url = import.meta.resolve(path);
+  const dataResponse = await fetchWithRetries(url);
+  if (!dataResponse.ok) {
+    throw new Error(
+      `Failed fetching ${url}: ${dataResponse.statusText} - ${await dataResponse
+        .text()}`,
+    );
+  }
+  return (await dataResponse.text())
+    .replace(
+      "// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.\n",
+      "",
+    );
 }
 
 function getExportNames(bindgenOutput: BindgenOutput) {

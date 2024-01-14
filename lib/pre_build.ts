@@ -294,12 +294,12 @@ function getAsyncLoaderText(
   bindingJsFileName: string,
 ) {
   const exportNames = getExportNames(bindgenOutput);
-  const loaderUrl = parseRelativePath(bindingJsFileName, "../loader.ts");
+  const loaderUrl = parseRelativePath(bindingJsFileName, "../loader/mod.js");
 
   let loaderText = `import { Loader } from "${loaderUrl}";\n`;
 
   if (useCache) {
-    const cacheUrl = parseRelativePath(bindingJsFileName, "../cache.ts");
+    const cacheUrl = parseRelativePath(bindingJsFileName, "../loader/cache.ts");
     loaderText += `import { cacheToLocalDir } from "${cacheUrl}";\n`;
   }
 

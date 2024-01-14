@@ -127,6 +127,7 @@ async function getBindingJsOutput(
 ) {
   const sourceHash = await getHash();
   const header = `// @generated file from wasmbuild -- do not edit
+// @ts-nocheck
 // deno-lint-ignore-file
 // deno-fmt-ignore-file`;
   const genText = bindgenOutput.js.replace(

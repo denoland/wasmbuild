@@ -3,8 +3,8 @@ import { fetchWithRetries } from "./fetch.js";
 
 /**
  * @callback DecompressCallback
- * @param {Uint8Array} bytes
- * @returns {Uint8Array}
+ * @param {Uint8Array} compressed
+ * @returns {Uint8Array} decompressed
  */
 
 /**

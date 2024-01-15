@@ -1,5 +1,5 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
-import { fetchWithRetries } from "../loader/fetch.js";
+import { fetchWithRetries } from "../loader/fetch.ts";
 import {
   Buffer,
   cacheDir,

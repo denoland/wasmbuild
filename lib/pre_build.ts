@@ -6,7 +6,6 @@ import { getCargoWorkspace, WasmCrate } from "./manifest.ts";
 import { verifyVersions } from "./versions.ts";
 import { BindgenOutput, generateBindgen } from "./bindgen.ts";
 import { pathExists } from "./helpers.ts";
-import { fetchWithRetries } from "../loader/fetch.ts";
 export type { BindgenOutput } from "./bindgen.ts";
 
 export interface PreBuildOutput {
@@ -383,7 +382,7 @@ export function isInstantiated() {
   return loaderText;
 
   function getWasmbuildLoaderText() {
-return `/**
+    return `/**
 * @callback WasmBuildDecompressCallback
 * @param {Uint8Array} compressed
 * @returns {Uint8Array} decompressed

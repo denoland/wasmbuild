@@ -1,7 +1,6 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
-/** @param {URL | string} url */
-export async function fetchWithRetries(url, maxRetries = 5) {
+export async function fetchWithRetries(url: URL | string, maxRetries = 5) {
   let sleepMs = 250;
   let iterationCount = 0;
   while (true) {

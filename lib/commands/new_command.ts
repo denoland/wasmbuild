@@ -122,7 +122,7 @@ mod tests {
       "./mod.js",
       `import { instantiate } from "./lib/rs_lib.generated.js";
 
-const { Greeter, add } = await instantiate();
+const { add, Greeter } = await instantiate();
 
 // adds
 console.log(add(1, 1));

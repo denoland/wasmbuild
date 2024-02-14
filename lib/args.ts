@@ -33,8 +33,7 @@ export interface CheckCommand extends CommonBuild {
 
 export function parseArgs(rawArgs: string[]): Command {
   const flags = parseFlags(rawArgs, { "--": true });
-
-  if (flags.help) return { kind: "help" };
+  if (flags.help || flags.h) return { kind: "help" };
   switch (flags._[0]) {
     case "new":
       return {

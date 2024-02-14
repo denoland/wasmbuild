@@ -1,5 +1,77 @@
 {
   "version": "3",
+  "packages": {
+    "specifiers": {
+      "jsr:@std/archive@0.215": "jsr:@std/archive@0.215.0",
+      "jsr:@std/assert@0.215": "jsr:@std/assert@0.215.0",
+      "jsr:@std/assert@^0.215.0": "jsr:@std/assert@0.215.0",
+      "jsr:@std/bytes@^0.215.0": "jsr:@std/bytes@0.215.0",
+      "jsr:@std/cli@0.215": "jsr:@std/cli@0.215.0",
+      "jsr:@std/encoding@0.215": "jsr:@std/encoding@0.215.0",
+      "jsr:@std/encoding@0.215.0": "jsr:@std/encoding@0.215.0",
+      "jsr:@std/flags@0.215": "jsr:@std/flags@0.215.0",
+      "jsr:@std/flags@0.215.0": "jsr:@std/flags@0.215.0",
+      "jsr:@std/fmt": "jsr:@std/fmt@0.214.0",
+      "jsr:@std/fmt@0.215": "jsr:@std/fmt@0.215.0",
+      "jsr:@std/fmt@^0.215.0": "jsr:@std/fmt@0.215.0",
+      "jsr:@std/fs@0.215": "jsr:@std/fs@0.215.0",
+      "jsr:@std/io@0.215": "jsr:@std/io@0.215.0",
+      "jsr:@std/io@^0.215.0": "jsr:@std/io@0.215.0",
+      "jsr:@std/path@0.215": "jsr:@std/path@0.215.0",
+      "jsr:@std/path@^0.215.0": "jsr:@std/path@0.215.0",
+      "jsr:@std/streams@0.215": "jsr:@std/streams@0.215.0"
+    },
+    "jsr": {
+      "@std/archive@0.215.0": {
+        "dependencies": [
+          "jsr:@std/io@^0.215.0"
+        ]
+      },
+      "@std/assert@0.215.0": {
+        "dependencies": [
+          "jsr:@std/fmt@^0.215.0"
+        ]
+      },
+      "@std/bytes@0.215.0": {},
+      "@std/cli@0.215.0": {
+        "dependencies": [
+          "jsr:@std/assert@^0.215.0"
+        ]
+      },
+      "@std/encoding@0.215.0": {},
+      "@std/flags@0.215.0": {
+        "dependencies": [
+          "jsr:@std/assert@^0.215.0"
+        ]
+      },
+      "@std/fmt@0.214.0": {},
+      "@std/fmt@0.215.0": {},
+      "@std/fs@0.215.0": {
+        "dependencies": [
+          "jsr:@std/assert@^0.215.0",
+          "jsr:@std/path@^0.215.0"
+        ]
+      },
+      "@std/io@0.215.0": {
+        "dependencies": [
+          "jsr:@std/assert@^0.215.0",
+          "jsr:@std/bytes@^0.215.0"
+        ]
+      },
+      "@std/path@0.215.0": {
+        "dependencies": [
+          "jsr:@std/assert@^0.215.0"
+        ]
+      },
+      "@std/streams@0.215.0": {
+        "dependencies": [
+          "jsr:@std/assert@^0.215.0",
+          "jsr:@std/bytes@^0.215.0",
+          "jsr:@std/io@^0.215.0"
+        ]
+      }
+    }
+  },
   "remote": {
     "https://deno.land/std@0.142.0/hash/sha1.ts": "679d476b80466c73a1ad6c9ade4a44c188b91bc6bf3f97644209c280c9ec076b",
     "https://deno.land/std@0.198.0/_util/diff.ts": "1a3c044aedf77647d6cac86b798c6417603361b66b54c53331b312caeb447aea",
@@ -111,6 +183,140 @@
     "https://deno.land/x/denoflate@1.2.1/pkg/denoflate.js": "b9f9ad9457d3f12f28b1fb35c555f57443427f74decb403113d67364e4f2caf4",
     "https://deno.land/x/denoflate@1.2.1/pkg/denoflate_bg.wasm.js": "d581956245407a2115a3d7e8d85a9641c032940a8e810acbd59ca86afd34d44d",
     "https://deno.land/x/dir@1.4.0/cache_dir/mod.ts": "8a82889db79c547fbbd3536c9c964047657b19fb59365c5fa59afc46082f9fe5",
-    "https://deno.land/x/dir@1.5.1/data_local_dir/mod.ts": "91eb1c4bfadfbeda30171007bac6d85aadacd43224a5ed721bbe56bc64e9eb66"
+    "https://deno.land/x/dir@1.5.1/data_local_dir/mod.ts": "91eb1c4bfadfbeda30171007bac6d85aadacd43224a5ed721bbe56bc64e9eb66",
+    "https://jsr.io/@std/archive/0.215.0/_common.ts": "a8b4d77760fc836c8437c434872ebf3f4e2eda70d58aedf0aa7a9b5d62849c32",
+    "https://jsr.io/@std/archive/0.215.0/untar.ts": "27a0c06fd9aef209406e1b487b7677ffaeec8bef381054c0b3c9a446615bc06a",
+    "https://jsr.io/@std/assert/0.215.0/assert.ts": "501b416473ec27c71885aaf819e363c8df617f89ce68ae57fec7acf9d62743b2",
+    "https://jsr.io/@std/assert/0.215.0/assert_exists.ts": "7ea6a5cbaf3ce2675adc863d11544ba0f0d6e61658c5f0a83b5aa999e48961f0",
+    "https://jsr.io/@std/assert/0.215.0/assert_is_error.ts": "823298a6a5bf5e51580932aadbb1cfb22a6945c502868dc9dca2a70bcf70062d",
+    "https://jsr.io/@std/assert/0.215.0/assert_throws.ts": "4209628c4fa3e569bb2924b289fad486f9e5feb0912bca6f60b484ddbfad7136",
+    "https://jsr.io/@std/assert/0.215.0/assertion_error.ts": "dd027fb33707dbff22cd2ef9b55fdb70e2095876caf3c68ecfbb811505ecc022",
+    "https://jsr.io/@std/bytes/0.215.0/concat.ts": "8142a1734fd445582be0d209d0def43c2a3c27370a0fd4b327187dd34b98d6eb",
+    "https://jsr.io/@std/bytes/0.215.0/copy.ts": "e3331dc8b9175f1016b9ef6c1890f1b80770762e017b6ca08b9b764954d26def",
+    "https://jsr.io/@std/cli/0.215.0/parse_args.ts": "909c47399d2bc60c0007540e15f90ca3f985642dcd1f4127f817924f704e7b08",
+    "https://jsr.io/@std/encoding/0.215.0/_util.ts": "beacef316c1255da9bc8e95afb1fa56ed69baef919c88dc06ae6cb7a6103d376",
+    "https://jsr.io/@std/encoding/0.215.0/base64.ts": "4b3bde3c0d699cc0fae6e5bd119ab3a8b9b05293e0053140faa340a30b01e4bc",
+    "https://jsr.io/@std/flags/0.215.0/mod.ts": "716f6da1cf99096b7788a345668c8755e807d78d4249ed939ac04f9151263f11",
+    "https://jsr.io/@std/fmt/0.215.0/colors.ts": "59b5de7c07cdc0322ed61b2d98da1ca4fbc9f576d45c2beee577a27556e52d63",
+    "https://jsr.io/@std/fs/0.215.0/_create_walk_entry.ts": "f52910386c0455d3f1f929d5702bad6e64127cff62d008d8bc03fd42f6eb3441",
+    "https://jsr.io/@std/fs/0.215.0/_get_file_info_type.ts": "da7bec18a7661dba360a1db475b826b18977582ce6fc9b25f3d4ee0403fe8cbd",
+    "https://jsr.io/@std/fs/0.215.0/_is_same_path.ts": "5d24b17a8771cd762212f8e7e2963f256cfa68aa3ba13c56877a79ca8cba8fe2",
+    "https://jsr.io/@std/fs/0.215.0/_is_subdir.ts": "55455de98a2770d2534f71cb8ea41a8add0010ed8571c0f6ee4a65555c018590",
+    "https://jsr.io/@std/fs/0.215.0/_to_path_string.ts": "037a0c6dd97c22c5711aee18cf18a425a3969b48025be173653de0e529d92420",
+    "https://jsr.io/@std/fs/0.215.0/copy.ts": "e3d169688ee06408d302d8a4375b953026ad54b8fbde0598c01fef6a379a8d31",
+    "https://jsr.io/@std/fs/0.215.0/empty_dir.ts": "cb52a05b7dd1520f857b7e7e90fc25ebc4c7d0c67af1378906dfd5280744a800",
+    "https://jsr.io/@std/fs/0.215.0/ensure_dir.ts": "a6c127285f5bdfe10e6ff5b55ff7f9b5c7f67c74d3dcfe66081c5780a5e1ee85",
+    "https://jsr.io/@std/fs/0.215.0/ensure_file.ts": "1a255645522625a273bf948c3be5a98eff9439e125423b850687b7a11be0fe54",
+    "https://jsr.io/@std/fs/0.215.0/ensure_link.ts": "c988b733b394c5e517d8a45741f61ebd67940e49c975e17ff1e0baa06f0be7ab",
+    "https://jsr.io/@std/fs/0.215.0/ensure_symlink.ts": "e76b8fc458f0eddacdfb300cb8f9243a496e5c7bb6eea6dd6b0d3c4e3624b1b4",
+    "https://jsr.io/@std/fs/0.215.0/eol.ts": "d560d5e3cc3a1acff483f1339d7de31ca6025808b2c499a8b246984b84282e0b",
+    "https://jsr.io/@std/fs/0.215.0/exists.ts": "e636a0e535793d8677095e7a75308eda47cc4c784f83c4e2beaa90825a5b84de",
+    "https://jsr.io/@std/fs/0.215.0/expand_glob.ts": "5ac35090a42e07da6e1d61ce89061c536438b7a03c2fb666b4cb2e7ee9541e08",
+    "https://jsr.io/@std/fs/0.215.0/mod.ts": "107f5afa4424c2d3ce2f7e9266173198da30302c69af662c720115fe504dc5ee",
+    "https://jsr.io/@std/fs/0.215.0/move.ts": "8301ee1883b3d5e0eda7c5b670e7fe5ca9ac98fe74258551ec513d222c1af85f",
+    "https://jsr.io/@std/fs/0.215.0/walk.ts": "1eed1303c391cbf2e0e01c2c6d8cb4d3ce171f1ab157b3a1221fe1eee9f415f8",
+    "https://jsr.io/@std/io/0.215.0/_common.ts": "36705cdb4dfcd338d6131bca1b16e48a4d5bf0d1dada6ce397268e88c17a5835",
+    "https://jsr.io/@std/io/0.215.0/_constants.ts": "3c7ad4695832e6e4a32e35f218c70376b62bc78621ef069a4a0a3d55739f8856",
+    "https://jsr.io/@std/io/0.215.0/buf_reader.ts": "f49aa80214612131562a452258b6d9fc13457c2d2cff33e84516c5b69eeb3457",
+    "https://jsr.io/@std/io/0.215.0/buf_writer.ts": "31e51f87dd410ff7ebb86693eb8bf6e131e875c4cb1709045cd1fc33d005879e",
+    "https://jsr.io/@std/io/0.215.0/buffer.ts": "edca84673d14efb2a3c1ef8e594a7c27372f4303beff36567159fb90fdce6aa1",
+    "https://jsr.io/@std/io/0.215.0/copy.ts": "578c68959575333b6aaac52686e92ee97a9bcc655ad2d40830c76fa233d9bb8b",
+    "https://jsr.io/@std/io/0.215.0/copy_n.ts": "17c14c79fef758c6ed149a65b19f59d060b8413acae6a9afecedc13764b0ad2c",
+    "https://jsr.io/@std/io/0.215.0/limited_reader.ts": "a8d8ac4f0c4edaf9f2c347f215a46eb711d85cd436d5ee3727c6d17014650857",
+    "https://jsr.io/@std/io/0.215.0/mod.ts": "571384032c5f60530542a28f2e8b0e73e47e87eca77056ba7e2363f4d4a4573a",
+    "https://jsr.io/@std/io/0.215.0/multi_reader.ts": "554cd275113a50e7db894a09489d5958162c28596369170f32d43c9a86008c3a",
+    "https://jsr.io/@std/io/0.215.0/read_all.ts": "de492461700c30b84fa5ecc3c95d2ef2efaf1420faf749d07408b540edbd1870",
+    "https://jsr.io/@std/io/0.215.0/read_delim.ts": "a579a14aa1871c431f2dc7b31eaa0374251cf957296394c2d4e7aa24241ce7d1",
+    "https://jsr.io/@std/io/0.215.0/read_int.ts": "0f052bc70706307be6bc06597e052135f274b1f187c9c58bd85cbf5b7a81724f",
+    "https://jsr.io/@std/io/0.215.0/read_lines.ts": "a5831afdd119ab2b65629fcfdb931dffb9c10714ff9214cc3510dd547dbffadb",
+    "https://jsr.io/@std/io/0.215.0/read_long.ts": "eddeea1cb3cffcff2687d94c72b958190fda6a54cf740af97e5c2583bbb46933",
+    "https://jsr.io/@std/io/0.215.0/read_range.ts": "5abc5dc8f7756c0d4d5db5eab5f96bf5cbc1e6d3bb6ce782f54cf36a88576220",
+    "https://jsr.io/@std/io/0.215.0/read_short.ts": "05f9761376befd7ff34ee0d32b9fab67c9085fe495995a651793150eb690dd6b",
+    "https://jsr.io/@std/io/0.215.0/read_string_delim.ts": "2da6add0a59da74ff7065e243b2efe6bae3b4efddc42cad8bf31d23c81955d1f",
+    "https://jsr.io/@std/io/0.215.0/slice_long_to_bytes.ts": "9708b9c1bab66385015f699cbc43effb6c281797b44f91a062c865bce38245d8",
+    "https://jsr.io/@std/io/0.215.0/string_reader.ts": "ab6bcce763344f03b445f9ba8e5693ddfb436ce2a55c9066bb77f9c20a4202c1",
+    "https://jsr.io/@std/io/0.215.0/string_writer.ts": "00232688f8ceef1bb3c5cec1fb032499860ebc2253b3a00eac972c4cce1b4e6f",
+    "https://jsr.io/@std/io/0.215.0/to_readable_stream.ts": "693cd7ffd0b03f9dc80da9ecc5e0c2ced87a638f48b55504b20e276ab95db8ac",
+    "https://jsr.io/@std/io/0.215.0/to_writable_stream.ts": "f3564c59f54dbe3b9a6e53df93a640a5bf835b9f16d14bdb6ab489efd304de7b",
+    "https://jsr.io/@std/io/0.215.0/types.ts": "78b187e0c9d5932de9a9f1e6bba12b43a8463d7486c13e471c516ad82012f330",
+    "https://jsr.io/@std/io/0.215.0/write_all.ts": "18303de726d1276da2a2eda9bcacce4408d356e0eb83ba3c2f545dc3d1e8a518",
+    "https://jsr.io/@std/path/0.215.0/_common/assert_path.ts": "2ca275f36ac1788b2acb60fb2b79cb06027198bc2ba6fb7e163efaedde98c297",
+    "https://jsr.io/@std/path/0.215.0/_common/basename.ts": "569744855bc8445f3a56087fd2aed56bdad39da971a8d92b138c9913aecc5fa2",
+    "https://jsr.io/@std/path/0.215.0/_common/common.ts": "6157c7ec1f4db2b4a9a187efd6ce76dcaf1e61cfd49f87e40d4ea102818df031",
+    "https://jsr.io/@std/path/0.215.0/_common/constants.ts": "dc5f8057159f4b48cd304eb3027e42f1148cf4df1fb4240774d3492b5d12ac0c",
+    "https://jsr.io/@std/path/0.215.0/_common/dirname.ts": "684df4aa71a04bbcc346c692c8485594fc8a90b9408dfbc26ff32cf3e0c98cc8",
+    "https://jsr.io/@std/path/0.215.0/_common/format.ts": "ef04423fd59d06dc027a4ccbe9eaa7b59c32f9d76e434d9debec43b7283e228e",
+    "https://jsr.io/@std/path/0.215.0/_common/from_file_url.ts": "d672bdeebc11bf80e99bf266f886c70963107bdd31134c4e249eef51133ceccf",
+    "https://jsr.io/@std/path/0.215.0/_common/glob_to_reg_exp.ts": "2007aa87bed6eb2c8ae8381adcc3125027543d9ec347713c1ad2c68427330770",
+    "https://jsr.io/@std/path/0.215.0/_common/normalize.ts": "684df4aa71a04bbcc346c692c8485594fc8a90b9408dfbc26ff32cf3e0c98cc8",
+    "https://jsr.io/@std/path/0.215.0/_common/normalize_string.ts": "dfdf657a1b1a7db7999f7c575ee7e6b0551d9c20f19486c6c3f5ff428384c965",
+    "https://jsr.io/@std/path/0.215.0/_common/relative.ts": "faa2753d9b32320ed4ada0733261e3357c186e5705678d9dd08b97527deae607",
+    "https://jsr.io/@std/path/0.215.0/_common/strip_trailing_separators.ts": "7024a93447efcdcfeaa9339a98fa63ef9d53de363f1fbe9858970f1bba02655a",
+    "https://jsr.io/@std/path/0.215.0/_common/to_file_url.ts": "7f76adbc83ece1bba173e6e98a27c647712cab773d3f8cbe0398b74afc817883",
+    "https://jsr.io/@std/path/0.215.0/_interface.ts": "a1419fcf45c0ceb8acdccc94394e3e94f99e18cfd32d509aab514c8841799600",
+    "https://jsr.io/@std/path/0.215.0/_os.ts": "8fb9b90fb6b753bd8c77cfd8a33c2ff6c5f5bc185f50de8ca4ac6a05710b2c15",
+    "https://jsr.io/@std/path/0.215.0/basename.ts": "5d341aadb7ada266e2280561692c165771d071c98746fcb66da928870cd47668",
+    "https://jsr.io/@std/path/0.215.0/common.ts": "4c80da2ee5563eb31f87cf7d21879db90d614a3fae83358670625e4b90342745",
+    "https://jsr.io/@std/path/0.215.0/constants.ts": "0c206169ca104938ede9da48ac952de288f23343304a1c3cb6ec7625e7325f36",
+    "https://jsr.io/@std/path/0.215.0/dirname.ts": "85bd955bf31d62c9aafdd7ff561c4b5fb587d11a9a5a45e2b01aedffa4238a7c",
+    "https://jsr.io/@std/path/0.215.0/extname.ts": "593303db8ae8c865cbd9ceec6e55d4b9ac5410c1e276bfd3131916591b954441",
+    "https://jsr.io/@std/path/0.215.0/format.ts": "98fad25f1af7b96a48efb5b67378fcc8ed77be895df8b9c733b86411632162af",
+    "https://jsr.io/@std/path/0.215.0/from_file_url.ts": "7c87244ca07e4065cb024016b03d012facb856cc7aed089d9b6f1e4ea6152316",
+    "https://jsr.io/@std/path/0.215.0/glob_to_regexp.ts": "5e51f78a0248c75464bf1d49173de3ec2c032880a530578e56b3fed2a57e69d3",
+    "https://jsr.io/@std/path/0.215.0/is_absolute.ts": "4791afc8bfd0c87f0526eaa616b0d16e7b3ab6a65b62942e50eac68de4ef67d7",
+    "https://jsr.io/@std/path/0.215.0/is_glob.ts": "a65f6195d3058c3050ab905705891b412ff942a292bcbaa1a807a74439a14141",
+    "https://jsr.io/@std/path/0.215.0/join.ts": "ae2ec5ca44c7e84a235fd532e4a0116bfb1f2368b394db1c4fb75e3c0f26a33a",
+    "https://jsr.io/@std/path/0.215.0/join_globs.ts": "5b3bf248b93247194f94fa6947b612ab9d3abd571ca8386cf7789038545e54a0",
+    "https://jsr.io/@std/path/0.215.0/mod.ts": "66d574090f2453c12a07e18115a16bfecc6cfed39e7d557869087af64f0e8e94",
+    "https://jsr.io/@std/path/0.215.0/normalize.ts": "4155743ccceeed319b350c1e62e931600272fad8ad00c417b91df093867a8352",
+    "https://jsr.io/@std/path/0.215.0/normalize_glob.ts": "cc89a77a7d3b1d01053b9dcd59462b75482b11e9068ae6c754b5cf5d794b374f",
+    "https://jsr.io/@std/path/0.215.0/parse.ts": "65e8e285f1a63b714e19ef24b68f56e76934c3df0b6e65fd440d3991f4f8aefb",
+    "https://jsr.io/@std/path/0.215.0/posix/_util.ts": "b24abdfa97820d3a9dc696bf7947c35ac2cf5d836c16ae20592a8dc0757321a3",
+    "https://jsr.io/@std/path/0.215.0/posix/basename.ts": "265d3360c49c1af372a10891518b785fc2ae138f019892c89642e1f1c523b2dc",
+    "https://jsr.io/@std/path/0.215.0/posix/common.ts": "4c896e6e9357f33c3ffe027cb13cb2ccf5dbe3575604b43c195befffb0f40b2b",
+    "https://jsr.io/@std/path/0.215.0/posix/constants.ts": "93481efb98cdffa4c719c22a0182b994e5a6aed3047e1962f6c2c75b7592bef1",
+    "https://jsr.io/@std/path/0.215.0/posix/dirname.ts": "ecdaeec17d5fdd00da89bb05962e209c7aa41ad4967279bc8662c0bb3a243b2f",
+    "https://jsr.io/@std/path/0.215.0/posix/extname.ts": "b1400d9d0ac2160accda327790c93daa4ee8325b87f4c4d9b21887e7c8fd73db",
+    "https://jsr.io/@std/path/0.215.0/posix/format.ts": "47318e54ac8cd2e9c35ef2a143d02c198ce093e31f9789b6ecb95cbc60fec71b",
+    "https://jsr.io/@std/path/0.215.0/posix/from_file_url.ts": "dc4a092de0d117d94bfd54390b4bc360ea1c68d4a1e42d2ea94d6fe75b483c37",
+    "https://jsr.io/@std/path/0.215.0/posix/glob_to_regexp.ts": "4db789540039ea4c75f1ba8182c43fc2965a019df3c26a825945642452e8bf75",
+    "https://jsr.io/@std/path/0.215.0/posix/is_absolute.ts": "e7147b25e786abb51dd888eca89d2fd3770c41e6bd556d19db26cca348fb78a4",
+    "https://jsr.io/@std/path/0.215.0/posix/is_glob.ts": "135ac8b1e647f673ea650fb713e2d9c42d0108c29cae3a2b77399fec0dae8864",
+    "https://jsr.io/@std/path/0.215.0/posix/join.ts": "1bbf0d9303160d4b9be76161d0ef73d67198cf7bf66e84d88eb560abc492070f",
+    "https://jsr.io/@std/path/0.215.0/posix/join_globs.ts": "52589b26215d134a6d95b592ae1c1cf35ab670e62c97053c632003c23c5aa0e9",
+    "https://jsr.io/@std/path/0.215.0/posix/mod.ts": "43111128c93add2f61503dafd41c97e9b3e5ada9f15fc5f26f5c779f1615de4b",
+    "https://jsr.io/@std/path/0.215.0/posix/normalize.ts": "9b9f666159c0e5ee3df292cf56555547b1be4cd3ca54da6a263a3074b8e44964",
+    "https://jsr.io/@std/path/0.215.0/posix/normalize_glob.ts": "5b6fa8264f0f3663ee4b30034f783973d7a530bdd0ad8ee37a566f2b2a65ee71",
+    "https://jsr.io/@std/path/0.215.0/posix/parse.ts": "96aad4733eb1091db6b3de423f23c25a2ac3e3a5b29b35c3ee808b123eef73e5",
+    "https://jsr.io/@std/path/0.215.0/posix/relative.ts": "f0617bf5614ac45462d71d8d03a5bbe3db9f5aaadc9e470a560013d0416d4cc0",
+    "https://jsr.io/@std/path/0.215.0/posix/resolve.ts": "00f39f36478ad11b64604ad9b508b137a930aae2423e757ba53ec5f11a919ee1",
+    "https://jsr.io/@std/path/0.215.0/posix/to_file_url.ts": "e1c2f7b256100610ae85a443f89404f4b5d730d882c388a76b8e4fa1ecfc5ac7",
+    "https://jsr.io/@std/path/0.215.0/posix/to_namespaced_path.ts": "28b216b3c76f892a4dca9734ff1cc0045d135532bfd9c435ae4858bfa5a2ebf0",
+    "https://jsr.io/@std/path/0.215.0/relative.ts": "ab739d727180ed8727e34ed71d976912461d98e2b76de3d3de834c1066667add",
+    "https://jsr.io/@std/path/0.215.0/resolve.ts": "a6f977bdb4272e79d8d0ed4333e3d71367cc3926acf15ac271f1d059c8494d8d",
+    "https://jsr.io/@std/path/0.215.0/to_file_url.ts": "ce1a439e03377882e58f06ef43ef2259d483bab235d1eb727f1637b0a6bd7070",
+    "https://jsr.io/@std/path/0.215.0/to_namespaced_path.ts": "b706a4103b104cfadc09600a5f838c2ba94dbcdb642344557122dda444526e40",
+    "https://jsr.io/@std/path/0.215.0/windows/_util.ts": "8f491fe68728772ce98d3bdf54dcd89c823d5ecd2bec6153c343a95843f625ca",
+    "https://jsr.io/@std/path/0.215.0/windows/basename.ts": "20179a24e3b4a8d5d957f0b6c5515d1d05c47c7e5824d595844f3ff5558e6e5b",
+    "https://jsr.io/@std/path/0.215.0/windows/common.ts": "4c896e6e9357f33c3ffe027cb13cb2ccf5dbe3575604b43c195befffb0f40b2b",
+    "https://jsr.io/@std/path/0.215.0/windows/constants.ts": "5afaac0a1f67b68b0a380a4ef391bf59feb55856aa8c60dfc01bd3b6abb813f5",
+    "https://jsr.io/@std/path/0.215.0/windows/dirname.ts": "f5aee3cff1830aa804bee6b947c51a667dfc713b339923d884e590cffdf5d8e0",
+    "https://jsr.io/@std/path/0.215.0/windows/extname.ts": "297ff46e51d75b97d4096cf5664471dca65b529f557c2e6e08aec3f2441767bf",
+    "https://jsr.io/@std/path/0.215.0/windows/format.ts": "8986f9e9b1cd48b404aa7c3873bfb976a9af08eeb40a58f1001a8d887d0dfe14",
+    "https://jsr.io/@std/path/0.215.0/windows/from_file_url.ts": "d67e4c8e7453597bf8071da6a995d6c9ad41f3c30192dc6494a25beb14647ff7",
+    "https://jsr.io/@std/path/0.215.0/windows/glob_to_regexp.ts": "5a9251ea357ec619f8b370a87e3ec010f36ceb9a0112973b6a1122684b72ccdb",
+    "https://jsr.io/@std/path/0.215.0/windows/is_absolute.ts": "d3534d9fd5680d4c6895bbb59193335e5753cdef875f095297be66eb96f2f530",
+    "https://jsr.io/@std/path/0.215.0/windows/is_glob.ts": "135ac8b1e647f673ea650fb713e2d9c42d0108c29cae3a2b77399fec0dae8864",
+    "https://jsr.io/@std/path/0.215.0/windows/join.ts": "3073737b883df7dd391f9743572284ec796cc518e420374da043a0eb714746da",
+    "https://jsr.io/@std/path/0.215.0/windows/join_globs.ts": "52589b26215d134a6d95b592ae1c1cf35ab670e62c97053c632003c23c5aa0e9",
+    "https://jsr.io/@std/path/0.215.0/windows/mod.ts": "74a29bae3451312d93ea22694b1ca4a05a7afe2b6dbab67c09cb59eb9744a776",
+    "https://jsr.io/@std/path/0.215.0/windows/normalize.ts": "f5d8b971161eff7b4f8e45c7520cbb0c6553ccff7c4b3ced2dfe0d6ad46a2328",
+    "https://jsr.io/@std/path/0.215.0/windows/normalize_glob.ts": "5bce9621a3562265bd3279f9b3b388611e19cf9f2c3521b0d8dbf18267e3b050",
+    "https://jsr.io/@std/path/0.215.0/windows/parse.ts": "c63488c9d581576f955eaa8c4ab09c165b8d922ec3911b302c31331c8303973f",
+    "https://jsr.io/@std/path/0.215.0/windows/relative.ts": "366eb25bd3469433e47dd4cac52d03048d5e27e8a89e059217065d3afa4e7e71",
+    "https://jsr.io/@std/path/0.215.0/windows/resolve.ts": "671e70d150bd933832ffcf02e97572fdfbb8ed199082bdabdf4e92d3e898636e",
+    "https://jsr.io/@std/path/0.215.0/windows/separator.ts": "e51c5522140eff4f8402617c5c68a201fdfa3a1a8b28dc23587cff931b665e43",
+    "https://jsr.io/@std/path/0.215.0/windows/to_file_url.ts": "cdead9ba8f1e4062c3c45a7c9fa6384e209b734526b4c6ab36ce2f17339367f5",
+    "https://jsr.io/@std/path/0.215.0/windows/to_namespaced_path.ts": "96dd0d55d484905e06553fd7d5feb6b3e4c0c99c337fda4199b6c32bce44833a"
   }
 }

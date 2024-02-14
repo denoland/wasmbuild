@@ -1,16 +1,16 @@
 [package]
 name = "wasmbuild"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 
 [lib]
 crate_type = ["cdylib"]
 
 [dependencies]
-anyhow = "1.0.75"
-js-sys = "0.3.67"
-serde = { version = "1.0.193", features = ["derive", "rc"] }
+anyhow = "=1.0.79"
+js-sys = "=0.3.68"
+serde = { version = "1.0.196", features = ["derive", "rc"] }
 # make sure to update the version in lib/versions.ts to match this version
-wasm-bindgen = "0.2.90"
-wasm-bindgen-cli-support = "0.2.90"
-serde-wasm-bindgen = "0.6.3"
+wasm-bindgen = "=0.2.91"
+wasm-bindgen-cli-support = "=0.2.91"
+serde-wasm-bindgen = "=0.6.3"

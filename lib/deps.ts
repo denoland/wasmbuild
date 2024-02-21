@@ -1,15 +1,16 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
-export * as colors from "https://deno.land/std@0.198.0/fmt/colors.ts";
-export * as base64 from "https://deno.land/std@0.198.0/encoding/base64.ts";
-export { parse as parseFlags } from "https://deno.land/std@0.198.0/flags/mod.ts";
-export { Sha1 } from "https://deno.land/std@0.142.0/hash/sha1.ts";
-export * as path from "https://deno.land/std@0.198.0/path/mod.ts";
-export { copy } from "https://deno.land/std@0.198.0/streams/copy.ts";
-export { writeAll } from "https://deno.land/std@0.198.0/streams/write_all.ts";
+export * as colors from "jsr:@std/fmt@0.215/colors";
+export * as base64 from "jsr:@std/encoding@0.215/base64";
+export { parseArgs as parseFlags } from "jsr:@std/cli@0.215/parse_args";
+// TODO(@littledivy): use webcrypto digest API
+export { Sha1 } from "./utils/sha1.ts";
+export * as path from "jsr:@std/path@0.215";
+export { copy } from "jsr:@std/io@0.215/copy";
+export { writeAll } from "jsr:@std/io@0.215/write_all";
 export { gunzip } from "https://deno.land/x/denoflate@1.2.1/mod.ts";
-export { Untar } from "https://deno.land/std@0.198.0/archive/untar.ts";
-export { Buffer } from "https://deno.land/std@0.198.0/io/mod.ts";
-export { emptyDir, ensureDir } from "https://deno.land/std@0.198.0/fs/mod.ts";
-export { expandGlob } from "https://deno.land/std@0.198.0/fs/expand_glob.ts";
+export { Untar } from "jsr:@std/archive@0.215/untar";
+export { Buffer } from "jsr:@std/io@0.215";
+export { emptyDir, ensureDir } from "jsr:@std/fs@0.215";
+export { expandGlob } from "jsr:@std/fs@0.215/expand_glob";
 export { default as cacheDir } from "https://deno.land/x/dir@1.4.0/cache_dir/mod.ts";

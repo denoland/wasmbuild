@@ -12,7 +12,6 @@ await Deno.permissions.request({ name: "read" });
 await Deno.permissions.request({ name: "write" });
 
 const command = parseArgs(Deno.args);
-
 switch (command.kind) {
   case "new": {
     await runNewCommand();

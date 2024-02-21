@@ -27,7 +27,6 @@ pub fn generate_bindgen(
 fn inner(name: &str, wasm_bytes: Vec<u8>) -> Result<Output> {
   let mut x = wasm_bindgen_cli_support::Bindgen::new()
     .deno(true)?
-    .weak_refs(true)
     .input_bytes(name, wasm_bytes)
     .generate_output()?;
 

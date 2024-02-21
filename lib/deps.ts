@@ -3,6 +3,7 @@
 export * as colors from "jsr:@std/fmt@0.215/colors";
 export * as base64 from "jsr:@std/encoding@0.215/base64";
 export { parseArgs as parseFlags } from "jsr:@std/cli@0.215/parse_args";
+// TODO(@littledivy): use webcrypto digest API
 export { Sha1 } from "./utils/sha1.ts";
 export * as path from "jsr:@std/path@0.215";
 export { copy } from "jsr:@std/io@0.215/copy";

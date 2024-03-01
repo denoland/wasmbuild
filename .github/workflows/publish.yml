@@ -24,10 +24,6 @@ jobs:
       - name: Build
         run: deno task build
 
-        # temporary until https://github.com/denoland/deno/issues/22656 is fixed
-      - name: Delete .gitignore
-        run: rm .gitignore
-
         # add back once https://github.com/denoland/deno/issues/22658 is fixed
       # - name: Publish package (Dry run)
       #   if: ${{ github.ref != 'refs/heads/main' }}

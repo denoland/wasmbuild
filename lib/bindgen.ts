@@ -1,3 +1,5 @@
+// Copyright 2018-2024 the Deno authors. MIT license.
+
 import { instantiate } from "./wasmbuild.generated.js";
 import * as path from "@std/path";
 

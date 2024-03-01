@@ -1,4 +1,6 @@
-import { assertEquals } from "https://deno.land/std@0.198.0/assert/mod.ts";
+// Copyright 2018-2024 the Deno authors. MIT license.
+
+import { assertEquals } from "@std/assert";
 import { CommonBuild, parseArgs } from "./args.ts";
 
 Deno.test("no default features", () => {

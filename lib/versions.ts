@@ -1,3 +1,5 @@
+// Copyright 2018-2024 the Deno authors. MIT license.
+
 interface WasmCrate {
   name: string;
   getDependencyVersion(name: string): string | undefined;

@@ -1,4 +1,4 @@
-// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
+// Copyright 2018-2024 the Deno authors. MIT license.
 
 export * as colors from "jsr:@std/fmt@0.215/colors";
 export * as base64 from "jsr:@std/encoding@0.215/base64";

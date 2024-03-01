@@ -1,4 +1,4 @@
-// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
+// Copyright 2018-2024 the Deno authors. MIT license.
 
 import * as colors from "@std/fmt/colors";
 import { ensureDir } from "@std/fs/ensure_dir";

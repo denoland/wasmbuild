@@ -1,5 +1,11 @@
 # Contributing
 
+Setup:
+
+1. Install [Deno](https://deno.com/).
+1. Install [Rust](https://www.rust-lang.org/).
+1. Run `deno task build`
+
 ## Upgrading wasm-bindgen version
 
 1. Upgrade the versions in the Cargo.toml files

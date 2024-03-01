@@ -22,7 +22,7 @@ const writer = new CodeBlockWriter({
   indentNumberOfSpaces: 2,
 });
 const copyrightComment =
-  "// Copyright 2018-2022 the Deno authors. MIT license.\n";
+  "// Copyright 2018-2024 the Deno authors. MIT license.\n";
 writer.writeLine(copyrightComment);
 writer.write("export const loaderText = ")
   .quote(emitText.replace(copyrightComment, ""))

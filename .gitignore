@@ -1,3 +1,2 @@
 .vscode
 target/
-lib/loader_text.generated.ts

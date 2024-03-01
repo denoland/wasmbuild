@@ -1,4 +1,4 @@
-// Copyright 2018-2022 the Deno authors. MIT license.
+// Copyright 2018-2024 the Deno authors. MIT license.
 
 export const loaderText =
   'export async function cacheToLocalDir(url, decompress) {\n\

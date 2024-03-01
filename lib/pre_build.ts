@@ -15,8 +15,14 @@ import { loaderText as generatedLoaderText } from "./loader_text.generated.ts";
 
 export interface PreBuildOutput {
   bindgen: BindgenOutput;
-  bindingJsText: string;
-  bindingJsPath: string;
+  bindingJs: {
+    path: string;
+    text: string;
+  };
+  bindingDts: {
+    path: string;
+    text: string;
+  };
   sourceHash: string;
   wasmFileName: string | undefined;
 }
@@ -104,6 +110,8 @@ export async function runPreBuild(
 
   const bindingJsFileName =
     `${crate.libName}.generated.${args.bindingJsFileExt}`;
+  const bindingTsFileName =
+    `${crate.libName}.generated.${args.bindingJsFileExt === "mjs" ? ".d.mts" : ".d.ts"}`;
   const bindingJsPath = path.join(args.outDir, bindingJsFileName);
 
   const { bindingJsText, sourceHash } = await getBindingJsOutput(
@@ -114,8 +122,14 @@ export async function runPreBuild(
 
   return {
     bindgen: bindgenOutput,
-    bindingJsText,
-    bindingJsPath,
+    bindingJs: {
+      path: bindingJsPath,
+      text: bindingJsText,
+    },
+    bindingDts: {
+      path: bindingTsFileName,
+      text: bindgenOutput.ts,
+    },
     sourceHash,
     wasmFileName: args.loaderKind === "sync"
       ? undefined

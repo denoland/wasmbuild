@@ -28,9 +28,10 @@ jobs:
       - name: Delete .gitignore
         run: rm .gitignore
 
-      - name: Publish package (Dry run)
-        if: ${{ github.ref != 'refs/heads/main' }}
-        run: deno publish --dry-run
+        # add back once https://github.com/denoland/deno/issues/22658 is fixed
+      # - name: Publish package (Dry run)
+      #   if: ${{ github.ref != 'refs/heads/main' }}
+      #   run: deno publish --dry-run
       - name: Publish package
         if: ${{ github.ref == 'refs/heads/main' }}
         run: deno publish

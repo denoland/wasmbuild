@@ -1,4 +1,4 @@
-// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
+// Copyright 2018-2022 the Deno authors. MIT license.
 
 export async function cacheToLocalDir(
   url: URL,

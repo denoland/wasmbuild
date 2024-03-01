@@ -1,6 +1,6 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
-import * as colors from "@std/fmt/colors"
+import * as colors from "@std/fmt/colors";
 import { CheckCommand } from "../args.ts";
 import { runPreBuild } from "../pre_build.ts";
 

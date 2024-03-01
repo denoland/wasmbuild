@@ -20,9 +20,10 @@
   },
   "tasks": {
     "fmt": "deno fmt && cargo fmt",
-    "build": "deno run -A ./main.ts -p wasmbuild",
+    "build": "deno task build:loader && deno run -A ./main.ts -p wasmbuild",
     "build:bindgen-upgrade": "WASMBUILD_BINDGEN_UPGRADE=1 deno task build",
     "build:lkg": "deno run -A https://deno.land/x/wasmbuild@0.15.3/main.ts -p wasmbuild",
+    "build:loader": "deno run -A scripts/build_loader_text.ts",
     "test": "cd tests && rm -rf lib lib_out_js_file lib_sync lib_no_cache && deno task test:main && deno task test:no-cache && deno task test:sync && deno task test:js-ext && deno test -A && deno task test:check",
     "test:main": "cd tests && deno run -A ../main.ts -p deno_test",
     "test:sync": "deno task test:main --sync --out lib_sync",
@@ -40,6 +41,6 @@
     "@std/io": "jsr:@std/io@^0.218.2",
     "@std/path": "jsr:@std/path@^0.218.2",
     "@std/streams": "jsr:@std/streams@^0.218.2",
-    "@ts-morph/common": "npm:@ts-morph/common@^21.0.1"
+    "ts-morph": "npm:ts-morph@^21"
   }
 }

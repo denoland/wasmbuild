@@ -1,2 +1,5 @@
 .vscode
 target/
+lib/loader_text.generated.ts
+lib/wasmbuild_bg.wasm
+lib/wasmbuild.generated.js

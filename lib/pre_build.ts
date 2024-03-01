@@ -10,6 +10,8 @@ import { verifyVersions } from "./versions.ts";
 import { BindgenOutput, generateBindgen } from "./bindgen.ts";
 import { pathExists } from "./helpers.ts";
 export type { BindgenOutput } from "./bindgen.ts";
+// run `deno task build` if this file doesn't exist
+import { loaderText as generatedLoaderText } from "./loader_text.generated.ts";
 
 export interface PreBuildOutput {
   bindgen: BindgenOutput;
@@ -108,7 +110,6 @@ export async function runPreBuild(
     args,
     crate,
     bindgenOutput,
-    bindingJsPath,
   );
 
   return {
@@ -126,7 +127,6 @@ async function getBindingJsOutput(
   args: CheckCommand | BuildCommand,
   crate: WasmCrate,
   bindgenOutput: BindgenOutput,
-  bindingJsPath: string,
 ) {
   const sourceHash = await getHash();
   const header = `// @generated file from wasmbuild -- do not edit
@@ -135,7 +135,7 @@ async function getBindingJsOutput(
 // deno-fmt-ignore-file`;
   const genText = bindgenOutput.js.replace(
     /\bconst\swasm_url\s.+/ms,
-    getLoaderText(args, crate, bindgenOutput, bindingJsPath),
+    getLoaderText(args, crate, bindgenOutput),
   );
   const bodyText = await getFormattedText(`
 // source-hash: ${sourceHash}
@@ -201,7 +201,6 @@ function getLoaderText(
   args: CheckCommand | BuildCommand,
   crate: WasmCrate,
   bindgenOutput: BindgenOutput,
-  bindingJsPath: string,
 ) {
   switch (args.loaderKind) {
     case "sync":
@@ -211,14 +210,12 @@ function getLoaderText(
         crate,
         bindgenOutput,
         false,
-        bindingJsPath,
       );
     case "async-with-cache":
       return getAsyncLoaderText(
         crate,
         bindgenOutput,
         true,
-        bindingJsPath,
       );
   }
 }
@@ -284,28 +281,10 @@ function base64decode(b64) {
   `;
 }
 
-function parseRelativePath(
-  fromFilePath: string,
-  toRelativeSpecifier: string,
-): string {
-  const specifier = import.meta.resolve(toRelativeSpecifier);
-  if (!specifier.startsWith("file:")) return specifier;
-
-  const fromDirPath = path.join(Deno.cwd(), path.dirname(fromFilePath));
-  const toFilePath = path.fromFileUrl(specifier);
-  const relativeFromTo = path.relative(fromDirPath, toFilePath)
-    .replace(/\\/g, "/");
-  // The path might be absolute on the Windows CI because it uses a
-  // different drive for the temp dir. In that case, just use the resolved
-  // specifier.
-  return path.isAbsolute(relativeFromTo) ? specifier : relativeFromTo;
-}
-
 function getAsyncLoaderText(
   crate: WasmCrate,
   bindgenOutput: BindgenOutput,
   useCache: boolean,
-  bindingJsFileName: string,
 ) {
   const exportNames = getExportNames(bindgenOutput);
 
@@ -318,9 +297,8 @@ function getAsyncLoaderText(
     // it will be transformed by dnt.
     loaderText +=
       `const isNodeOrDeno = typeof Deno === "object" || (typeof process !== "undefined" && process.versions != null && process.versions.node != null);\n`;
-    const cacheUrl = parseRelativePath(bindingJsFileName, "../loader/cache.ts");
     cacheText +=
-      `isNodeOrDeno ? (await import("${cacheUrl}")).cacheToLocalDir : undefined`;
+      `isNodeOrDeno ? cacheToLocalDir : undefined`;
   } else {
     cacheText = "undefined";
   }
@@ -382,7 +360,7 @@ export function isInstantiated() {
 }
 `;
 
-  return loaderText;
+  return loaderText + " " + generatedLoaderText;
 
   function getWasmbuildLoaderText() {
     return `/**

@@ -70,7 +70,7 @@ async function downloadBinaryen(tempPath: string) {
   );
 
   const response = await fetchWithRetries(binaryenUrl());
-  const ds = new DecompressionStream("gzip")
+  const ds = new DecompressionStream("gzip");
   const decompressed = response.body!.pipeThrough(ds);
   const untar = new Untar(new Buffer(await toArrayBuffer(decompressed)));
 

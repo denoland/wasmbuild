@@ -9,7 +9,7 @@ Add a task to the _deno.json_ file in your project:
 ```json
 {
   "tasks": {
-    "wasmbuild": "deno run -A https://deno.land/x/wasmbuild@VERSION_GOES_HERE/main.ts"
+    "wasmbuild": "deno run -A jsr:@deno/wasmbuild@VERSION_GOES_HERE"
   }
 }
 ```

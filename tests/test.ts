@@ -1,6 +1,6 @@
+import { assertEquals } from "@std/assert";
 import * as wasm from "./lib/deno_test.generated.js";
 import * as wasmSync from "./lib_sync/deno_test.generated.js";
-import { assertEquals } from "./test.deps.ts";
 
 assertEquals(wasm.isInstantiated(), false);
 assertEquals(wasmSync.isInstantiated(), false);

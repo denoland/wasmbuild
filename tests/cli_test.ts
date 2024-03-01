@@ -1,4 +1,4 @@
-import { path } from "../lib/deps.ts";
+import * as path from "@std/path";
 
 const rootFolder = path.dirname(
   path.dirname(path.fromFileUrl(import.meta.url)),

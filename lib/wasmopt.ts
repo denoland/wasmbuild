@@ -1,15 +1,13 @@
-// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
-import { fetchWithRetries } from "../loader/fetch.ts";
-import {
-  Buffer,
-  cacheDir,
-  colors,
-  copy,
-  ensureDir,
-  gunzip,
-  path,
-  Untar,
-} from "./deps.ts";
+// Copyright 2018-2024 the Deno authors. MIT license.
+
+import { Buffer } from "@std/io/buffer";
+import { Untar } from "@std/archive/untar";
+import { copy } from "@std/io/copy";
+import { ensureDir } from "@std/fs/ensure_dir";
+import { toArrayBuffer } from "@std/streams";
+import * as colors from "@std/fmt/colors";
+import * as path from "@std/path";
+import { fetchWithRetries } from "./loader.ts";
 
 const wasmOptFileName = Deno.build.os === "windows"
   ? "wasm-opt.exe"
@@ -73,9 +71,9 @@ async function downloadBinaryen(tempPath: string) {
   );
 
   const response = await fetchWithRetries(binaryenUrl());
-  const buf = new Uint8Array(await response.arrayBuffer());
-  const decompressed = gunzip(buf);
-  const untar = new Untar(new Buffer(decompressed));
+  const ds = new DecompressionStream("gzip");
+  const decompressed = response.body!.pipeThrough(ds);
+  const untar = new Untar(new Buffer(await toArrayBuffer(decompressed)));
 
   for await (const entry of untar) {
     if (
@@ -120,4 +118,30 @@ function binaryenUrl() {
   return new URL(
     `https://github.com/WebAssembly/binaryen/releases/download/${tag}/binaryen-${tag}-${arch}-${os}.tar.gz`,
   );
+}
+
+// MIT License - Copyright (c) justjavac.
+// https://github.com/justjavac/deno_dirs/blob/e8c001bbef558f08fd486d444af391729b0b8068/cache_dir/mod.ts
+function cacheDir(): string | undefined {
+  switch (Deno.build.os) {
+    case "linux": {
+      const xdg = Deno.env.get("XDG_CACHE_HOME");
+      if (xdg) return xdg;
+
+      const home = Deno.env.get("HOME");
+      if (home) return `${home}/.cache`;
+      break;
+    }
+
+    case "darwin": {
+      const home = Deno.env.get("HOME");
+      if (home) return `${home}/Library/Caches`;
+      break;
+    }
+
+    case "windows":
+      return Deno.env.get("LOCALAPPDATA") ?? undefined;
+  }
+
+  return undefined;
 }

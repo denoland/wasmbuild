@@ -1,4 +1,6 @@
-import { assertThrows } from "jsr:@std/assert@0.215/assert_throws";
+// Copyright 2018-2024 the Deno authors. MIT license.
+
+import { assertThrows } from "@std/assert/assert_throws";
 import { verifyVersions } from "./versions.ts";
 
 const correctMap: { [name: string]: string } = {

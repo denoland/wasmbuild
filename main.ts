@@ -1,5 +1,5 @@
 #!/usr/bin/env -S deno run --allow-run --allow-read --allow-write --allow-env
-// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
+// Copyright 2018-2024 the Deno authors. MIT license.
 
 import { parseArgs } from "./lib/args.ts";
 import { runNewCommand } from "./lib/commands/new_command.ts";

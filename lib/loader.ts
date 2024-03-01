@@ -1,6 +1,4 @@
-// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
-import { default as localDataDir } from "https://deno.land/x/dir@1.5.1/data_local_dir/mod.ts";
-import { fetchWithRetries } from "./fetch.ts";
+// Copyright 2018-2024 the Deno authors. MIT license.
 
 export async function cacheToLocalDir(
   url: URL,
@@ -134,4 +132,51 @@ function windowsToFileUrl(path: string): URL {
     }
   }
   return url;
+}
+
+export async function fetchWithRetries(url: URL | string, maxRetries = 5) {
+  let sleepMs = 250;
+  let iterationCount = 0;
+  while (true) {
+    iterationCount++;
+    try {
+      const res = await fetch(url);
+      if (res.ok || iterationCount > maxRetries) {
+        return res;
+      }
+    } catch (err) {
+      if (iterationCount > maxRetries) {
+        throw err;
+      }
+    }
+    console.warn(`Failed fetching. Retrying in ${sleepMs}ms...`);
+    await new Promise((resolve) => setTimeout(resolve, sleepMs));
+    sleepMs = Math.min(sleepMs * 2, 10_000);
+  }
+}
+
+// MIT License - Copyright (c) justjavac.
+// https://github.com/justjavac/deno_dirs/blob/e8c001bbef558f08fd486d444af391729b0b8068/data_local_dir/mod.ts
+function localDataDir(): string | undefined {
+  switch (Deno.build.os) {
+    case "linux": {
+      const xdg = Deno.env.get("XDG_DATA_HOME");
+      if (xdg) return xdg;
+
+      const home = Deno.env.get("HOME");
+      if (home) return `${home}/.local/share`;
+      break;
+    }
+
+    case "darwin": {
+      const home = Deno.env.get("HOME");
+      if (home) return `${home}/Library/Application Support`;
+      break;
+    }
+
+    case "windows":
+      return Deno.env.get("LOCALAPPDATA") ?? undefined;
+  }
+
+  return undefined;
 }

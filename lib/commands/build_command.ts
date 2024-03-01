@@ -1,7 +1,10 @@
-// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
+// Copyright 2018-2024 the Deno authors. MIT license.
 
+import * as colors from "@std/fmt/colors";
+import { emptyDir } from "@std/fs/empty_dir";
+import * as path from "@std/path";
+import { ensureDir } from "@std/fs";
 import { BuildCommand } from "../args.ts";
-import { colors, emptyDir, ensureDir, path } from "../deps.ts";
 import { runPreBuild } from "../pre_build.ts";
 import { runWasmOpt } from "../wasmopt.ts";
 

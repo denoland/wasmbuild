@@ -15,7 +15,7 @@ export type LoaderKind = "sync" | "async" | "async-with-cache";
 
 export interface CommonBuild {
   outDir: string;
-  bindingJsFileExt: string;
+  bindingJsFileExt: "js" | "mjs";
   profile: "debug" | "release";
   project: string | undefined;
   loaderKind: LoaderKind;
@@ -68,9 +68,17 @@ export function parseArgs(rawArgs: string[]): Command {
         : "async-with-cache",
       isOpt: !(flags["skip-opt"] ?? flags.debug == "debug"),
       outDir: flags.out ?? "./lib",
-      bindingJsFileExt: flags["js-ext"] ?? `js`,
+      bindingJsFileExt: getBindingJsFileExt(),
       cargoFlags: getCargoFlags(),
     };
+  }
+
+  function getBindingJsFileExt() {
+    const ext: string = flags["js-ext"] ?? `js`;
+    if (ext !== "js" && ext !== "mjs") {
+      throw new Error("js-ext must be 'js' or 'mjs'");
+    }
+    return ext;
   }
 
   function getCargoFlags() {

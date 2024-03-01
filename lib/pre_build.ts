@@ -15,8 +15,14 @@ import { loaderText as generatedLoaderText } from "./loader_text.generated.ts";
 
 export interface PreBuildOutput {
   bindgen: BindgenOutput;
-  bindingJsText: string;
-  bindingJsPath: string;
+  bindingJs: {
+    path: string;
+    text: string;
+  };
+  bindingDts: {
+    path: string;
+    text: string;
+  };
   sourceHash: string;
   wasmFileName: string | undefined;
 }
@@ -104,7 +110,6 @@ export async function runPreBuild(
 
   const bindingJsFileName =
     `${crate.libName}.generated.${args.bindingJsFileExt}`;
-  const bindingJsPath = path.join(args.outDir, bindingJsFileName);
 
   const { bindingJsText, sourceHash } = await getBindingJsOutput(
     args,
@@ -114,13 +119,25 @@ export async function runPreBuild(
 
   return {
     bindgen: bindgenOutput,
-    bindingJsText,
-    bindingJsPath,
+    bindingJs: {
+      path: path.join(args.outDir, bindingJsFileName),
+      text: bindingJsText,
+    },
+    bindingDts: {
+      path: path.join(args.outDir, getDtsFileName(args, crate)),
+      text: getBindgenDtsOutput(args, bindgenOutput),
+    },
     sourceHash,
     wasmFileName: args.loaderKind === "sync"
       ? undefined
       : getWasmFileNameFromCrate(crate),
   };
+}
+
+function getDtsFileName(args: CheckCommand | BuildCommand, crate: WasmCrate) {
+  return `${crate.libName}.generated.${
+    args.bindingJsFileExt === "mjs" ? "d.mts" : "d.ts"
+  }`;
 }
 
 async function getBindingJsOutput(
@@ -132,7 +149,9 @@ async function getBindingJsOutput(
   const header = `// @generated file from wasmbuild -- do not edit
 // @ts-nocheck: generated
 // deno-lint-ignore-file
-// deno-fmt-ignore-file`;
+// deno-fmt-ignore-file
+/// <reference types="./${getDtsFileName(args, crate)}" />
+`;
   const genText = bindgenOutput.js.replace(
     /\bconst\swasm_url\s.+/ms,
     getLoaderText(args, crate, bindgenOutput),
@@ -223,24 +242,12 @@ function getLoaderText(
 function getSyncLoaderText(bindgenOutput: BindgenOutput) {
   const exportNames = getExportNames(bindgenOutput);
   return `
-/** Instantiates an instance of the Wasm module returning its functions.
- * @remarks It is safe to call this multiple times and once successfully
- * loaded it will always return a reference to the same object.
- */
 export function instantiate() {
   return instantiateWithInstance().exports;
 }
 
 let instanceWithExports;
 
-/** Instantiates an instance of the Wasm module along with its exports.
- * @remarks It is safe to call this multiple times and once successfully
- * loaded it will always return a reference to the same object.
- * @returns {{
- *   instance: WebAssembly.Instance;
- *   exports: { ${exportNames.map((n) => `${n}: typeof ${n}`).join("; ")} }
- * }}
- */
 export function instantiateWithInstance() {
   if (instanceWithExports == null) {
     const instance = instantiateInstance();
@@ -255,7 +262,6 @@ export function instantiateWithInstance() {
   return instanceWithExports;
 }
 
-/** Gets if the Wasm module has been instantiated. */
 export function isInstantiated() {
   return instanceWithExports != null;
 }
@@ -307,34 +313,11 @@ const loader = new WasmBuildLoader({
   imports,
   cache: ${cacheText},
 })
-`;
 
-  loaderText += `/**
-  * Options for instantiating a Wasm instance.
-  * @typedef {Object} InstantiateOptions
-  * @property {URL=} url - Optional url to the Wasm file to instantiate.
-  * @property {DecompressCallback=} decompress - Callback to decompress the
-  * raw Wasm file bytes before instantiating.
-  */
-
-/** Instantiates an instance of the Wasm module returning its functions.
- * @remarks It is safe to call this multiple times and once successfully
- * loaded it will always return a reference to the same object.
- * @param {InstantiateOptions=} opts
- */
 export async function instantiate(opts) {
   return (await instantiateWithInstance(opts)).exports;
 }
 
-/** Instantiates an instance of the Wasm module along with its exports.
- * @remarks It is safe to call this multiple times and once successfully
- * loaded it will always return a reference to the same object.
- * @param {InstantiateOptions=} opts
- * @returns {Promise<{
- *   instance: WebAssembly.Instance;
- *   exports: { ${exportNames.map((n) => `${n}: typeof ${n}`).join("; ")} }
- * }>}
- */
 export async function instantiateWithInstance(opts) {
   const {instance } = await loader.load(
     opts?.url ?? new URL("${getWasmFileNameFromCrate(crate)}", import.meta.url),
@@ -353,65 +336,31 @@ function getWasmInstanceExports() {
   return { ${exportNames.join(", ")} };
 }
 
-/** Gets if the Wasm module has been instantiated. */
 export function isInstantiated() {
   return loader.instance != null;
 }
 `;
 
-  return loaderText + " " + generatedLoaderText;
+  return loaderText + generatedLoaderText;
 
   function getWasmbuildLoaderText() {
-    return `/**
-* @callback WasmBuildDecompressCallback
-* @param {Uint8Array} compressed
-* @returns {Uint8Array} decompressed
-*/
-
-/**
-* @callback WasmBuildCacheCallback
-* @param {URL} url
-* @param {WasmBuildDecompressCallback | undefined} decompress
-* @returns {Promise<URL |Uint8Array>}
-*/
-
-/**
-* @typedef WasmBuildLoaderOptions
-* @property {WebAssembly.Imports | undefined} imports - The Wasm module's imports.
-* @property {WasmBuildCacheCallback} [cache] - A function that caches the Wasm module to
-* a local path so that a network request isn't required on every load.
-*
-* Returns an ArrayBuffer with the bytes on download success, but cache save failure.
-*/
-
-class WasmBuildLoader {
- /** @type {WasmBuildLoaderOptions} */
+    return `class WasmBuildLoader {
  #options;
- /** @type {Promise<WebAssembly.WebAssemblyInstantiatedSource> | undefined} */
  #lastLoadPromise;
- /** @type {WebAssembly.WebAssemblyInstantiatedSource | undefined} */
  #instantiated;
 
- /** @param {WasmBuildLoaderOptions} options */
  constructor(options) {
    this.#options = options;
  }
 
- /** @returns {WebAssembly.Instance | undefined} */
  get instance() {
    return this.#instantiated?.instance;
  }
 
- /** @returns {WebAssembly.Module | undefined} */
  get module() {
    return this.#instantiated?.module;
  }
 
- /**
-  * @param {URL} url
-  * @param {WasmBuildDecompressCallback | undefined} decompress
-  * @returns {Promise<WebAssembly.WebAssemblyInstantiatedSource>}
-  */
  load(
    url,
    decompress,
@@ -431,10 +380,6 @@ class WasmBuildLoader {
    return this.#lastLoadPromise;
  }
 
- /**
-  * @param {URL} url
-  * @param {WasmBuildDecompressCallback | undefined} decompress
-  */
  async #instantiate(url, decompress) {
    const imports = this.#options.imports;
    if (this.#options.cache != null && url.protocol !== "file:") {
@@ -457,8 +402,7 @@ class WasmBuildLoader {
    const isFile = url.protocol === "file:";
 
    // make file urls work in Node via dnt
-   const isNode =
-     (/** @type {any} */ (globalThis)).process?.versions?.node != null;
+   const isNode = globalThis.process?.versions?.node != null;
    if (isFile && typeof Deno !== "object") {
      throw new Error(
        "Loading local files are not supported in this environment",
@@ -487,12 +431,7 @@ class WasmBuildLoader {
          wasmResponse.headers.get("content-type")?.toLowerCase()
            .startsWith("application/wasm")
        ) {
-         return WebAssembly.instantiateStreaming(
-           // Cast to any so there's no type checking issues with dnt
-           // (https://github.com/denoland/wasmbuild/issues/92)
-           /** @type {any} */ (wasmResponse),
-           imports,
-         );
+         return WebAssembly.instantiateStreaming(wasmResponse, imports);
        } else {
          return WebAssembly.instantiate(
            await wasmResponse.arrayBuffer(),
@@ -507,6 +446,84 @@ class WasmBuildLoader {
 }
 `;
   }
+}
+
+function getBindgenDtsOutput(
+  args: CheckCommand | BuildCommand,
+  bindgenOutput: BindgenOutput,
+) {
+  switch (args.loaderKind) {
+    case "sync":
+      return getDtsSyncLoaderText(bindgenOutput);
+    case "async":
+    case "async-with-cache":
+      return getDtsAsyncLoaderText(bindgenOutput);
+  }
+}
+
+function getDtsSyncLoaderText(bindgenOutput: BindgenOutput) {
+  return `${getCommonDtsLoaderText(bindgenOutput)}
+
+/** Instantiates an instance of the Wasm module returning its functions.
+* @remarks It is safe to call this multiple times and once successfully
+* loaded it will always return a reference to the same object. */
+export function instantiate(): InstantiateResult["exports"];
+
+/** Instantiates an instance of the Wasm module along with its exports.
+ * @remarks It is safe to call this multiple times and once successfully
+ * loaded it will always return a reference to the same object. */
+export function instantiateWithInstance(): InstantiateResult;
+
+${getLibraryDts(bindgenOutput)}`;
+}
+
+function getDtsAsyncLoaderText(bindgenOutput: BindgenOutput) {
+  return `${getCommonDtsLoaderText(bindgenOutput)}
+/** Options for instantiating a Wasm instance. */
+export interface InstantiateOptions {
+  /** Optional url to the Wasm file to instantiate. */
+  url?: URL;
+  /** Callback to decompress the raw Wasm file bytes before instantiating. */
+  decompress?: (bytes: Uint8Array) => Uint8Array;
+}
+
+/** Instantiates an instance of the Wasm module returning its functions.
+* @remarks It is safe to call this multiple times and once successfully
+* loaded it will always return a reference to the same object. */
+export function instantiate(opts?: InstantiateOptions): Promise<InstantiateResult["exports"]>;
+
+/** Instantiates an instance of the Wasm module along with its exports.
+ * @remarks It is safe to call this multiple times and once successfully
+ * loaded it will always return a reference to the same object. */
+export function instantiateWithInstance(opts?: InstantiateOptions): Promise<InstantiateResult>;
+
+${getLibraryDts(bindgenOutput)}`;
+}
+
+function getCommonDtsLoaderText(bindgenOutput: BindgenOutput) {
+  const exportNames = getExportNames(bindgenOutput);
+  return `// deno-lint-ignore-file
+// deno-fmt-ignore-file
+
+export interface InstantiateResult {
+  instance: WebAssembly.Instance;
+  exports: {
+    ${exportNames.map((n) => `${n}: typeof ${n}`).join(";\n    ")}
+  };
+}
+
+/** Gets if the Wasm module has been instantiated. */
+export function isInstantiated(): boolean;
+`;
+}
+
+function getLibraryDts(bindgenOutput: BindgenOutput) {
+  return bindgenOutput.ts.replace(
+    `/* tslint:disable */
+/* eslint-disable */
+`,
+    "",
+  );
 }
 
 function getExportNames(bindgenOutput: BindgenOutput) {

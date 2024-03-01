@@ -1,6 +1,6 @@
 {
   "name": "@deno/wasmbuild",
-  "version": "0.15.6",
+  "version": "0.0.0",
   "exports": "./main.ts",
   "exclude": [
     "./tests/target",

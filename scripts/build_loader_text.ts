@@ -29,3 +29,5 @@ writer.write("export const loaderText = ")
   .write(";")
   .newLine();
 loaderTextFile.writeTextSync(writer.toString());
+
+await $`deno fmt ${loaderTextFile}`;

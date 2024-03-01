@@ -6,8 +6,7 @@ import { ensureDir } from "@std/fs/ensure_dir";
 import { toArrayBuffer } from "@std/streams";
 import * as colors from "@std/fmt/colors";
 import * as path from "@std/path";
-import { fetchWithRetries } from "../loader/fetch.ts";
-import { cacheDir} from "./vendor/data_dir.ts";
+import { fetchWithRetries } from "./loader.js";
 
 const wasmOptFileName = Deno.build.os === "windows"
   ? "wasm-opt.exe"
@@ -118,4 +117,30 @@ function binaryenUrl() {
   return new URL(
     `https://github.com/WebAssembly/binaryen/releases/download/${tag}/binaryen-${tag}-${arch}-${os}.tar.gz`,
   );
+}
+
+// MIT License - Copyright (c) justjavac.
+// https://github.com/justjavac/deno_dirs/blob/e8c001bbef558f08fd486d444af391729b0b8068/cache_dir/mod.ts
+function cacheDir(): string | undefined {
+  switch (Deno.build.os) {
+    case "linux": {
+      const xdg = Deno.env.get("XDG_CACHE_HOME");
+      if (xdg) return xdg;
+
+      const home = Deno.env.get("HOME");
+      if (home) return `${home}/.cache`;
+      break;
+    }
+
+    case "darwin": {
+      const home = Deno.env.get("HOME");
+      if (home) return `${home}/Library/Caches`;
+      break;
+    }
+
+    case "windows":
+      return Deno.env.get("LOCALAPPDATA") ?? undefined;
+  }
+
+  return undefined;
 }

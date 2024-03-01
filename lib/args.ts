@@ -76,7 +76,7 @@ export function parseArgs(rawArgs: string[]): Command {
   function getBindingJsFileExt() {
     const ext: string = flags["js-ext"] ?? `js`;
     if (ext !== "js" && ext !== "mjs") {
-      throw new Error("js-ext must be 'js' or 'mjs'")
+      throw new Error("js-ext must be 'js' or 'mjs'");
     }
     return ext;
   }

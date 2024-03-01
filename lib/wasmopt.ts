@@ -1,15 +1,13 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
+import { Buffer } from "@std/io/buffer";
+import { Untar } from "@std/archive/untar";
+import { copy } from "@std/io/copy";
+import { ensureDir } from "@std/fs/ensure_dir";
+import { toArrayBuffer } from "@std/streams";
+import * as colors from "@std/fmt/colors";
+import * as path from "@std/path";
 import { fetchWithRetries } from "../loader/fetch.ts";
-import {
-  Buffer,
-  cacheDir,
-  colors,
-  copy,
-  ensureDir,
-  gunzip,
-  path,
-  Untar,
-} from "./deps.ts";
+import { cacheDir} from "./vendor/data_dir.ts";
 
 const wasmOptFileName = Deno.build.os === "windows"
   ? "wasm-opt.exe"
@@ -73,9 +71,9 @@ async function downloadBinaryen(tempPath: string) {
   );
 
   const response = await fetchWithRetries(binaryenUrl());
-  const buf = new Uint8Array(await response.arrayBuffer());
-  const decompressed = gunzip(buf);
-  const untar = new Untar(new Buffer(decompressed));
+  const ds = new DecompressionStream("gzip")
+  const decompressed = response.body!.pipeThrough(ds);
+  const untar = new Untar(new Buffer(await toArrayBuffer(decompressed)));
 
   for await (const entry of untar) {
     if (

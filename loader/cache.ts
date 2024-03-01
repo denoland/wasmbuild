@@ -1,5 +1,5 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
-import { default as localDataDir } from "https://deno.land/x/dir@1.5.1/data_local_dir/mod.ts";
+import { localDataDir } from "../lib/vendor/data_dir.ts";
 import { fetchWithRetries } from "./fetch.ts";
 
 export async function cacheToLocalDir(

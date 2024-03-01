@@ -1,6 +1,7 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
-import { colors, ensureDir } from "../deps.ts";
+import * as colors from "@std/fmt/colors";
+import { ensureDir } from "@std/fs/ensure_dir";
 import { versions } from "../versions.ts";
 import { pathExists } from "../helpers.ts";
 

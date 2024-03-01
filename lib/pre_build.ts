@@ -1,7 +1,10 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
 import { BuildCommand, CheckCommand } from "./args.ts";
-import { base64, colors, path, Sha1 } from "./deps.ts";
+import * as colors from "@std/fmt/colors";
+import * as path from "@std/path";
+import * as base64 from "@std/encoding/base64";
+import { Sha1 } from "./utils/sha1.ts";
 import { getCargoWorkspace, WasmCrate } from "./manifest.ts";
 import { verifyVersions } from "./versions.ts";
 import { BindgenOutput, generateBindgen } from "./bindgen.ts";

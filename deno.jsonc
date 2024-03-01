@@ -6,6 +6,15 @@
     "./tests/target",
     "./target"
   ],
+  "publish": {
+    "exclude": [
+      "**/*_test.ts",
+      "tests/",
+      "rs_lib/",
+      "**/*.toml",
+      "**/*.lock"
+    ]
+  },
   "compilerOptions": {
     "checkJs": true
   },
@@ -20,5 +29,15 @@
     "test:no-cache": "deno task test:main --no-cache --out lib_no_cache",
     "test:js-ext": "deno task test:main --js-ext mjs --out lib_out_js_file && cat tests/lib_out_js_file/deno_test.generated.mjs > /dev/null",
     "test:check": "deno task test:main --check && deno task test:sync --check"
+  },
+  "imports": {
+    "@std/archive": "jsr:@std/archive@^0.218.2",
+    "@std/cli": "jsr:@std/cli@^0.218.2",
+    "@std/encoding": "jsr:@std/encoding@^0.218.2",
+    "@std/fmt": "jsr:@std/fmt@^0.218.2",
+    "@std/fs": "jsr:@std/fs@^0.218.2",
+    "@std/io": "jsr:@std/io@^0.218.2",
+    "@std/path": "jsr:@std/path@^0.218.2",
+    "@std/streams": "jsr:@std/streams@^0.218.2"
   }
 }

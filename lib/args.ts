@@ -1,6 +1,6 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
-import { parseFlags } from "./deps.ts";
+import { parseArgs as parseFlags } from "@std/cli/parse_args";
 
 export type Command = NewCommand | BuildCommand | CheckCommand | HelpCommand;
 

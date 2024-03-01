@@ -1,6 +1,8 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
-import { expandGlob, path, Sha1 } from "./deps.ts";
+import { Sha1 } from "./utils/sha1.ts";
+import * as path from "@std/path";
+import { expandGlob } from "@std/fs/expand_glob";
 
 export interface CargoMetadata {
   packages: CargoPackageMetadata[];

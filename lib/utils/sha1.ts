@@ -1,5 +1,6 @@
 // Copyright 2018-2024 the Deno authors. All rights reserved. MIT license.
-// This module is browser compatible.
+
+// TODO(@littledivy): use webcrypto digest API instead of this
 
 /*
  * [js-sha1]{@link https://github.com/emn178/js-sha1}

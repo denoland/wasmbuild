@@ -1,5 +1,5 @@
 import { instantiate } from "./wasmbuild.generated.js";
-import { path } from "./deps.ts";
+import * as path from "@std/path";
 
 export interface BindgenOutput {
   js: string;

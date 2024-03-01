@@ -1,8 +1,5 @@
 name: Publish
-on:
-  push:
-    branches:
-      - main
+on: [push, pull_request]
 
 jobs:
   publish:
@@ -13,10 +10,26 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dsherret/rust-toolchain-file@v1
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - uses: denoland/setup-deno@v1
         with:
           deno-version: v1.x
+      - uses: actions/checkout@v4
 
+      - name: Build
+        run: deno task build
+
+      - name: Delete .gitignore
+        run: rm .gitignore
+
+      - name: Publish package (Dry run)
+        if: ${{ github.ref != 'refs/heads/main' }}
+        run: deno publish --dry-run
       - name: Publish package
+        if: ${{ github.ref == 'refs/heads/main' }}
         run: deno publish

@@ -1,5 +1,8 @@
 import $ from "@david/dax";
-import { CodeBlockWriter, Project, ScriptTarget } from "ts-morph";
+import { Project, ScriptTarget } from "ts-morph";
+// todo(dsherret): remove this after upgrading to a ts-morph version
+// that exports code-block-writer >= v13.0.1
+import CodeBlockWriter from "code-block-writer";
 
 const rootDir = $.path(import.meta).parentOrThrow().parentOrThrow();
 

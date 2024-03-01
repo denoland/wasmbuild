@@ -297,8 +297,7 @@ function getAsyncLoaderText(
     // it will be transformed by dnt.
     loaderText +=
       `const isNodeOrDeno = typeof Deno === "object" || (typeof process !== "undefined" && process.versions != null && process.versions.node != null);\n`;
-    cacheText +=
-      `isNodeOrDeno ? cacheToLocalDir : undefined`;
+    cacheText += `isNodeOrDeno ? cacheToLocalDir : undefined`;
   } else {
     cacheText = "undefined";
   }

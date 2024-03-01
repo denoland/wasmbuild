@@ -6,7 +6,7 @@ import { ensureDir } from "@std/fs/ensure_dir";
 import { toArrayBuffer } from "@std/streams";
 import * as colors from "@std/fmt/colors";
 import * as path from "@std/path";
-import { fetchWithRetries } from "./loader.js";
+import { fetchWithRetries } from "./loader.ts";
 
 const wasmOptFileName = Deno.build.os === "windows"
   ? "wasm-opt.exe"

@@ -31,6 +31,7 @@
     "test:check": "deno task test:main --check && deno task test:sync --check"
   },
   "imports": {
+    "@david/dax": "jsr:@david/dax@^0.39.2",
     "@std/archive": "jsr:@std/archive@^0.218.2",
     "@std/cli": "jsr:@std/cli@^0.218.2",
     "@std/encoding": "jsr:@std/encoding@^0.218.2",
@@ -38,6 +39,7 @@
     "@std/fs": "jsr:@std/fs@^0.218.2",
     "@std/io": "jsr:@std/io@^0.218.2",
     "@std/path": "jsr:@std/path@^0.218.2",
-    "@std/streams": "jsr:@std/streams@^0.218.2"
+    "@std/streams": "jsr:@std/streams@^0.218.2",
+    "@ts-morph/common": "npm:@ts-morph/common@^21.0.1"
   }
 }

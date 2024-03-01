@@ -1,12 +1,9 @@
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
-// @ts-check
 
-/**
- * @param {URL} url
- * @param {(bytes: Uint8Array) => Uint8Array} decompress
- * @returns {Promise<URL | Uint8Array | undefined>}
-*/
-export async function cacheToLocalDir(url, decompress) {
+export async function cacheToLocalDir(
+  url: URL,
+  decompress: (bytes: Uint8Array) => Uint8Array,
+) {
   const localPath = await getUrlLocalPath(url);
   if (localPath == null) {
     return undefined;
@@ -23,11 +20,7 @@ export async function cacheToLocalDir(url, decompress) {
   return toFileUrl(localPath);
 }
 
-/** 
- * @param {URL} url
- * @returns {Promise<string | undefined>}
-*/
-async function getUrlLocalPath(url) {
+async function getUrlLocalPath(url: URL) {
   try {
     const dataDirPath = await getInitializedLocalDataDirPath();
     const hash = await getUrlHash(url);
@@ -37,9 +30,6 @@ async function getUrlLocalPath(url) {
   }
 }
 
-/**
- * @returns {Promise<string>}
- */
 async function getInitializedLocalDataDirPath() {
   const dataDir = localDataDir();
   if (dataDir == null) {
@@ -50,12 +40,7 @@ async function getInitializedLocalDataDirPath() {
   return dirPath;
 }
 
-/**
- * 
- * @param {string | URL} filePath 
- * @returns {Promise<boolean>}
- */
-async function exists(filePath) {
+async function exists(filePath: string | URL): Promise<boolean> {
   try {
     await Deno.lstat(filePath);
     return true;
@@ -67,8 +52,7 @@ async function exists(filePath) {
   }
 }
 
-/** @param {string} dir */
-async function ensureDir(dir) {
+async function ensureDir(dir: string) {
   try {
     const fileInfo = await Deno.lstat(dir);
     if (!fileInfo.isDirectory) {
@@ -84,11 +68,7 @@ async function ensureDir(dir) {
   }
 }
 
-/**
- * @param {URL} url
- * @returns {Promise<string>}
- */
-async function getUrlHash(url) {
+async function getUrlHash(url: URL) {
   // Taken from MDN: https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest
   const hashBuffer = await crypto.subtle.digest(
     "SHA-256",
@@ -103,19 +83,14 @@ async function getUrlHash(url) {
   return hashHex;
 }
 
-/**
- * @param {URL} url
- * @returns {Promise<ArrayBuffer>}
- */
-async function getUrlBytes(url) {
+async function getUrlBytes(url: URL) {
   const response = await fetchWithRetries(url);
   return await response.arrayBuffer();
 }
 
 // the below is extracted from deno_std/path
 
-/** @type {Record<string, string>} */
-const WHITESPACE_ENCODINGS = {
+const WHITESPACE_ENCODINGS: Record<string, string> = {
   "\u0009": "%09",
   "\u000A": "%0A",
   "\u000B": "%0B",
@@ -124,31 +99,19 @@ const WHITESPACE_ENCODINGS = {
   "\u0020": "%20",
 };
 
-/**
- * @param {string} string
- * @returns {string}
-*/
-function encodeWhitespace(string) {
+function encodeWhitespace(string: string): string {
   return string.replaceAll(/[\s]/g, (c) => {
     return WHITESPACE_ENCODINGS[c] ?? c;
   });
 }
 
-/**
- * @param {string} path
- * @returns {URL}
-*/
-function toFileUrl(path) {
+function toFileUrl(path: string): URL {
   return Deno.build.os === "windows"
     ? windowsToFileUrl(path)
     : posixToFileUrl(path);
 }
 
-/**
- * @param {string} path
- * @returns {URL}
-*/
-function posixToFileUrl(path) {
+function posixToFileUrl(path: string): URL {
   const url = new URL("file:///");
   url.pathname = encodeWhitespace(
     path.replace(/%/g, "%25").replace(/\\/g, "%5C"),
@@ -156,18 +119,10 @@ function posixToFileUrl(path) {
   return url;
 }
 
-/**
- * @param {string} path
- * @returns {URL}
-*/
-function windowsToFileUrl(path) {
-  const matchValue = path.match(
+function windowsToFileUrl(path: string): URL {
+  const [, hostname, pathname] = path.match(
     /^(?:[/\\]{2}([^/\\]+)(?=[/\\](?:[^/\\]|$)))?(.*)/,
-  )
-  if (matchValue == null) {
-    throw new Error("Invalid path: " + path);
-  }
-  const [, hostname, pathname] = matchValue;
+  )!;
   const url = new URL("file:///");
   url.pathname = encodeWhitespace(pathname.replace(/%/g, "%25"));
   if (hostname != null && hostname != "localhost") {
@@ -179,11 +134,7 @@ function windowsToFileUrl(path) {
   return url;
 }
 
-/**
- * @param {URL | string} url
- * @returns {Promise<Response>}
-*/
-export async function fetchWithRetries(url, maxRetries = 5) {
+export async function fetchWithRetries(url: URL | string, maxRetries = 5) {
   let sleepMs = 250;
   let iterationCount = 0;
   while (true) {
@@ -206,8 +157,7 @@ export async function fetchWithRetries(url, maxRetries = 5) {
 
 // MIT License - Copyright (c) justjavac.
 // https://github.com/justjavac/deno_dirs/blob/e8c001bbef558f08fd486d444af391729b0b8068/data_local_dir/mod.ts
-/** @returns {string | undefined} */
-function localDataDir() {
+function localDataDir(): string | undefined {
   switch (Deno.build.os) {
     case "linux": {
       const xdg = Deno.env.get("XDG_DATA_HOME");

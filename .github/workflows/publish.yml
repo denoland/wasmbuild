@@ -10,6 +10,7 @@ jobs:
       id-token: write
 
     steps:
+      - uses: actions/checkout@v4
       - name: Install Rust
         uses: dsherret/rust-toolchain-file@v1
 
@@ -19,11 +20,11 @@ jobs:
       - uses: denoland/setup-deno@v1
         with:
           deno-version: v1.x
-      - uses: actions/checkout@v4
 
       - name: Build
         run: deno task build
 
+        # temporary until https://github.com/denoland/deno/issues/22656 is fixed
       - name: Delete .gitignore
         run: rm .gitignore
 

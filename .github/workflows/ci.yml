@@ -9,13 +9,13 @@ jobs:
       github.event_name == 'push' ||
       !startsWith(github.event.pull_request.head.label, 'denoland:')
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+      id-token: write
     timeout-minutes: 30
     strategy:
       matrix:
         os: [macOS-latest, ubuntu-latest, windows-2019]
-
-    env:
-      GH_ACTIONS: 1
 
     steps:
       - name: clone repository

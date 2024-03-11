@@ -295,8 +295,7 @@
       }
     }
   },
-  "remote": {
-  },
+  "remote": {},
   "workspace": {
     "dependencies": [
       "jsr:@david/dax@^0.39.2",

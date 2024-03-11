@@ -70,7 +70,7 @@ edition = "2021"
 crate_type = ["cdylib"]
 
 [dependencies]
-wasm-bindgen = "=${versions.wasmBindgen}"
+wasm-bindgen = "=${versions["wasm-bindgen"]}"
 `,
   );
   await Deno.writeTextFile(

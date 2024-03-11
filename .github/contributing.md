@@ -9,7 +9,7 @@ Setup:
 ## Upgrading wasm-bindgen version
 
 1. Upgrade the versions in the Cargo.toml files
-1. Upgrade the versions in `lib/version.ts` to match.
+1. Upgrade the versions in `lib/versions.ts` to match.
 1. Run `cargo install -f wasm-bindgen-cli` to get the latest wasm-bindgen-cli
    version.
    - See https://github.com/denoland/wasmbuild/issues/51 for why this is

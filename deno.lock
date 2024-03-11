@@ -295,7 +295,7 @@
       }
     }
   },
-"remote": {
+  "remote": {
   },
   "workspace": {
     "dependencies": [

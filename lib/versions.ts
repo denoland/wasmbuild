@@ -1,13 +1,5 @@
 // Copyright 2018-2024 the Deno authors. MIT license.
 
-/**
- * This module contains logic for ensuring that some other Rust dependencies
- * are using the correct version of the wasm-bindgen crate. Mismatches in
- * versions can cause runtime errors that are difficult to troubleshoot.
- * 
- * @see {@link https://github.com/rustwasm/wasm-bindgen/pull/2913#issuecomment-1139100835}
- */
-
 interface WasmCrate {
   name: string;
   getDependencyVersion(name: string): string | undefined;

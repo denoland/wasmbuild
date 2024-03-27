@@ -6,21 +6,21 @@ interface WasmCrate {
 }
 
 export const versions = {
-  wasmBindgen: "0.2.91",
-  wasmBindgenFutures: "0.4.41",
-  jsSys: "0.3.68",
-  webSys: "0.3.68",
-};
+  "wasm-bindgen": "0.2.91",
+  "wasm-bindgen-futures": "0.4.41",
+  "js-sys": "0.3.68",
+  "web-sys": "0.3.68",
+} as const;
 
 export function verifyVersions(crate: WasmCrate) {
-  verifyVersion(crate, "wasm-bindgen", versions.wasmBindgen);
+  verifyVersion(crate, "wasm-bindgen", versions["wasm-bindgen"]);
   verifyVersionAllowNone(
     crate,
     "wasm-bindgen-futures",
-    versions.wasmBindgenFutures,
+    versions["wasm-bindgen-futures"],
   );
-  verifyVersionAllowNone(crate, "js-sys", versions.jsSys);
-  verifyVersionAllowNone(crate, "web-sys", versions.webSys);
+  verifyVersionAllowNone(crate, "js-sys", versions["js-sys"]);
+  verifyVersionAllowNone(crate, "web-sys", versions["web-sys"]);
 }
 
 function verifyVersionAllowNone(

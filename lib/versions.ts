@@ -6,10 +6,10 @@ interface WasmCrate {
 }
 
 export const versions = {
-  "wasm-bindgen": "0.2.91",
-  "wasm-bindgen-futures": "0.4.41",
-  "js-sys": "0.3.68",
-  "web-sys": "0.3.68",
+  "wasm-bindgen": "0.2.92",
+  "wasm-bindgen-futures": "0.4.42",
+  "js-sys": "0.3.69",
+  "web-sys": "0.3.69",
 } as const;
 
 export function verifyVersions(crate: WasmCrate) {

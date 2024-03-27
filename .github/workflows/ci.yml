@@ -47,13 +47,6 @@ jobs:
       - name: Test
         run: deno task test
 
-      - name: Get tag version
-        if: contains(matrix.os, 'ubuntu') && startsWith(github.ref, 'refs/tags/')
-        id: get_tag_version
-        run: echo TAG_VERSION=${GITHUB_REF/refs\/tags\//} >> "$GITHUB_OUTPUT"
-
-      - name: Publish
-        if: contains(matrix.os, 'ubuntu') && startsWith(github.ref, 'refs/tags/')
-        run: |
-          deno run -A ./scripts/update_deno_json_version.ts ${{steps.get_tag_version.outputs.TAG_VERSION}}
-          deno publish
+      - name: Publish on tag
+        if: contains(matrix.os, 'ubuntu')
+        run: deno run -A jsr:@david/publish-on-tag@0.1.2 --allow-dirty

@@ -1,13 +1,13 @@
 // Copyright 2018-2024 the Deno authors. MIT license.
 
-import { BuildCommand, CheckCommand } from "./args.ts";
+import type { BuildCommand, CheckCommand } from "./args.ts";
 import * as colors from "@std/fmt/colors";
 import * as path from "@std/path";
 import * as base64 from "@std/encoding/base64";
 import { Sha1 } from "./utils/sha1.ts";
-import { getCargoWorkspace, WasmCrate } from "./manifest.ts";
+import { getCargoWorkspace, type WasmCrate } from "./manifest.ts";
 import { verifyVersions } from "./versions.ts";
-import { BindgenOutput, generateBindgen } from "./bindgen.ts";
+import { type BindgenOutput, generateBindgen } from "./bindgen.ts";
 import { pathExists } from "./helpers.ts";
 export type { BindgenOutput } from "./bindgen.ts";
 // run `deno task build` if this file doesn't exist

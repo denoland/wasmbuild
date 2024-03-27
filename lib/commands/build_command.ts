@@ -4,7 +4,7 @@ import * as colors from "@std/fmt/colors";
 import { emptyDir } from "@std/fs/empty_dir";
 import * as path from "@std/path";
 import { ensureDir } from "@std/fs";
-import { BuildCommand } from "../args.ts";
+import type { BuildCommand } from "../args.ts";
 import { runPreBuild } from "../pre_build.ts";
 import { runWasmOpt } from "../wasmopt.ts";
 

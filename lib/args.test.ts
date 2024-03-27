@@ -1,7 +1,7 @@
 // Copyright 2018-2024 the Deno authors. MIT license.
 
 import { assertEquals } from "@std/assert";
-import { CommonBuild, parseArgs } from "./args.ts";
+import { type CommonBuild, parseArgs } from "./args.ts";
 
 Deno.test("no default features", () => {
   const args = parseArgs([

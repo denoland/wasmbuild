@@ -77,8 +77,16 @@ export async function runPreBuild(
     cargoBuildCmd.push("--release");
   }
 
-  const RUSTFLAGS = Deno.env.get("RUSTFLAGS") ||
-    "" + `--remap-path-prefix='${root}'=. --remap-path-prefix='${home}'=~`;
+  const CARGO_ENCODED_RUSTFLAGS = [
+    ...(
+      Deno.env.get("CARGO_ENCODED_RUSTFLAGS")?.split("\x1f") ??
+        Deno.env.get("RUSTFLAGS")?.split(" ") ??
+        []
+    ),
+    `--remap-path-prefix=${root}=.`,
+    `--remap-path-prefix=${home}=~`,
+  ].join("\x1f");
+
   console.log(`  ${colors.bold(colors.gray(cargoBuildCmd.join(" ")))}`);
   const cargoBuildReleaseCmdProcess = new Deno.Command("cargo", {
     args: cargoBuildCmd,
@@ -86,7 +94,7 @@ export async function runPreBuild(
       "SOURCE_DATE_EPOCH": "1600000000",
       "TZ": "UTC",
       "LC_ALL": "C",
-      RUSTFLAGS,
+      CARGO_ENCODED_RUSTFLAGS,
     },
   }).spawn();
   const cargoBuildReleaseCmdOutput = await cargoBuildReleaseCmdProcess.status;

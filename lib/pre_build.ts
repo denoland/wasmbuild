@@ -44,19 +44,28 @@ export async function runPreBuild(
 
   verifyVersions(crate);
 
-  console.log(
-    `${
-      colors.bold(colors.green("Ensuring"))
-    } wasm32-unknown-unknown target installed...`,
-  );
-
-  const rustupAddWasm = new Deno.Command("rustup", {
-    args: ["target", "add", "wasm32-unknown-unknown"],
-  });
-  const rustupAddWasmOutput = await rustupAddWasm.output();
-  if (!rustupAddWasmOutput.success) {
-    console.error(`adding wasm32-unknown-unknown target failed`);
-    Deno.exit(1);
+  try {
+    const rustupAddWasm = new Deno.Command("rustup", {
+      args: ["target", "add", "wasm32-unknown-unknown"],
+    });
+    console.log(
+      `${
+        colors.bold(colors.green("Ensuring"))
+      } wasm32-unknown-unknown target installed...`,
+    );
+    const rustupAddWasmOutput = await rustupAddWasm.output();
+    if (!rustupAddWasmOutput.success) {
+      console.error(`adding wasm32-unknown-unknown target failed`);
+      Deno.exit(1);
+    }
+  } catch (error) {
+    if (error instanceof Deno.errors.NotFound) {
+      console.info(
+        `rustup not found. Ensure wasm32-unknown-unknown installed manually.`,
+      );
+    } else {
+      throw error;
+    }
   }
 
   console.log(

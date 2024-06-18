@@ -152,7 +152,7 @@ async function getFileTextIfExists(path: string) {
 }
 
 async function checkIfRequiredToolsExist() {
-  const requiredTools = ["deno", "cargo", "rustup"];
+  const requiredTools = ["deno", "cargo"];
   const notInstalled: string[] = [];
 
   for (const tool of requiredTools) {

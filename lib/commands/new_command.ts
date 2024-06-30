@@ -67,7 +67,7 @@ version = "0.0.0"
 edition = "2021"
 
 [lib]
-crate_type = ["cdylib"]
+crate-type = ["cdylib"]
 
 [dependencies]
 wasm-bindgen = "=${versions["wasm-bindgen"]}"

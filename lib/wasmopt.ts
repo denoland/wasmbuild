@@ -79,7 +79,7 @@ async function downloadBinaryen(tempPath: string) {
     ) {
       const fileName = path.join(tempPath, entry.path);
       await ensureDir(path.dirname(fileName));
-      const file = await Deno.open(fileName, {
+      using file = await Deno.open(fileName, {
         create: true,
         write: true,
         mode: 0o755,

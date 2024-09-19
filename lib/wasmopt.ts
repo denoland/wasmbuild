@@ -85,6 +85,8 @@ async function downloadBinaryen(tempPath: string) {
         mode: 0o755,
       });
       await entry.readable?.pipeTo(file.writable);
+    } else {
+      await entry.readable?.cancel();
     }
   }
 }

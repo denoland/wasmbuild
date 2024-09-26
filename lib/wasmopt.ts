@@ -1,6 +1,6 @@
 // Copyright 2018-2024 the Deno authors. MIT license.
 
-import { UntarStream } from "@std/tar/untar-stream";
+import { UntarStream } from "https://raw.githubusercontent.com/denoland/std/0352a3c441aefe39d1233b4be92c49e404963457/tar/untar_stream.ts";
 import { ensureDir } from "@std/fs/ensure_dir";
 import * as colors from "@std/fmt/colors";
 import * as path from "@std/path";

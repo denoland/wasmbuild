@@ -1,10 +1,7 @@
 // Copyright 2018-2024 the Deno authors. MIT license.
 
-import { Buffer } from "@std/io/buffer";
-import { Untar } from "@std/archive/untar";
-import { copy } from "@std/io/copy";
+import { UntarStream } from "@std/tar/untar-stream";
 import { ensureDir } from "@std/fs/ensure_dir";
-import { toArrayBuffer } from "@std/streams";
 import * as colors from "@std/fmt/colors";
 import * as path from "@std/path";
 import { fetchWithRetries } from "./loader.ts";
@@ -71,27 +68,25 @@ async function downloadBinaryen(tempPath: string) {
   );
 
   const response = await fetchWithRetries(binaryenUrl());
-  const ds = new DecompressionStream("gzip");
-  const decompressed = response.body!.pipeThrough(ds);
-  const untar = new Untar(new Buffer(await toArrayBuffer(decompressed)));
+  const entries = response.body!
+    .pipeThrough(new DecompressionStream("gzip"))
+    .pipeThrough(new UntarStream());
 
-  for await (const entry of untar) {
+  for await (const entry of entries) {
     if (
-      entry.fileName.endsWith(wasmOptFileName) ||
-      entry.fileName.endsWith(".dylib")
+      entry.path.endsWith(wasmOptFileName) ||
+      entry.path.endsWith(".dylib")
     ) {
-      const fileName = path.join(tempPath, entry.fileName);
+      const fileName = path.join(tempPath, entry.path);
       await ensureDir(path.dirname(fileName));
-      const file = await Deno.open(fileName, {
+      using file = await Deno.open(fileName, {
         create: true,
         write: true,
         mode: 0o755,
       });
-      try {
-        await copy(entry, file);
-      } finally {
-        file.close();
-      }
+      await entry.readable?.pipeTo(file.writable);
+    } else {
+      await entry.readable?.cancel();
     }
   }
 }

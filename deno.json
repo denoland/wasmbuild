@@ -33,15 +33,14 @@
   },
   "imports": {
     "@david/dax": "jsr:@david/dax@^0.39.2",
-    "@std/archive": "jsr:@std/archive@^0.218.2",
     "@std/assert": "jsr:@std/assert@^0.218.2",
     "@std/cli": "jsr:@std/cli@^0.218.2",
     "@std/encoding": "jsr:@std/encoding@^0.218.2",
     "@std/fmt": "jsr:@std/fmt@^0.218.2",
     "@std/fs": "jsr:@std/fs@^0.218.2",
-    "@std/io": "jsr:@std/io@^0.218.2",
     "@std/path": "jsr:@std/path@^0.218.2",
-    "@std/streams": "jsr:@std/streams@^0.218.2",
+    "@std/streams": "jsr:@std/streams@^1.0.6",
+    "@std/tar": "jsr:@std/tar@^0.1.2",
     "code-block-writer": "npm:code-block-writer@^13.0.1",
     "ts-morph": "npm:ts-morph@^21"
   }

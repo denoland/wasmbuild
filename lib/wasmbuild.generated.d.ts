@@ -30,8 +30,8 @@ export function instantiate(opts?: InstantiateOptions): Promise<InstantiateResul
 export function instantiateWithInstance(opts?: InstantiateOptions): Promise<InstantiateResult>;
 
 /**
-* @param {string} name
-* @param {Uint8Array} wasm_bytes
-* @returns {any}
-*/
+ * @param {string} name
+ * @param {Uint8Array} wasm_bytes
+ * @returns {any}
+ */
 export function generate_bindgen(name: string, wasm_bytes: Uint8Array): any;

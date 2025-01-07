@@ -5,6 +5,7 @@ import * as path from "@std/path";
 
 export interface BindgenOutput {
   js: string;
+  js_bg: string;
   ts: string;
   snippets: Map<string, string[]>;
   localModules: Map<string, string>;
@@ -38,7 +39,7 @@ async function generateForSelfBuild(filePath: string): Promise<BindgenOutput> {
     const p = new Deno.Command("wasm-bindgen", {
       args: [
         "--target",
-        "deno",
+        "bundler",
         "--out-dir",
         tempPath,
         filePath,
@@ -53,6 +54,7 @@ async function generateForSelfBuild(filePath: string): Promise<BindgenOutput> {
     );
     return {
       js: await Deno.readTextFile(path.join(tempPath, "wasmbuild.js")),
+      js_bg: await Deno.readTextFile(path.join(tempPath, "wasmbuild_bg.js")),
       ts: await Deno.readTextFile(path.join(tempPath, "wasmbuild.d.ts")),
       localModules: new Map(),
       snippets: new Map(),

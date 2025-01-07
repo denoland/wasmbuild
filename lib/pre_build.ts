@@ -132,10 +132,9 @@ export async function runPreBuild(
   );
 
   const bindingJsFileName =
-    `${crate.libName}.generated.${args.bindingJsFileExt}`;
+    `${crate.libName}.js`;
 
   const { bindingJsText, sourceHash } = await getBindingJsOutput(
-    args,
     crate,
     bindgenOutput,
   );
@@ -147,11 +146,11 @@ export async function runPreBuild(
       text: bindingJsText,
     },
     bindingJsBg: {
-      path: path.join(args.outDir, getJsBgFileName(args, crate)),
+      path: path.join(args.outDir, getJsBgFileName(crate)),
       text: `${generatedHeader}\n\n${await getFormattedText(bindgenOutput.js_bg)}`,
     },
     bindingDts: {
-      path: path.join(args.outDir, getDtsFileName(args, crate)),
+      path: path.join(args.outDir, getDtsFileName(crate)),
       text: getLibraryDts(bindgenOutput),
     },
     sourceHash,
@@ -159,26 +158,23 @@ export async function runPreBuild(
   };
 }
 
-function getJsBgFileName(args: CheckCommand | BuildCommand, crate: WasmCrate) {
-  return `${crate.libName}_bg.generated.${args.bindingJsFileExt}`;
+function getJsBgFileName(crate: WasmCrate) {
+  return `${crate.libName}_internal_bg.js`;
 }
 
-function getDtsFileName(args: CheckCommand | BuildCommand, crate: WasmCrate) {
-  return `${crate.libName}.generated.${
-    args.bindingJsFileExt === "mjs" ? "d.mts" : "d.ts"
-  }`;
+function getDtsFileName(crate: WasmCrate) {
+  return `${crate.libName}.d.ts`;
 }
 
 async function getBindingJsOutput(
-  args: CheckCommand | BuildCommand,
   crate: WasmCrate,
   bindgenOutput: BindgenOutput,
 ) {
   const sourceHash = await getHash();
   const header = `${generatedHeader}
-/// <reference types="./${getDtsFileName(args, crate)}" />
+/// <reference types="./${getDtsFileName(crate)}" />
 `;
-  const genText = bindgenOutput.js.replaceAll(`${crate.name}_bg.js`, getJsBgFileName(args, crate));
+  const genText = bindgenOutput.js;
   const bodyText = await getFormattedText(`
 // source-hash: ${sourceHash}
 ${genText}

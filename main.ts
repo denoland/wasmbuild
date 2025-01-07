@@ -67,12 +67,6 @@ function showHelp() {
   );
   console.log();
   console.log(
-    "%c--js-ext <ext_no_period> %c- Extension to use for the wasm-bindgen JS file. Defaults to js.",
-    "font-weight: bold",
-    "font-weight: normal",
-  );
-  console.log();
-  console.log(
     "%c--all-features %c- Build the crate with all features.",
     "font-weight: bold",
     "font-weight: normal",
@@ -91,12 +85,6 @@ function showHelp() {
   );
   console.log();
   console.log(
-    "%c--sync %c- Generate a synchronous module that stores the Wasm module inline as base64 text.",
-    "font-weight: bold",
-    "font-weight: normal",
-  );
-  console.log();
-  console.log(
     "%c--skip-opt %c- Skip running wasm-opt.",
     "font-weight: bold",
     "font-weight: normal",
@@ -104,12 +92,6 @@ function showHelp() {
   console.log();
   console.log(
     "%c--check %c- Checks if the output is up-to-date.",
-    "font-weight: bold",
-    "font-weight: normal",
-  );
-  console.log();
-  console.log(
-    "%c--no-cache %c- Do not generate the code to cache the Wasm file locally.",
     "font-weight: bold",
     "font-weight: normal",
   );

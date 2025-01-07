@@ -17,13 +17,13 @@ export interface BindgenOutput {
   wasm: {
     name: string;
     bytes: number[];
-  }
+  };
 }
 
 export async function generateBindgen({ libName, filePath, ext }: {
-  libName: string,
-  filePath: string
-  ext: string,
+  libName: string;
+  filePath: string;
+  ext: string;
 }) {
   // if wasmbuild is building itself, then we need to use the wasm-bindgen-cli
   const hasEnvPerm = await Deno.permissions.query({ name: "env" });
@@ -67,7 +67,7 @@ async function generateForSelfBuild(filePath: string): Promise<BindgenOutput> {
     return {
       js: {
         name: "wasmbuild.js",
-        text: (await Deno.readTextFile(path.join(tempPath, "wasmbuild.js")))
+        text: (await Deno.readTextFile(path.join(tempPath, "wasmbuild.js"))),
       },
       jsBg: {
         name: "wasmbuild_bg.js",
@@ -82,7 +82,7 @@ async function generateForSelfBuild(filePath: string): Promise<BindgenOutput> {
       wasm: {
         name: "wasmbuild_bg.wasm",
         bytes: Array.from(wasmBytes),
-      }
+      },
     };
   } finally {
     await Deno.remove(tempPath, {

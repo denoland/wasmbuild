@@ -11,7 +11,6 @@ export interface HelpCommand {
   kind: "help";
 }
 
-
 export interface CommonBuild {
   outDir: string;
   bindingJsFileExt: "js" | "mjs";
@@ -57,10 +56,14 @@ export function parseArgs(rawArgs: string[]): Command {
 
   function getCommonBuild(): CommonBuild {
     if (flags.sync) {
-      throw new Error("The --sync flag is no longer supported now that Wasmbuild supports Wasm imports. Use an old version if you need it.");
+      throw new Error(
+        "The --sync flag is no longer supported now that Wasmbuild supports Wasm imports. Use an old version if you need it.",
+      );
     }
     if (flags["no-cache"]) {
-      throw new Error("The --no-cache flag is no longer necessary now that Wasmbuild supports Wasm imports.");
+      throw new Error(
+        "The --no-cache flag is no longer necessary now that Wasmbuild supports Wasm imports.",
+      );
     }
 
     return {

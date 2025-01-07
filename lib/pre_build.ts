@@ -119,14 +119,14 @@ export async function runPreBuild(
   }
 
   console.log(`  ${colors.bold(colors.gray("Running wasm-bindgen..."))}`);
-  const bindgenOutput = await generateBindgen( {
+  const bindgenOutput = await generateBindgen({
     libName: crate.libName,
     ext: args.bindingJsFileExt,
     filePath: path.join(
       workspace.metadata.target_directory,
       `wasm32-unknown-unknown/${args.profile}/${crate.libName}.wasm`,
     ),
-});
+  });
 
   console.log(
     `${colors.bold(colors.green("Generating"))} lib JS bindings...`,
@@ -145,7 +145,9 @@ export async function runPreBuild(
     },
     bindingJsBg: {
       path: path.join(args.outDir, bindgenOutput.jsBg.name),
-      text: `${generatedHeader}\n\n${await getFormattedText(bindgenOutput.jsBg.text)}`,
+      text: `${generatedHeader}\n\n${await getFormattedText(
+        bindgenOutput.jsBg.text,
+      )}`,
     },
     bindingDts: {
       path: path.join(args.outDir, bindgenOutput.ts.name),
@@ -194,7 +196,6 @@ ${genText}
     return hasher.hex();
   }
 }
-
 
 async function getFormattedText(inputText: string) {
   const denoFmtCmdArgs = [

@@ -243,5 +243,5 @@ function getLibraryDts(bindgenOutput: BindgenOutput) {
 }
 
 function getWasmFileNameFromCrate(crate: WasmCrate) {
-  return `${crate.libName}_bg.wasm`;
+  return `${crate.libName}.wasm`;
 }

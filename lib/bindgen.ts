@@ -54,7 +54,7 @@ async function generateForSelfBuild(filePath: string): Promise<BindgenOutput> {
       path.join(tempPath, "wasmbuild_internal_bg.wasm"),
     );
     return {
-      js: await Deno.readTextFile(path.join(tempPath, "wasmbuild_internal.js")),
+      js: (await Deno.readTextFile(path.join(tempPath, "wasmbuild_internal.js"))).replaceAll("wasmbuild_internal_bg.wasm", "wasmbuild.wasm"),
       js_bg: await Deno.readTextFile(path.join(tempPath, "wasmbuild_internal_bg.js")),
       ts: await Deno.readTextFile(path.join(tempPath, "wasmbuild_internal.d.ts")),
       localModules: new Map(),
@@ -62,8 +62,8 @@ async function generateForSelfBuild(filePath: string): Promise<BindgenOutput> {
       wasmBytes: Array.from(wasmBytes),
     };
   } finally {
-    // await Deno.remove(tempPath, {
-    //   recursive: true,
-    // });
+    await Deno.remove(tempPath, {
+      recursive: true,
+    });
   }
 }

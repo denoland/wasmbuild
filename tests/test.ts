@@ -8,7 +8,7 @@ assertEquals(wasmSync.isInstantiated(), false);
 async function assertInstantiate() {
   let init = false;
   const module = await wasm.instantiate({
-    url: new URL("./lib/deno_test_bg.wasm", import.meta.url),
+    url: new URL("./lib/deno_test.wasm", import.meta.url),
     decompress: (wasm: Uint8Array) => {
       init = true;
       return wasm;

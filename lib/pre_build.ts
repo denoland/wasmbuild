@@ -148,16 +148,14 @@ export async function runPreBuild(
     },
     bindingJsBg: {
       path: path.join(args.outDir, getJsBgFileName(args, crate)),
-      text: `${generatedHeader}\n${bindgenOutput.js_bg}`,
+      text: `${generatedHeader}\n\n${await getFormattedText(bindgenOutput.js_bg)}`,
     },
     bindingDts: {
       path: path.join(args.outDir, getDtsFileName(args, crate)),
       text: getLibraryDts(bindgenOutput),
     },
     sourceHash,
-    wasmFileName: args.loaderKind === "sync"
-      ? undefined
-      : getWasmFileNameFromCrate(crate),
+    wasmFileName: getWasmFileNameFromCrate(crate),
   };
 }
 
@@ -191,33 +189,6 @@ ${genText}
     sourceHash,
   };
 
-  async function getFormattedText(inputText: string) {
-    const denoFmtCmdArgs = [
-      "fmt",
-      "--quiet",
-      "--ext",
-      "js",
-      "-",
-    ];
-    console.log(`  ${colors.bold(colors.gray(denoFmtCmdArgs.join(" ")))}`);
-    const denoFmtCmd = new Deno.Command(Deno.execPath(), {
-      args: denoFmtCmdArgs,
-      stdin: "piped",
-      stdout: "piped",
-    });
-    const denoFmtChild = denoFmtCmd.spawn();
-    const stdin = denoFmtChild.stdin.getWriter();
-    await stdin.write(new TextEncoder().encode(inputText));
-    await stdin.close();
-
-    const output = await denoFmtChild.output();
-    if (!output.success) {
-      console.error("deno fmt command failed");
-      Deno.exit(1);
-    }
-    return new TextDecoder().decode(output.stdout);
-  }
-
   async function getHash() {
     // Create a hash of all the sources, snippets, and local modules
     // in order to tell when the output has changed.
@@ -236,6 +207,34 @@ ${genText}
     }
     return hasher.hex();
   }
+}
+
+
+async function getFormattedText(inputText: string) {
+  const denoFmtCmdArgs = [
+    "fmt",
+    "--quiet",
+    "--ext",
+    "js",
+    "-",
+  ];
+  console.log(`  ${colors.bold(colors.gray(denoFmtCmdArgs.join(" ")))}`);
+  const denoFmtCmd = new Deno.Command(Deno.execPath(), {
+    args: denoFmtCmdArgs,
+    stdin: "piped",
+    stdout: "piped",
+  });
+  const denoFmtChild = denoFmtCmd.spawn();
+  const stdin = denoFmtChild.stdin.getWriter();
+  await stdin.write(new TextEncoder().encode(inputText));
+  await stdin.close();
+
+  const output = await denoFmtChild.output();
+  if (!output.success) {
+    console.error("deno fmt command failed");
+    Deno.exit(1);
+  }
+  return new TextDecoder().decode(output.stdout);
 }
 
 function getLibraryDts(bindgenOutput: BindgenOutput) {

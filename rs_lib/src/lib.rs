@@ -35,7 +35,7 @@ fn inner(name: &str, wasm_bytes: Vec<u8>) -> Result<Output> {
     .generate_output()?;
 
   Ok(Output {
-    js: format!("import * as wasm from \"./{name}_bg.wasm\";
+    js: format!("import * as wasm from \"./{name}.wasm\";
 export * from \"./{name}_internal_bg.js\";
 import {{ __wbg_set_wasm }} from \"./{name}_internal_bg.js\";
 __wbg_set_wasm(wasm);

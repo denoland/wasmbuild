@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use anyhow::Result;
+use anyhow::bail;
 use wasm_bindgen::prelude::*;
 
 // uncomment for debugging
@@ -76,10 +77,17 @@ __wbg_set_wasm(wasm);
       name: format!("{}.internal.{}", name, ext),
       text: x.js().to_string(),
     },
-    ts: x.ts().map(|t| BindgenTextFileOutput {
-      name: format!("{}.d.{}", name, ext),
-      text: t.to_string()
-    }),
+    ts: match x.ts() {
+      Some(t) => Some(BindgenTextFileOutput {
+        name: format!("{}.d.{}", name, match ext {
+          "js" => "ts",
+          "mjs" => "mts",
+          _ => bail!("Unsupported extension: {}", ext),
+        }),
+        text: t.to_string()
+      }),
+      None => None,
+    },
     snippets: x.snippets().clone(),
     local_modules: x.local_modules().clone(),
     wasm: BindgenBytesFileOutput {

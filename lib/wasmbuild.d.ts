@@ -1,3 +1,7 @@
+// @generated file from wasmbuild -- do not edit
+// deno-lint-ignore-file
+// deno-fmt-ignore-file
+
 /**
  * @param {string} name
  * @param {string} ext

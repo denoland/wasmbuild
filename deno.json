@@ -38,8 +38,6 @@
     "@std/fs": "jsr:@std/fs@^0.218.2",
     "@std/path": "jsr:@std/path@^0.218.2",
     "@std/streams": "jsr:@std/streams@^1.0.6",
-    "@std/tar": "jsr:@std/tar@^0.1.2",
-    "code-block-writer": "npm:code-block-writer@^13.0.1",
-    "ts-morph": "npm:ts-morph@^21"
+    "@std/tar": "jsr:@std/tar@^0.1.2"
   }
 }

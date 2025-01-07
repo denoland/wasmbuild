@@ -151,7 +151,11 @@ export async function runPreBuild(
     },
     bindingDts: {
       path: path.join(args.outDir, bindgenOutput.ts.name),
-      text: getLibraryDts(bindgenOutput),
+      text: `// @generated file from wasmbuild -- do not edit
+// deno-lint-ignore-file
+// deno-fmt-ignore-file
+
+${await getFormattedText(getLibraryDts(bindgenOutput))}`,
     },
     sourceHash,
     wasmFileName: bindgenOutput.wasm.name,
@@ -202,7 +206,7 @@ async function getFormattedText(inputText: string) {
     "fmt",
     "--quiet",
     "--ext",
-    "js",
+    "ts",
     "-",
   ];
   console.log(`  ${colors.bold(colors.gray(denoFmtCmdArgs.join(" ")))}`);

@@ -10,9 +10,18 @@ import { type BindgenOutput, generateBindgen } from "./bindgen.ts";
 import { pathExists } from "./helpers.ts";
 export type { BindgenOutput } from "./bindgen.ts";
 
+const generatedHeader = `// @generated file from wasmbuild -- do not edit
+// @ts-nocheck: generated
+// deno-lint-ignore-file
+// deno-fmt-ignore-file`;
+
 export interface PreBuildOutput {
   bindgen: BindgenOutput;
   bindingJs: {
+    path: string;
+    text: string;
+  };
+  bindingJsBg: {
     path: string;
     text: string;
   };
@@ -137,6 +146,10 @@ export async function runPreBuild(
       path: path.join(args.outDir, bindingJsFileName),
       text: bindingJsText,
     },
+    bindingJsBg: {
+      path: path.join(args.outDir, getJsBgFileName(args, crate)),
+      text: `${generatedHeader}\n${bindgenOutput.js_bg}`,
+    },
     bindingDts: {
       path: path.join(args.outDir, getDtsFileName(args, crate)),
       text: getLibraryDts(bindgenOutput),
@@ -146,6 +159,10 @@ export async function runPreBuild(
       ? undefined
       : getWasmFileNameFromCrate(crate),
   };
+}
+
+function getJsBgFileName(args: CheckCommand | BuildCommand, crate: WasmCrate) {
+  return `${crate.libName}_bg.generated.${args.bindingJsFileExt}`;
 }
 
 function getDtsFileName(args: CheckCommand | BuildCommand, crate: WasmCrate) {
@@ -160,13 +177,10 @@ async function getBindingJsOutput(
   bindgenOutput: BindgenOutput,
 ) {
   const sourceHash = await getHash();
-  const header = `// @generated file from wasmbuild -- do not edit
-// @ts-nocheck: generated
-// deno-lint-ignore-file
-// deno-fmt-ignore-file
+  const header = `${generatedHeader}
 /// <reference types="./${getDtsFileName(args, crate)}" />
 `;
-  const genText = bindgenOutput.js;
+  const genText = bindgenOutput.js.replaceAll(`${crate.name}_bg.js`, getJsBgFileName(args, crate));
   const bodyText = await getFormattedText(`
 // source-hash: ${sourceHash}
 ${genText}

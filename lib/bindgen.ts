@@ -1,6 +1,6 @@
 // Copyright 2018-2024 the Deno authors. MIT license.
 
-import { instantiate } from "./wasmbuild.generated.js";
+import { generate_bindgen } from "./wasmbuild_bg.generated.js";
 import * as path from "@std/path";
 
 export interface BindgenOutput {
@@ -20,7 +20,6 @@ export async function generateBindgen(libName: string, filePath: string) {
   }
 
   const originalWasmBytes = await Deno.readFile(filePath);
-  const { generate_bindgen } = await instantiate();
   return await generate_bindgen(
     libName,
     originalWasmBytes,

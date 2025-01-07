@@ -20,10 +20,9 @@ Deno.test("should create a new wasmbuild project, build it, and run it", async (
     await Deno.writeTextFile(
       path.join(tempDir, "test.ts"),
       `
-import { instantiate } from "./lib/rs_lib.generated.js";
+import { add } from "./lib/rs_lib.js";
 
 Deno.test("should add values", async () => {
-  const { add } = await instantiate();
   const result = add(1, 2);
   if (result !== 3) {
     throw new Error("Did not match");

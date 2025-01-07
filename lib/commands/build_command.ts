@@ -23,7 +23,7 @@ export async function runBuildCommand(args: BuildCommand) {
 
   if (output.wasmFileName != null) {
     const wasmDest = path.join(args.outDir, output.wasmFileName);
-    await Deno.writeFile(wasmDest, new Uint8Array(output.bindgen.wasmBytes));
+    await Deno.writeFile(wasmDest, new Uint8Array(output.bindgen.wasm.bytes));
     if (args.isOpt) {
       await optimizeWasmFile(wasmDest);
     }

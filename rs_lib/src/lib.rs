@@ -12,13 +12,27 @@ use wasm_bindgen::prelude::*;
 
 #[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")]
+pub struct BindgenTextFileOutput {
+  pub name: String,
+  pub text: String,
+}
+
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BindgenBytesFileOutput {
+  pub name: String,
+  pub bytes: Vec<u8>,
+}
+
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Output {
-  pub js: String,
-  pub js_bg: String,
-  pub ts: Option<String>,
+  pub js: BindgenTextFileOutput,
+  pub js_bg: BindgenTextFileOutput,
+  pub ts: Option<BindgenTextFileOutput>,
   pub snippets: HashMap<String, Vec<String>>,
   pub local_modules: HashMap<String, String>,
-  pub wasm_bytes: Vec<u8>,
+  pub wasm: BindgenBytesFileOutput,
 }
 
 #[wasm_bindgen]
@@ -50,15 +64,27 @@ fn inner(name: &str, ext: &str, wasm_bytes: Vec<u8>) -> Result<Output> {
   }
 
   Ok(Output {
-    js: format!("import * as wasm from \"./{name}.wasm\";
+    js: BindgenTextFileOutput {
+      name: format!("{}.", name, ext),
+      text: format!("import * as wasm from \"./{name}.wasm\";
 export * from \"./{name}.internal.{ext}\";
 import {{ __wbg_set_wasm }} from \"./{name}.internal.{ext}\";
 __wbg_set_wasm(wasm);
 "),
-    js_bg: x.js().to_string(),
-    ts: x.ts().map(|t| t.to_string()),
+    },
+    js_bg: BindgenTextFileOutput {
+      name: format!("{}.internal.{}", name, ext),
+      text: x.js().to_string(),
+    },
+    ts: x.ts().map(|t| BindgenTextFileOutput {
+      name: format!("{}.d.ts", name),
+      text: t.to_string()
+    }),
     snippets: x.snippets().clone(),
     local_modules: x.local_modules().clone(),
-    wasm_bytes: x.wasm_mut().emit_wasm(),
+    wasm: BindgenBytesFileOutput {
+      name: format!("{}.wasm", name),
+      bytes: x.wasm_mut().emit_wasm(),
+    }
   })
 }

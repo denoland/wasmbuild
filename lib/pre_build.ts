@@ -132,10 +132,7 @@ export async function runPreBuild(
     `${colors.bold(colors.green("Generating"))} lib JS bindings...`,
   );
 
-  const bindingJsFileName = `${crate.libName}.${args.bindingJsFileExt}`;
-
   const { bindingJsText, sourceHash } = await getBindingJsOutput(
-    args,
     crate,
     bindgenOutput,
   );
@@ -143,15 +140,15 @@ export async function runPreBuild(
   return {
     bindgen: bindgenOutput,
     bindingJs: {
-      path: path.join(args.outDir, bindingJsFileName),
+      path: path.join(args.outDir, bindgenOutput.js.name),
       text: bindingJsText,
     },
     bindingJsBg: {
-      path: path.join(args.outDir, getJsBgFileName(args, crate)),
-      text: `${generatedHeader}\n\n${await getFormattedText(bindgenOutput.jsBg)}`,
+      path: path.join(args.outDir, bindgenOutput.jsBg.name),
+      text: `${generatedHeader}\n\n${await getFormattedText(bindgenOutput.jsBg.text)}`,
     },
     bindingDts: {
-      path: path.join(args.outDir, getDtsFileName(args, crate)),
+      path: path.join(args.outDir, bindgenOutput.ts.name),
       text: getLibraryDts(bindgenOutput),
     },
     sourceHash,
@@ -159,24 +156,13 @@ export async function runPreBuild(
   };
 }
 
-function getJsBgFileName(args: CheckCommand | BuildCommand,  crate: WasmCrate) {
-  return `${crate.libName}.internal.${args.bindingJsFileExt}`;
-}
-
-function getDtsFileName(args: CheckCommand | BuildCommand, crate: WasmCrate) {
-  return `${crate.libName}.${
-    args.bindingJsFileExt === "mjs" ? "d.mts" : "d.ts"
-  }`;
-}
-
 async function getBindingJsOutput(
-  args: CheckCommand | BuildCommand,
   crate: WasmCrate,
   bindgenOutput: BindgenOutput,
 ) {
   const sourceHash = await getHash();
   const header = `${generatedHeader}
-/// <reference types="./${getDtsFileName(args, crate)}" />
+/// <reference types="./${bindgenOutput.ts.name}" />
 `;
   const genText = bindgenOutput.js;
   const bodyText = await getFormattedText(`
@@ -238,7 +224,7 @@ async function getFormattedText(inputText: string) {
 }
 
 function getLibraryDts(bindgenOutput: BindgenOutput) {
-  return bindgenOutput.ts.replace(
+  return bindgenOutput.ts.text.replace(
     `/* tslint:disable */
 /* eslint-disable */
 `,

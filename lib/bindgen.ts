@@ -3,13 +3,21 @@
 import { generate_bindgen } from "./wasmbuild.js";
 import * as path from "@std/path";
 
+export interface BindgenTextFileOutput {
+  name: string;
+  text: string;
+}
+
 export interface BindgenOutput {
-  js: string;
-  jsBg: string;
-  ts: string;
+  js: BindgenTextFileOutput;
+  jsBg: BindgenTextFileOutput;
+  ts: BindgenTextFileOutput;
   snippets: Map<string, string[]>;
   localModules: Map<string, string>;
-  wasmBytes: number[];
+  wasm: {
+    name: string;
+    bytes: number[];
+  }
 }
 
 export async function generateBindgen({ libName, filePath, ext }: {
@@ -44,8 +52,6 @@ async function generateForSelfBuild(filePath: string): Promise<BindgenOutput> {
       args: [
         "--target",
         "bundler",
-        "--out-name",
-        "wasmbuild_internal",
         "--out-dir",
         tempPath,
         filePath,
@@ -56,15 +62,27 @@ async function generateForSelfBuild(filePath: string): Promise<BindgenOutput> {
       throw new Error("Failed.");
     }
     const wasmBytes = await Deno.readFile(
-      path.join(tempPath, "wasmbuild_internal_bg.wasm"),
+      path.join(tempPath, "wasmbuild_bg.wasm"),
     );
     return {
-      js: (await Deno.readTextFile(path.join(tempPath, "wasmbuild_internal.js"))).replaceAll("wasmbuild_internal_bg.wasm", "wasmbuild.wasm"),
-      jsBg: await Deno.readTextFile(path.join(tempPath, "wasmbuild_internal_bg.js")),
-      ts: await Deno.readTextFile(path.join(tempPath, "wasmbuild_internal.d.ts")),
+      js: {
+        name: "wasmbuild.js",
+        text: (await Deno.readTextFile(path.join(tempPath, "wasmbuild.js")))
+      },
+      jsBg: {
+        name: "wasmbuild_bg.js",
+        text: await Deno.readTextFile(path.join(tempPath, "wasmbuild_bg.js")),
+      },
+      ts: {
+        name: "wasmbuild.d.ts",
+        text: await Deno.readTextFile(path.join(tempPath, "wasmbuild.d.ts")),
+      },
       localModules: new Map(),
       snippets: new Map(),
-      wasmBytes: Array.from(wasmBytes),
+      wasm: {
+        name: "wasmbuild.wasm",
+        bytes: Array.from(wasmBytes),
+      }
     };
   } finally {
     await Deno.remove(tempPath, {

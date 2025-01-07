@@ -65,7 +65,7 @@ fn inner(name: &str, ext: &str, wasm_bytes: Vec<u8>) -> Result<Output> {
 
   Ok(Output {
     js: BindgenTextFileOutput {
-      name: format!("{}.", name, ext),
+      name: format!("{}.{}", name, ext),
       text: format!("import * as wasm from \"./{name}.wasm\";
 export * from \"./{name}.internal.{ext}\";
 import {{ __wbg_set_wasm }} from \"./{name}.internal.{ext}\";
@@ -77,7 +77,7 @@ __wbg_set_wasm(wasm);
       text: x.js().to_string(),
     },
     ts: x.ts().map(|t| BindgenTextFileOutput {
-      name: format!("{}.d.ts", name),
+      name: format!("{}.d.{}", name, ext),
       text: t.to_string()
     }),
     snippets: x.snippets().clone(),

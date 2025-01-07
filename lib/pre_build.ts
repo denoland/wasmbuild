@@ -152,7 +152,7 @@ export async function runPreBuild(
       text: getLibraryDts(bindgenOutput),
     },
     sourceHash,
-    wasmFileName: getWasmFileNameFromCrate(crate),
+    wasmFileName: bindgenOutput.wasm.name,
   };
 }
 
@@ -164,7 +164,7 @@ async function getBindingJsOutput(
   const header = `${generatedHeader}
 /// <reference types="./${bindgenOutput.ts.name}" />
 `;
-  const genText = bindgenOutput.js;
+  const genText = bindgenOutput.js.text;
   const bodyText = await getFormattedText(`
 // source-hash: ${sourceHash}
 ${genText}
@@ -230,8 +230,4 @@ function getLibraryDts(bindgenOutput: BindgenOutput) {
 `,
     "",
   );
-}
-
-function getWasmFileNameFromCrate(crate: WasmCrate) {
-  return `${crate.libName}.wasm`;
 }

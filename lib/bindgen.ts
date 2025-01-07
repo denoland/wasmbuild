@@ -80,7 +80,7 @@ async function generateForSelfBuild(filePath: string): Promise<BindgenOutput> {
       localModules: new Map(),
       snippets: new Map(),
       wasm: {
-        name: "wasmbuild.wasm",
+        name: "wasmbuild_bg.wasm",
         bytes: Array.from(wasmBytes),
       }
     };

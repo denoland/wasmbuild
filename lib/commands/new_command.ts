@@ -121,9 +121,7 @@ mod tests {
     // use a .js file for the most compatibility out of the box (ex. browsers)
     await Deno.writeTextFile(
       "./mod.js",
-      `import { instantiate } from "./lib/rs_lib.generated.js";
-
-const { add, Greeter } = await instantiate();
+      `import { add, Greeter } from "./lib/rs_lib.js";
 
 // adds
 console.log(add(1, 1));

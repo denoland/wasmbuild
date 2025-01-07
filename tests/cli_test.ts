@@ -35,7 +35,7 @@ Deno.test("should add values", async () => {
 
     // ensure the generated wasm module has no import statements
     const fileText = Deno.readTextFileSync(
-      path.join(tempDir, "./lib/rs_lib.generated.js"),
+      path.join(tempDir, "./lib/rs_lib.js"),
     );
     if (fileText.includes("import ")) {
       console.log(fileText);

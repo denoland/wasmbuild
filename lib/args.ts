@@ -14,6 +14,7 @@ export interface HelpCommand {
 
 export interface CommonBuild {
   outDir: string;
+  bindingJsFileExt: "js" | "mjs";
   profile: "debug" | "release";
   project: string | undefined;
   isOpt: boolean;
@@ -61,15 +62,13 @@ export function parseArgs(rawArgs: string[]): Command {
     if (flags["no-cache"]) {
       throw new Error("The --no-cache flag is no longer necessary now that Wasmbuild supports Wasm imports.");
     }
-    if (flags["js-ext"]) {
-      throw new Error("The --js-ext flag is no longer supported due to limitations with the wasm-bindgen output with Wasm imports.");
-    }
 
     return {
       profile: flags.debug ? "debug" : "release",
       project: flags.p ?? flags.project,
       isOpt: !(flags["skip-opt"] ?? flags.debug == "debug"),
       outDir: flags.out ?? "./lib",
+      bindingJsFileExt: getBindingJsFileExt(),
       cargoFlags: getCargoFlags(),
     };
   }

@@ -5,14 +5,18 @@ import * as path from "@std/path";
 
 export interface BindgenOutput {
   js: string;
-  js_bg: string;
+  jsBg: string;
   ts: string;
   snippets: Map<string, string[]>;
   localModules: Map<string, string>;
   wasmBytes: number[];
 }
 
-export async function generateBindgen(libName: string, filePath: string) {
+export async function generateBindgen({ libName, filePath, ext }: {
+  libName: string,
+  filePath: string
+  ext: string,
+}) {
   // if wasmbuild is building itself, then we need to use the wasm-bindgen-cli
   const hasEnvPerm = await Deno.permissions.query({ name: "env" });
   if (hasEnvPerm && Deno.env.get("WASMBUILD_BINDGEN_UPGRADE") === "1") {
@@ -22,6 +26,7 @@ export async function generateBindgen(libName: string, filePath: string) {
   const originalWasmBytes = await Deno.readFile(filePath);
   return await generate_bindgen(
     libName,
+    ext,
     originalWasmBytes,
   ) as BindgenOutput;
 }
@@ -55,7 +60,7 @@ async function generateForSelfBuild(filePath: string): Promise<BindgenOutput> {
     );
     return {
       js: (await Deno.readTextFile(path.join(tempPath, "wasmbuild_internal.js"))).replaceAll("wasmbuild_internal_bg.wasm", "wasmbuild.wasm"),
-      js_bg: await Deno.readTextFile(path.join(tempPath, "wasmbuild_internal_bg.js")),
+      jsBg: await Deno.readTextFile(path.join(tempPath, "wasmbuild_internal_bg.js")),
       ts: await Deno.readTextFile(path.join(tempPath, "wasmbuild_internal.d.ts")),
       localModules: new Map(),
       snippets: new Map(),

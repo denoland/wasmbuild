@@ -67,6 +67,12 @@ function showHelp() {
   );
   console.log();
   console.log(
+    "%c--js-ext <ext_no_period> %c- Extension to use for the wasm-bindgen JS files. Defaults to js.",
+    "font-weight: bold",
+    "font-weight: normal",
+  );
+  console.log();
+  console.log(
     "%c--all-features %c- Build the crate with all features.",
     "font-weight: bold",
     "font-weight: normal",

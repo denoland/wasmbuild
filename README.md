@@ -32,50 +32,12 @@ deno task wasmbuild
 
 You can now try it out with `deno run mod.js`
 
-Bindings will be generated at `./lib/<crate-name>.generated.js`. Import the
-`instantiate` function and call it asynchronously to get the exports:
+Bindings will be generated at `./lib/<crate-name>.js`. Import the exports and use them:
 
 ```ts
-import { instantiate } from "./lib/rs_lib.generated.js";
+import { add } from "./lib/rs_lib.js";
 
-const { add } = await instantiate();
 console.log(add(1, 1));
-```
-
-Or instantiate and use the exports:
-
-```ts
-import { add, instantiate } from "./lib/rs_lib.generated.js";
-
-await instantiate();
-console.log(add(1, 1));
-```
-
-### Compression
-
-When instantiating, you might want to decompress Wasm bytes.
-
-```ts
-import { instantiate } from "./lib/rs_lib.generated.js";
-import { decompress } from "https://deno.land/x/lz4@v0.1.2/mod.ts";
-
-await instantiate({
-  decompress,
-});
-```
-
-Note, however, wasmbuild CLI does not compress the Wasm file automatically.
-
-### Custom URL to .wasm file
-
-A custom URL to the .wasm file may be provided by specifying the `url` option:
-
-```ts
-import { instantiate } from "./lib/rs_lib.generated.js";
-
-await instantiate({
-  url: new URL("./custom_path_to_url.wasm", import.meta.url),
-});
 ```
 
 ## Checking output is up-to-date
@@ -107,8 +69,5 @@ For example, in a GitHub action:
 - `--no-default-features` - Build the crate with no default features.
 - `--features` - Specify the features to create. Specify multiple features
   quoted and with spaces (ex. `--features "wasm serialization"`).
-- `--sync` - Generate a synchronous module that stores the Wasm module inline as
-  base64 text.
 - `--skip-opt` - Skip running wasm-opt.
 - `--check` - Checks if the output is up-to-date.
-- `--no-cache` - Do not generate the code to cache the Wasm file locally.

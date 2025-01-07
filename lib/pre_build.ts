@@ -119,22 +119,23 @@ export async function runPreBuild(
   }
 
   console.log(`  ${colors.bold(colors.gray("Running wasm-bindgen..."))}`);
-  const bindgenOutput = await generateBindgen(
-    crate.libName,
-    path.join(
+  const bindgenOutput = await generateBindgen( {
+    libName: crate.libName,
+    ext: args.bindingJsFileExt,
+    filePath: path.join(
       workspace.metadata.target_directory,
       `wasm32-unknown-unknown/${args.profile}/${crate.libName}.wasm`,
     ),
-  );
+});
 
   console.log(
     `${colors.bold(colors.green("Generating"))} lib JS bindings...`,
   );
 
-  const bindingJsFileName =
-    `${crate.libName}.js`;
+  const bindingJsFileName = `${crate.libName}.${args.bindingJsFileExt}`;
 
   const { bindingJsText, sourceHash } = await getBindingJsOutput(
+    args,
     crate,
     bindgenOutput,
   );
@@ -146,11 +147,11 @@ export async function runPreBuild(
       text: bindingJsText,
     },
     bindingJsBg: {
-      path: path.join(args.outDir, getJsBgFileName(crate)),
-      text: `${generatedHeader}\n\n${await getFormattedText(bindgenOutput.js_bg)}`,
+      path: path.join(args.outDir, getJsBgFileName(args, crate)),
+      text: `${generatedHeader}\n\n${await getFormattedText(bindgenOutput.jsBg)}`,
     },
     bindingDts: {
-      path: path.join(args.outDir, getDtsFileName(crate)),
+      path: path.join(args.outDir, getDtsFileName(args, crate)),
       text: getLibraryDts(bindgenOutput),
     },
     sourceHash,
@@ -158,21 +159,24 @@ export async function runPreBuild(
   };
 }
 
-function getJsBgFileName(crate: WasmCrate) {
-  return `${crate.libName}_internal_bg.js`;
+function getJsBgFileName(args: CheckCommand | BuildCommand,  crate: WasmCrate) {
+  return `${crate.libName}.internal.${args.bindingJsFileExt}`;
 }
 
-function getDtsFileName(crate: WasmCrate) {
-  return `${crate.libName}.d.ts`;
+function getDtsFileName(args: CheckCommand | BuildCommand, crate: WasmCrate) {
+  return `${crate.libName}.${
+    args.bindingJsFileExt === "mjs" ? "d.mts" : "d.ts"
+  }`;
 }
 
 async function getBindingJsOutput(
+  args: CheckCommand | BuildCommand,
   crate: WasmCrate,
   bindgenOutput: BindgenOutput,
 ) {
   const sourceHash = await getHash();
   const header = `${generatedHeader}
-/// <reference types="./${getDtsFileName(crate)}" />
+/// <reference types="./${getDtsFileName(args, crate)}" />
 `;
   const genText = bindgenOutput.js;
   const bodyText = await getFormattedText(`

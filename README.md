@@ -32,8 +32,7 @@ deno task wasmbuild
 
 You can now try it out with `deno run mod.js`
 
-Bindings will be generated at `./lib/<crate-name>.js`. Import the exports and
-use them:
+Bindings will be generated at `./lib/<crate-name>.js`:
 
 ```ts
 import { add } from "./lib/rs_lib.js";

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
-use anyhow::Result;
 use anyhow::bail;
+use anyhow::Result;
 use wasm_bindgen::prelude::*;
 
 // uncomment for debugging
@@ -67,11 +67,13 @@ fn inner(name: &str, ext: &str, wasm_bytes: Vec<u8>) -> Result<Output> {
   Ok(Output {
     js: BindgenTextFileOutput {
       name: format!("{}.{}", name, ext),
-      text: format!("import * as wasm from \"./{name}.wasm\";
+      text: format!(
+        "import * as wasm from \"./{name}.wasm\";
 export * from \"./{name}.internal.{ext}\";
 import {{ __wbg_set_wasm }} from \"./{name}.internal.{ext}\";
 __wbg_set_wasm(wasm);
-"),
+"
+      ),
     },
     js_bg: BindgenTextFileOutput {
       name: format!("{}.internal.{}", name, ext),
@@ -79,12 +81,16 @@ __wbg_set_wasm(wasm);
     },
     ts: match x.ts() {
       Some(t) => Some(BindgenTextFileOutput {
-        name: format!("{}.d.{}", name, match ext {
-          "js" => "ts",
-          "mjs" => "mts",
-          _ => bail!("Unsupported extension: {}", ext),
-        }),
-        text: t.to_string()
+        name: format!(
+          "{}.d.{}",
+          name,
+          match ext {
+            "js" => "ts",
+            "mjs" => "mts",
+            _ => bail!("Unsupported extension: {}", ext),
+          }
+        ),
+        text: t.to_string(),
       }),
       None => None,
     },
@@ -93,6 +99,6 @@ __wbg_set_wasm(wasm);
     wasm: BindgenBytesFileOutput {
       name: format!("{}.wasm", name),
       bytes: x.wasm_mut().emit_wasm(),
-    }
+    },
   })
 }

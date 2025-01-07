@@ -164,7 +164,7 @@ async function getBindingJsOutput(
 ) {
   const sourceHash = await getHash();
   const header = `${generatedHeader}
-/// <reference types="./${bindgenOutput.ts.name}" />
+// @ts-self-types="./${bindgenOutput.ts.name}"
 `;
   const genText = bindgenOutput.js.text;
   const bodyText = await getFormattedText(`

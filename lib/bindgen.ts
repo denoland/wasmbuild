@@ -1,17 +1,30 @@
 // Copyright 2018-2024 the Deno authors. MIT license.
 
-import { instantiate } from "./wasmbuild.generated.js";
+import { generate_bindgen } from "./wasmbuild.js";
 import * as path from "@std/path";
 
-export interface BindgenOutput {
-  js: string;
-  ts: string;
-  snippets: Map<string, string[]>;
-  localModules: Map<string, string>;
-  wasmBytes: number[];
+export interface BindgenTextFileOutput {
+  name: string;
+  text: string;
 }
 
-export async function generateBindgen(libName: string, filePath: string) {
+export interface BindgenOutput {
+  js: BindgenTextFileOutput;
+  jsBg: BindgenTextFileOutput;
+  ts: BindgenTextFileOutput;
+  snippets: Map<string, string[]>;
+  localModules: Map<string, string>;
+  wasm: {
+    name: string;
+    bytes: number[];
+  };
+}
+
+export async function generateBindgen({ libName, filePath, ext }: {
+  libName: string;
+  filePath: string;
+  ext: string;
+}) {
   // if wasmbuild is building itself, then we need to use the wasm-bindgen-cli
   const hasEnvPerm = await Deno.permissions.query({ name: "env" });
   if (hasEnvPerm && Deno.env.get("WASMBUILD_BINDGEN_UPGRADE") === "1") {
@@ -19,9 +32,9 @@ export async function generateBindgen(libName: string, filePath: string) {
   }
 
   const originalWasmBytes = await Deno.readFile(filePath);
-  const { generate_bindgen } = await instantiate();
   return await generate_bindgen(
     libName,
+    ext,
     originalWasmBytes,
   ) as BindgenOutput;
 }
@@ -38,7 +51,7 @@ async function generateForSelfBuild(filePath: string): Promise<BindgenOutput> {
     const p = new Deno.Command("wasm-bindgen", {
       args: [
         "--target",
-        "deno",
+        "bundler",
         "--out-dir",
         tempPath,
         filePath,
@@ -52,11 +65,24 @@ async function generateForSelfBuild(filePath: string): Promise<BindgenOutput> {
       path.join(tempPath, "wasmbuild_bg.wasm"),
     );
     return {
-      js: await Deno.readTextFile(path.join(tempPath, "wasmbuild.js")),
-      ts: await Deno.readTextFile(path.join(tempPath, "wasmbuild.d.ts")),
+      js: {
+        name: "wasmbuild.js",
+        text: (await Deno.readTextFile(path.join(tempPath, "wasmbuild.js"))),
+      },
+      jsBg: {
+        name: "wasmbuild_bg.js",
+        text: await Deno.readTextFile(path.join(tempPath, "wasmbuild_bg.js")),
+      },
+      ts: {
+        name: "wasmbuild.d.ts",
+        text: await Deno.readTextFile(path.join(tempPath, "wasmbuild.d.ts")),
+      },
       localModules: new Map(),
       snippets: new Map(),
-      wasmBytes: Array.from(wasmBytes),
+      wasm: {
+        name: "wasmbuild_bg.wasm",
+        bytes: Array.from(wasmBytes),
+      },
     };
   } finally {
     await Deno.remove(tempPath, {

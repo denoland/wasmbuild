@@ -4,7 +4,6 @@ import { UntarStream } from "@std/tar/untar-stream";
 import { ensureDir } from "@std/fs/ensure_dir";
 import * as colors from "@std/fmt/colors";
 import * as path from "@std/path";
-import { fetchWithRetries } from "./loader.ts";
 
 const wasmOptFileName = Deno.build.os === "windows"
   ? "wasm-opt.exe"
@@ -22,6 +21,27 @@ export async function runWasmOpt(filePath: string) {
 
   if (!output.success) {
     throw new Error(`error executing wasmopt`);
+  }
+}
+
+async function fetchWithRetries(url: URL | string, maxRetries = 5) {
+  let sleepMs = 250;
+  let iterationCount = 0;
+  while (true) {
+    iterationCount++;
+    try {
+      const res = await fetch(url);
+      if (res.ok || iterationCount > maxRetries) {
+        return res;
+      }
+    } catch (err) {
+      if (iterationCount > maxRetries) {
+        throw err;
+      }
+    }
+    console.warn(`Failed fetching. Retrying in ${sleepMs}ms...`);
+    await new Promise((resolve) => setTimeout(resolve, sleepMs));
+    sleepMs = Math.min(sleepMs * 2, 10_000);
   }
 }
 

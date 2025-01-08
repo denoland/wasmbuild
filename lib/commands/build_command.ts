@@ -16,12 +16,14 @@ export async function runBuildCommand(args: BuildCommand) {
 
   console.log(`  write ${colors.yellow(output.bindingJs.path)}`);
   await Deno.writeTextFile(output.bindingJs.path, output.bindingJs.text);
+  console.log(`  write ${colors.yellow(output.bindingJsBg.path)}`);
+  await Deno.writeTextFile(output.bindingJsBg.path, output.bindingJsBg.text);
   console.log(`  write ${colors.yellow(output.bindingDts.path)}`);
   await Deno.writeTextFile(output.bindingDts.path, output.bindingDts.text);
 
   if (output.wasmFileName != null) {
     const wasmDest = path.join(args.outDir, output.wasmFileName);
-    await Deno.writeFile(wasmDest, new Uint8Array(output.bindgen.wasmBytes));
+    await Deno.writeFile(wasmDest, new Uint8Array(output.bindgen.wasm.bytes));
     if (args.isOpt) {
       await optimizeWasmFile(wasmDest);
     }

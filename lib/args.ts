@@ -11,14 +11,11 @@ export interface HelpCommand {
   kind: "help";
 }
 
-export type LoaderKind = "sync" | "async" | "async-with-cache";
-
 export interface CommonBuild {
   outDir: string;
   bindingJsFileExt: "js" | "mjs";
   profile: "debug" | "release";
   project: string | undefined;
-  loaderKind: LoaderKind;
   isOpt: boolean;
   cargoFlags: string[];
 }
@@ -58,14 +55,20 @@ export function parseArgs(rawArgs: string[]): Command {
   }
 
   function getCommonBuild(): CommonBuild {
+    if (flags.sync) {
+      throw new Error(
+        "The --sync flag is no longer supported now that Wasmbuild supports Wasm imports. Use an old version if you need it.",
+      );
+    }
+    if (flags["no-cache"]) {
+      throw new Error(
+        "The --no-cache flag is no longer necessary now that Wasmbuild supports Wasm imports.",
+      );
+    }
+
     return {
       profile: flags.debug ? "debug" : "release",
       project: flags.p ?? flags.project,
-      loaderKind: flags.sync
-        ? "sync"
-        : flags["no-cache"]
-        ? "async"
-        : "async-with-cache",
       isOpt: !(flags["skip-opt"] ?? flags.debug == "debug"),
       outDir: flags.out ?? "./lib",
       bindingJsFileExt: getBindingJsFileExt(),

@@ -1,3 +1,4 @@
 target/
 lib_out_js_file
+lib_inline
 lib

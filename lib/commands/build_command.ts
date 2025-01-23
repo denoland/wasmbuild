@@ -113,12 +113,14 @@ function base64decode(b64) {
 
 import * as imports from "./${output.crateName}.internal.${args.bindingJsFileExt}";
 const bytes = base64decode("\\\n${base64.encodeBase64(wasmBytes).replace(/.{78}/g, "$&\\\n")}\\\n");
-const wasmModule = new WebAssembly.Module(wasmBytes);
-const wasm = new WebAssembly.Instance(wasmModule, imports);
+const wasmModule = new WebAssembly.Module(bytes);
+const wasm = new WebAssembly.Instance(wasmModule, {
+  "./${output.crateName}.internal.${args.bindingJsFileExt}": imports,
+});
 
 export * from "./${output.crateName}.internal.${args.bindingJsFileExt}";
-import {{ __wbg_set_wasm }} from "./${output.crateName}.internal.${args.bindingJsFileExt}";
-__wbg_set_wasm(wasm);
+import { __wbg_set_wasm } from "./${output.crateName}.internal.${args.bindingJsFileExt}";
+__wbg_set_wasm(wasm.exports);
 `
   }, {
     path: output.bindingJsBg.path,

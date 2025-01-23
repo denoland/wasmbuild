@@ -4,29 +4,31 @@ import { UntarStream } from "@std/tar/untar-stream";
 import { ensureDir } from "@std/fs/ensure-dir";
 import * as colors from "@std/fmt/colors";
 import * as path from "@std/path";
+import { createTempFileSync } from "@david/temp";
 
 const wasmOptFileName = Deno.build.os === "windows"
   ? "wasm-opt.exe"
   : "wasm-opt";
-const tag = "version_109";
+const tag = "version_121";
 
 export async function runWasmOpt(fileBytes: Uint8Array) {
   const binPath = await getWasmOptBinaryPath();
+  using outputTempFile = createTempFileSync();
+  using inputTempFile = createTempFileSync();
+  inputTempFile.writeSync(fileBytes);
   const p = new Deno.Command(binPath, {
-    args: ["-Oz", "-"],
-    stdin: "piped",
+    args: ["-Oz", inputTempFile.toString(), "-o", outputTempFile.toString()],
+    stdin: "inherit",
     stderr: "inherit",
-    stdout: "piped",
+    stdout: "inherit",
   }).spawn();
-  const stdin = p.stdin.getWriter();
-  await stdin.write(fileBytes);
-  stdin.close();
-  const output = await p.output();
 
-  if (!output.success) {
+  const status = await p.status;
+
+  if (!status.success) {
     throw new Error(`error executing wasmopt`);
   }
-  return output.stdout;
+  return outputTempFile.readBytesSync();
 }
 
 async function fetchWithRetries(url: URL | string, maxRetries = 5) {

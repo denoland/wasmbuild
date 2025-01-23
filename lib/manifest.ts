@@ -1,8 +1,8 @@
 // Copyright 2018-2025 the Deno authors. MIT license.
 
 import { Sha1 } from "./utils/sha1.ts";
-import * as path from "@std/path";
 import { expandGlob } from "@std/fs/expand-glob";
+import { Path } from "@david/path";
 
 export interface CargoMetadata {
   packages: CargoPackageMetadata[];
@@ -43,11 +43,11 @@ export interface CargoPackageTarget {
 }
 
 export async function getCargoWorkspace(
-  directory: string,
+  directory: Path,
   cargoFlags: string[],
 ) {
   const p = new Deno.Command("cargo", {
-    cwd: directory,
+    cwd: directory.toString(),
     args: ["metadata", "--format-version", "1", ...cargoFlags],
     stdout: "piped",
   });
@@ -153,7 +153,7 @@ export class WasmCrate {
   }
 
   get rootFolder() {
-    return path.dirname(this.#pkg.manifest_path);
+    return new Path(this.#pkg.manifest_path).parentOrThrow();
   }
 
   async getSourcesHash() {
@@ -174,7 +174,7 @@ export class WasmCrate {
     const paths = [];
     for await (
       const entry of expandGlob("**/{*.rs,Cargo.toml}", {
-        root: this.rootFolder,
+        root: this.rootFolder.toString(),
         exclude: ["./target"],
       })
     ) {

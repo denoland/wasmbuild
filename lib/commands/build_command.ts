@@ -1,10 +1,7 @@
 // Copyright 2018-2025 the Deno authors. MIT license.
 
 import * as colors from "@std/fmt/colors";
-import { emptyDir } from "@std/fs/empty-dir";
-import * as path from "@std/path";
 import * as base64 from "@std/encoding/base64";
-import { ensureDir } from "@std/fs";
 import type { BuildCommand } from "../args.ts";
 import {
   generatedHeader,
@@ -12,11 +9,12 @@ import {
   runPreBuild,
 } from "../pre_build.ts";
 import { runWasmOpt } from "../wasmopt.ts";
+import { Path } from "@david/path";
 
 export async function runBuildCommand(args: BuildCommand) {
   const output = await runPreBuild(args);
 
-  await ensureDir(args.outDir);
+  await args.outDir.ensureDir();
   await writeSnippets();
 
   const files = args.inline
@@ -24,11 +22,11 @@ export async function runBuildCommand(args: BuildCommand) {
     : await handleWasmModuleOutput(output, args);
 
   for (const file of files) {
-    console.log(`  write ${colors.yellow(file.path)}`);
+    console.log(`  write ${colors.yellow(file.path.toString())}`);
     if (typeof file.data === "string") {
-      await Deno.writeTextFile(file.path, file.data);
+      await file.path.writeText(file.data);
     } else {
-      await Deno.writeFile(file.path, file.data);
+      await file.path.write(file.data);
     }
   }
 
@@ -44,35 +42,35 @@ export async function runBuildCommand(args: BuildCommand) {
       return; // don't create the snippets directory
     }
 
-    const snippetsDest = path.join(args.outDir, "snippets");
+    const snippetsDest = args.outDir.join("snippets");
     // start with a fresh directory in order to clear out any previously
     // created snippets which might have a different name
-    await emptyDir(snippetsDest);
+    await snippetsDest.emptyDir();
 
     for (const [name, text] of localModules) {
-      const filePath = path.join(snippetsDest, name);
-      const dirPath = path.dirname(filePath);
-      await Deno.mkdir(dirPath, { recursive: true });
-      await Deno.writeTextFile(filePath, text);
+      const filePath = snippetsDest.join(name);
+      const dirPath = filePath.parentOrThrow();
+      await dirPath.mkdir({ recursive: true });
+      await filePath.writeText(text);
     }
 
     for (const [identifier, list] of snippets) {
       if (list.length === 0) {
         continue;
       }
-      const dirPath = path.join(snippetsDest, identifier);
-      await Deno.mkdir(dirPath, { recursive: true });
+      const dirPath = snippetsDest.join(identifier);
+      await dirPath.mkdir({ recursive: true });
       for (const [i, text] of list.entries()) {
         const name = `inline${i}.js`;
-        const filePath = path.join(dirPath, name);
-        await Deno.writeTextFile(filePath, text);
+        const filePath = dirPath.join(name);
+        await filePath.writeText(text);
       }
     }
   }
 }
 
 interface FileEntry {
-  path: string;
+  path: Path;
   data: string | Uint8Array;
 }
 
@@ -81,12 +79,11 @@ async function handleWasmModuleOutput(
   args: BuildCommand,
 ): Promise<FileEntry[]> {
   return [{
-    path: path.join(
-      args.outDir,
+    path: args.outDir.join(
       `${output.crateName}.${args.bindingJsFileExt}`,
     ),
     data: `${generatedHeader}
-// @ts-self-types="./${path.basename(output.bindingDts.path)}"
+// @ts-self-types="./${output.bindingDts.path.basename()}"
 import * as wasm from "./${output.wasmFileName}";
 export * from "./${output.crateName}.internal.${args.bindingJsFileExt}";
 import {{ __wbg_set_wasm }} from "./${output.crateName}.internal.${args.bindingJsFileExt}";
@@ -99,7 +96,7 @@ __wbg_set_wasm(wasm);
     path: output.bindingDts.path,
     data: output.bindingDts.text,
   }, {
-    path: path.join(args.outDir, output.wasmFileName),
+    path: args.outDir.join(output.wasmFileName),
     data: await getWasmBytes(output, args),
   }];
 }
@@ -111,12 +108,11 @@ async function inlinePreBuild(
   const wasmBytes = await getWasmBytes(output, args);
 
   return [{
-    path: path.join(
-      args.outDir,
+    path: args.outDir.join(
       `${output.crateName}.${args.bindingJsFileExt}`,
     ),
     data: `${generatedHeader}
-// @ts-self-types="./${path.basename(output.bindingDts.path)}"
+// @ts-self-types="./${output.bindingDts.path.basename()}"
 function base64decode(b64) {
   const binString = atob(b64);
   const size = binString.length;

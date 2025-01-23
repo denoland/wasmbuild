@@ -1,6 +1,7 @@
 // Copyright 2018-2025 the Deno authors. MIT license.
 
 import { parseArgs as parseFlags } from "@std/cli/parse-args";
+import { Path } from "@david/path";
 
 export type Command = NewCommand | BuildCommand | CheckCommand | HelpCommand;
 
@@ -12,7 +13,7 @@ export interface HelpCommand {
 }
 
 export interface CommonBuild {
-  outDir: string;
+  outDir: Path;
   bindingJsFileExt: "js" | "mjs";
   profile: "debug" | "release";
   project: string | undefined;
@@ -74,7 +75,7 @@ export function parseArgs(rawArgs: string[]): Command {
       project: flags.p ?? flags.project,
       inline: flags.inline,
       isOpt: !(flags["skip-opt"] ?? flags.debug == "debug"),
-      outDir: flags.out ?? "./lib",
+      outDir: new Path(flags.out ?? "./lib"),
       bindingJsFileExt: getBindingJsFileExt(),
       cargoFlags: getCargoFlags(),
     };

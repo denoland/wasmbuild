@@ -23,7 +23,8 @@ export async function runCheckCommand(args: CheckCommand) {
   async function getOriginalSourceHash() {
     try {
       return getSourceHashFromText(
-        await Deno.readTextFile(output.bindingJs.path),
+        await args.outDir.join(`${output.crateName}.${args.bindingJsFileExt}`)
+          .readText(),
       );
     } catch (err) {
       if (err instanceof Deno.errors.NotFound) {

@@ -2,12 +2,11 @@
 
 import type { BuildCommand, CheckCommand } from "./args.ts";
 import * as colors from "@std/fmt/colors";
-import * as path from "@std/path";
 import { Sha1 } from "./utils/sha1.ts";
 import { getCargoWorkspace } from "./manifest.ts";
 import { verifyVersions } from "./versions.ts";
 import { type BindgenOutput, generateBindgen } from "./bindgen.ts";
-import { pathExists } from "./helpers.ts";
+import { Path } from "@david/path";
 export type { BindgenOutput } from "./bindgen.ts";
 
 export const generatedHeader = `// @generated file from wasmbuild -- do not edit
@@ -19,11 +18,11 @@ export interface PreBuildOutput {
   crateName: string;
   bindgen: BindgenOutput;
   bindingJsBg: {
-    path: string;
+    path: Path;
     text: string;
   };
   bindingDts: {
-    path: string;
+    path: Path;
     text: string;
   };
   sourceHash: string;
@@ -34,8 +33,8 @@ export async function runPreBuild(
   args: CheckCommand | BuildCommand,
 ): Promise<PreBuildOutput> {
   const home = Deno.env.get("HOME");
-  const root = Deno.cwd();
-  if (!await pathExists(path.join(root, "Cargo.toml"))) {
+  const root = new Path(Deno.cwd());
+  if (!root.join("Cargo.toml").existsSync()) {
     console.error(
       "%cConsider running `deno task wasmbuild new` to get started",
       "color: yellow",
@@ -119,8 +118,7 @@ export async function runPreBuild(
   const bindgenOutput = await generateBindgen({
     libName: crate.libName,
     ext: args.bindingJsFileExt,
-    filePath: path.join(
-      workspace.metadata.target_directory,
+    filePath: new Path(workspace.metadata.target_directory).join(
       `wasm32-unknown-unknown/${args.profile}/${crate.libName}.wasm`,
     ),
   });
@@ -135,13 +133,13 @@ export async function runPreBuild(
     crateName: crate.libName,
     bindgen: bindgenOutput,
     bindingJsBg: {
-      path: path.join(args.outDir, bindgenOutput.jsBg.name),
+      path: args.outDir.join(bindgenOutput.jsBg.name),
       text: `${generatedHeader}\n\n${await getFormattedText(
         bindgenOutput.jsBg.text,
       )}`,
     },
     bindingDts: {
-      path: path.join(args.outDir, bindgenOutput.ts.name),
+      path: args.outDir.join(bindgenOutput.ts.name),
       text: `// @generated file from wasmbuild -- do not edit
 // deno-lint-ignore-file
 // deno-fmt-ignore-file

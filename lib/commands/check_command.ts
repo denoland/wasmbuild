@@ -21,13 +21,14 @@ export async function runCheckCommand(args: CheckCommand) {
   }
 
   async function getOriginalSourceHash() {
+    const filePath = args.outDir.join(output.bindingJsBg.path.basename());
     try {
       return getSourceHashFromText(
-        await args.outDir.join(`${output.bindingJsBg.path.basename()}`)
-          .readText(),
+        await filePath.readText(),
       );
     } catch (err) {
       if (err instanceof Deno.errors.NotFound) {
+        console.warn(`${colors.yellow("Warning")} could not find ${filePath}`);
         return undefined;
       } else {
         throw err;

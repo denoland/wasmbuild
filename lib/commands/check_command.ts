@@ -21,7 +21,7 @@ export async function runCheckCommand(args: CheckCommand) {
   }
 
   async function getOriginalSourceHash() {
-    const filePath = args.outDir.join(output.bindingJsBg.path.basename());
+    const filePath = args.outDir.join(`${output.crateName}.${args.bindingJsFileExt}`);
     try {
       return getSourceHashFromText(
         await filePath.readText(),

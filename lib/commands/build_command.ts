@@ -6,7 +6,11 @@ import * as path from "@std/path";
 import * as base64 from "@std/encoding/base64";
 import { ensureDir } from "@std/fs";
 import type { BuildCommand } from "../args.ts";
-import { generatedHeader, type PreBuildOutput, runPreBuild } from "../pre_build.ts";
+import {
+  generatedHeader,
+  type PreBuildOutput,
+  runPreBuild,
+} from "../pre_build.ts";
 import { runWasmOpt } from "../wasmopt.ts";
 
 export async function runBuildCommand(args: BuildCommand) {
@@ -72,19 +76,25 @@ interface FileEntry {
   data: string | Uint8Array;
 }
 
-async function handleWasmModuleOutput(output: PreBuildOutput, args: BuildCommand): Promise<FileEntry[]> {
+async function handleWasmModuleOutput(
+  output: PreBuildOutput,
+  args: BuildCommand,
+): Promise<FileEntry[]> {
   return [{
-    path: path.join(args.outDir, `${output.crateName}.${args.bindingJsFileExt}`),
+    path: path.join(
+      args.outDir,
+      `${output.crateName}.${args.bindingJsFileExt}`,
+    ),
     data: `${generatedHeader}
 // @ts-self-types="./${path.basename(output.bindingDts.path)}"
 import * as wasm from "./${output.wasmFileName}";
 export * from "./${output.crateName}.internal.${args.bindingJsFileExt}";
 import {{ __wbg_set_wasm }} from "./${output.crateName}.internal.${args.bindingJsFileExt}";
 __wbg_set_wasm(wasm);
-`
+`,
   }, {
     path: output.bindingJsBg.path,
-    data: output.bindingJsBg.text
+    data: output.bindingJsBg.text,
   }, {
     path: output.bindingDts.path,
     data: output.bindingDts.text,
@@ -94,11 +104,17 @@ __wbg_set_wasm(wasm);
   }];
 }
 
-async function inlinePreBuild(output: PreBuildOutput, args: BuildCommand): Promise<FileEntry[]> {
+async function inlinePreBuild(
+  output: PreBuildOutput,
+  args: BuildCommand,
+): Promise<FileEntry[]> {
   const wasmBytes = await getWasmBytes(output, args);
 
   return [{
-    path: path.join(args.outDir, `${output.crateName}.${args.bindingJsFileExt}`),
+    path: path.join(
+      args.outDir,
+      `${output.crateName}.${args.bindingJsFileExt}`,
+    ),
     data: `${generatedHeader}
 // @ts-self-types="./${path.basename(output.bindingDts.path)}"
 function base64decode(b64) {
@@ -112,7 +128,9 @@ function base64decode(b64) {
 }
 
 import * as imports from "./${output.crateName}.internal.${args.bindingJsFileExt}";
-const bytes = base64decode("\\\n${base64.encodeBase64(wasmBytes).replace(/.{78}/g, "$&\\\n")}\\\n");
+const bytes = base64decode("\\\n${
+      base64.encodeBase64(wasmBytes).replace(/.{78}/g, "$&\\\n")
+    }\\\n");
 const wasmModule = new WebAssembly.Module(bytes);
 const wasm = new WebAssembly.Instance(wasmModule, {
   "./${output.crateName}.internal.${args.bindingJsFileExt}": imports,
@@ -121,10 +139,10 @@ const wasm = new WebAssembly.Instance(wasmModule, {
 export * from "./${output.crateName}.internal.${args.bindingJsFileExt}";
 import { __wbg_set_wasm } from "./${output.crateName}.internal.${args.bindingJsFileExt}";
 __wbg_set_wasm(wasm.exports);
-`
+`,
   }, {
     path: output.bindingJsBg.path,
-    data: output.bindingJsBg.text
+    data: output.bindingJsBg.text,
   }, {
     path: output.bindingDts.path,
     data: output.bindingDts.text,
@@ -140,17 +158,17 @@ async function getWasmBytes(output: PreBuildOutput, args: BuildCommand) {
   }
 }
 
-  async function optimizeWasmFile(fileBytes: Uint8Array) {
-    try {
-      console.log(
-        `${colors.bold(colors.green("Optimizing"))} .wasm file...`,
-      );
-      return await runWasmOpt(fileBytes);
-    } catch (err) {
-      console.error(
-        `${colors.bold(colors.red("Error"))} ` +
-          `running wasm-opt failed. Maybe skip with --skip-opt?\n\n${err}`,
-      );
-      Deno.exit(1);
-    }
+async function optimizeWasmFile(fileBytes: Uint8Array) {
+  try {
+    console.log(
+      `${colors.bold(colors.green("Optimizing"))} .wasm file...`,
+    );
+    return await runWasmOpt(fileBytes);
+  } catch (err) {
+    console.error(
+      `${colors.bold(colors.red("Error"))} ` +
+        `running wasm-opt failed. Maybe skip with --skip-opt?\n\n${err}`,
+    );
+    Deno.exit(1);
   }
+}

@@ -16,7 +16,7 @@ export const generatedHeader = `// @generated file from wasmbuild -- do not edit
 // deno-fmt-ignore-file`;
 
 export interface PreBuildOutput {
-  crateName: string,
+  crateName: string;
   bindgen: BindgenOutput;
   bindingJsBg: {
     path: string;

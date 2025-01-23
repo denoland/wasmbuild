@@ -170,7 +170,7 @@ ${await getFormattedText(getLibraryDts(bindgenOutput))}`,
   }
 }
 
-async function getFormattedText(inputText: string) {
+export async function getFormattedText(inputText: string) {
   const denoFmtCmdArgs = [
     "fmt",
     "--quiet",

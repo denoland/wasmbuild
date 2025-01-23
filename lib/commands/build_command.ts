@@ -5,6 +5,7 @@ import * as base64 from "@std/encoding/base64";
 import type { BuildCommand } from "../args.ts";
 import {
   generatedHeader,
+  getFormattedText,
   type PreBuildOutput,
   runPreBuild,
 } from "../pre_build.ts";
@@ -82,13 +83,15 @@ async function handleWasmModuleOutput(
     path: args.outDir.join(
       `${output.crateName}.${args.bindingJsFileExt}`,
     ),
-    data: `${generatedHeader}
+    data: await getFormattedText(`${generatedHeader}
 // @ts-self-types="./${output.bindingDts.path.basename()}"
+// source-hash: ${output.sourceHash}
+
 import * as wasm from "./${output.wasmFileName}";
 export * from "./${output.crateName}.internal.${args.bindingJsFileExt}";
 import { __wbg_set_wasm } from "./${output.crateName}.internal.${args.bindingJsFileExt}";
 __wbg_set_wasm(wasm);
-`,
+`),
   }, {
     path: output.bindingJsBg.path,
     data: output.bindingJsBg.text,
@@ -111,8 +114,10 @@ async function inlinePreBuild(
     path: args.outDir.join(
       `${output.crateName}.${args.bindingJsFileExt}`,
     ),
-    data: `${generatedHeader}
+    data: await getFormattedText(`${generatedHeader}
 // @ts-self-types="./${output.bindingDts.path.basename()}"
+// source-hash: ${output.sourceHash}
+
 function base64decode(b64) {
   const binString = atob(b64);
   const size = binString.length;
@@ -135,7 +140,7 @@ const wasm = new WebAssembly.Instance(wasmModule, {
 export * from "./${output.crateName}.internal.${args.bindingJsFileExt}";
 import { __wbg_set_wasm } from "./${output.crateName}.internal.${args.bindingJsFileExt}";
 __wbg_set_wasm(wasm.exports);
-`,
+`),
   }, {
     path: output.bindingJsBg.path,
     data: output.bindingJsBg.text,

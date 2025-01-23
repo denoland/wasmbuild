@@ -137,7 +137,7 @@ console.log(greeter.greet());
 }
 
 function writeIfNotExists(path: Path, text: string) {
-  if (!path.existsSync()) {
+  if (path.existsSync()) {
     return;
   }
   path.writeTextSync(text);

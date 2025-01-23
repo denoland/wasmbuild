@@ -47,14 +47,15 @@ edition = "2021"
 `,
   );
 
-  let gitIgnoreText = await getFileTextIfExists("./.gitignore") ?? "";
+  const gitIgnoreFile = rootDir.join(".gitignore");
+  let gitIgnoreText = gitIgnoreFile.readMaybeTextSync() ?? "";
   if (!/^\/target$/m.test(gitIgnoreText)) {
     gitIgnoreText = gitIgnoreText.trim();
     if (gitIgnoreText.length > 0) {
       gitIgnoreText = gitIgnoreText + "\n";
     }
     gitIgnoreText += "/target\n";
-    await Deno.writeTextFile("./.gitignore", gitIgnoreText);
+    gitIgnoreFile.writeTextSync(gitIgnoreText);
   }
 
   const srcDir = rsLibDir.join("src");
@@ -141,18 +142,6 @@ function writeIfNotExists(path: Path, text: string) {
     return;
   }
   path.writeTextSync(text);
-}
-
-async function getFileTextIfExists(path: string) {
-  try {
-    return await Deno.readTextFile(path);
-  } catch (err) {
-    if (err instanceof Deno.errors.NotFound) {
-      return undefined;
-    } else {
-      throw err;
-    }
-  }
 }
 
 async function checkIfRequiredToolsExist() {

@@ -5,7 +5,7 @@ const rootFolder = new Path(import.meta.dirname!).parentOrThrow();
 
 Deno.test("should create a new wasmbuild project, build it, and run it", async () => {
   using tempDir = createTempDirSync();
-  await tempDir.join("deno.json").writeText(
+  tempDir.join("deno.json").writeTextSync(
     `{ "tasks": { "wasmbuild": "${
       Deno.execPath().replace(/\\/g, "\\\\")
     } run -A ${
@@ -14,7 +14,7 @@ Deno.test("should create a new wasmbuild project, build it, and run it", async (
   );
   await runCommand("deno", "task", "wasmbuild", "new");
   await runCommand("deno", "task", "wasmbuild");
-  await tempDir.join("test.ts").writeText(`
+  tempDir.join("test.ts").writeTextSync(`
 import { add } from "./lib/rs_lib.js";
 
 Deno.test("should add values", async () => {

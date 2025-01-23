@@ -15,8 +15,8 @@ import type { Path } from "@david/path";
 export async function runBuildCommand(args: BuildCommand) {
   const output = await runPreBuild(args);
 
-  await args.outDir.ensureDir();
-  await writeSnippets();
+  args.outDir.ensureDirSync();
+  writeSnippets();
 
   const files = args.inline
     ? await inlinePreBuild(output, args)
@@ -25,9 +25,9 @@ export async function runBuildCommand(args: BuildCommand) {
   for (const file of files) {
     console.log(`  write ${colors.yellow(file.path.toString())}`);
     if (typeof file.data === "string") {
-      await file.path.writeText(file.data);
+      file.path.writeTextSync(file.data);
     } else {
-      await file.path.write(file.data);
+      file.path.writeSync(file.data);
     }
   }
 
@@ -35,7 +35,7 @@ export async function runBuildCommand(args: BuildCommand) {
     `${colors.bold(colors.green("Finished"))} WebAssembly output`,
   );
 
-  async function writeSnippets() {
+  function writeSnippets() {
     const localModules = Array.from(output.bindgen.localModules);
     const snippets = Array.from(output.bindgen.snippets);
 
@@ -46,13 +46,13 @@ export async function runBuildCommand(args: BuildCommand) {
     const snippetsDest = args.outDir.join("snippets");
     // start with a fresh directory in order to clear out any previously
     // created snippets which might have a different name
-    await snippetsDest.emptyDir();
+    snippetsDest.emptyDirSync();
 
     for (const [name, text] of localModules) {
       const filePath = snippetsDest.join(name);
       const dirPath = filePath.parentOrThrow();
-      await dirPath.mkdir({ recursive: true });
-      await filePath.writeText(text);
+      dirPath.mkdirSync({ recursive: true });
+      filePath.writeTextSync(text);
     }
 
     for (const [identifier, list] of snippets) {
@@ -60,11 +60,11 @@ export async function runBuildCommand(args: BuildCommand) {
         continue;
       }
       const dirPath = snippetsDest.join(identifier);
-      await dirPath.mkdir({ recursive: true });
+      dirPath.mkdirSync({ recursive: true });
       for (const [i, text] of list.entries()) {
         const name = `inline${i}.js`;
         const filePath = dirPath.join(name);
-        await filePath.writeText(text);
+        filePath.writeTextSync(text);
       }
     }
   }
@@ -85,8 +85,8 @@ async function handleWasmModuleOutput(
     ),
     data: await getFormattedText(`${generatedHeader}
 // @ts-self-types="./${output.bindingDts.path.basename()}"
-// source-hash: ${output.sourceHash}
 
+// source-hash: ${output.sourceHash}
 import * as wasm from "./${output.wasmFileName}";
 export * from "./${output.bindingJsBg.path.basename()}";
 import { __wbg_set_wasm } from "./${output.bindingJsBg.path.basename()}";
@@ -116,18 +116,8 @@ async function inlinePreBuild(
     ),
     data: await getFormattedText(`${generatedHeader}
 // @ts-self-types="./${output.bindingDts.path.basename()}"
+
 // source-hash: ${output.sourceHash}
-
-function base64decode(b64) {
-  const binString = atob(b64);
-  const size = binString.length;
-  const bytes = new Uint8Array(size);
-  for (let i = 0; i < size; i++) {
-    bytes[i] = binString.charCodeAt(i);
-  }
-  return bytes;
-}
-
 import * as imports from "./${output.bindingJsBg.path.basename()}";
 const bytes = base64decode("\\\n${
       base64.encodeBase64(wasmBytes).replace(/.{78}/g, "$&\\\n")
@@ -140,6 +130,16 @@ const wasm = new WebAssembly.Instance(wasmModule, {
 export * from "./${output.bindingJsBg.path.basename()}";
 import { __wbg_set_wasm } from "./${output.bindingJsBg.path.basename()}";
 __wbg_set_wasm(wasm.exports);
+
+function base64decode(b64) {
+  const binString = atob(b64);
+  const size = binString.length;
+  const bytes = new Uint8Array(size);
+  for (let i = 0; i < size; i++) {
+    bytes[i] = binString.charCodeAt(i);
+  }
+  return bytes;
+}
 `),
   }, {
     path: output.bindingJsBg.path,

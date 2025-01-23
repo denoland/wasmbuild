@@ -162,7 +162,7 @@ export class WasmCrate {
     paths.sort();
     const hasher = new Sha1();
     for (const path of paths) {
-      const fileText = await Deno.readTextFile(path);
+      const fileText = path.readTextSync();
       // standardize file paths so this is not subject to
       // however git is configured to checkout files
       hasher.update(fileText.replace(/\r?\n/g, "\n"));
@@ -179,7 +179,7 @@ export class WasmCrate {
       })
     ) {
       if (entry.isFile) {
-        paths.push(entry.path);
+        paths.push(new Path(entry.path));
       }
     }
     return paths;

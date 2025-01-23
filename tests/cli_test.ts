@@ -8,7 +8,9 @@ Deno.test("should create a new wasmbuild project, build it, and run it", async (
   await tempDir.join("deno.json").writeText(
     `{ "tasks": { "wasmbuild": "${
       Deno.execPath().replace(/\\/g, "\\\\")
-    } run -A ${rootFolder.join("main.ts").toString().replace(/\\/g, "\\\\")}" }}\n`,
+    } run -A ${
+      rootFolder.join("main.ts").toString().replace(/\\/g, "\\\\")
+    }" }}\n`,
   );
   await runCommand("deno", "task", "wasmbuild", "new");
   await runCommand("deno", "task", "wasmbuild");

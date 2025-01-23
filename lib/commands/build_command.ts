@@ -9,7 +9,7 @@ import {
   runPreBuild,
 } from "../pre_build.ts";
 import { runWasmOpt } from "../wasmopt.ts";
-import { Path } from "@david/path";
+import type { Path } from "@david/path";
 
 export async function runBuildCommand(args: BuildCommand) {
   const output = await runPreBuild(args);

@@ -2,7 +2,7 @@
 
 import { createTempDirSync } from "@david/temp";
 import { generate_bindgen } from "./wasmbuild.js";
-import { Path } from "@david/path";
+import type { Path } from "@david/path";
 
 export interface BindgenTextFileOutput {
   name: string;

@@ -1,7 +1,6 @@
 // Copyright 2018-2025 the Deno authors. MIT license.
 
 import { UntarStream } from "@std/tar/untar-stream";
-import { ensureDir } from "@std/fs/ensure-dir";
 import * as colors from "@std/fmt/colors";
 import { createTempFileSync } from "@david/temp";
 import { Path } from "@david/path";
@@ -75,7 +74,6 @@ async function getWasmOptBinaryPath() {
 
   return wasmOptExePath;
 }
-
 
 async function downloadBinaryen(tempPath: Path) {
   console.log(

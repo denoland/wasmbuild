@@ -7,7 +7,7 @@ import { Path } from "@david/path";
 export async function runNewCommand() {
   await checkIfRequiredToolsExist();
 
-  const rootDir = new Path(".");
+  const rootDir = new Path(Deno.cwd());
   const rsLibDir = rootDir.join("rs_lib");
 
   if (rsLibDir.existsSync()) {

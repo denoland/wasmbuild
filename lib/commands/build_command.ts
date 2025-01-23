@@ -86,7 +86,7 @@ async function handleWasmModuleOutput(
 // @ts-self-types="./${output.bindingDts.path.basename()}"
 import * as wasm from "./${output.wasmFileName}";
 export * from "./${output.crateName}.internal.${args.bindingJsFileExt}";
-import {{ __wbg_set_wasm }} from "./${output.crateName}.internal.${args.bindingJsFileExt}";
+import { __wbg_set_wasm } from "./${output.crateName}.internal.${args.bindingJsFileExt}";
 __wbg_set_wasm(wasm);
 `,
   }, {

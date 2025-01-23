@@ -1,7 +1,7 @@
-// Copyright 2018-2024 the Deno authors. MIT license.
+// Copyright 2018-2025 the Deno authors. MIT license.
 
 import { UntarStream } from "@std/tar/untar-stream";
-import { ensureDir } from "@std/fs/ensure_dir";
+import { ensureDir } from "@std/fs/ensure-dir";
 import * as colors from "@std/fmt/colors";
 import * as path from "@std/path";
 
@@ -10,18 +10,23 @@ const wasmOptFileName = Deno.build.os === "windows"
   : "wasm-opt";
 const tag = "version_109";
 
-export async function runWasmOpt(filePath: string) {
+export async function runWasmOpt(fileBytes: Uint8Array) {
   const binPath = await getWasmOptBinaryPath();
   const p = new Deno.Command(binPath, {
-    args: ["-Oz", filePath, "-o", filePath],
+    args: ["-Oz", "-"],
+    stdin: "piped",
     stderr: "inherit",
-    stdout: "inherit",
+    stdout: "piped",
   }).spawn();
-  const output = await p.status;
+  const stdin = p.stdin.getWriter();
+  await stdin.write(fileBytes);
+  stdin.close();
+  const output = await p.output();
 
   if (!output.success) {
     throw new Error(`error executing wasmopt`);
   }
+  return output.stdout;
 }
 
 async function fetchWithRetries(url: URL | string, maxRetries = 5) {

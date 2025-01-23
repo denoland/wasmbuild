@@ -1,4 +1,4 @@
-// Copyright 2018-2024 the Deno authors. MIT license.
+// Copyright 2018-2025 the Deno authors. MIT license.
 
 import { generate_bindgen } from "./wasmbuild.js";
 import * as path from "@std/path";
@@ -9,7 +9,6 @@ export interface BindgenTextFileOutput {
 }
 
 export interface BindgenOutput {
-  js: BindgenTextFileOutput;
   jsBg: BindgenTextFileOutput;
   ts: BindgenTextFileOutput;
   snippets: Map<string, string[]>;
@@ -65,10 +64,6 @@ async function generateForSelfBuild(filePath: string): Promise<BindgenOutput> {
       path.join(tempPath, "wasmbuild_bg.wasm"),
     );
     return {
-      js: {
-        name: "wasmbuild.js",
-        text: (await Deno.readTextFile(path.join(tempPath, "wasmbuild.js"))),
-      },
       jsBg: {
         name: "wasmbuild_bg.js",
         text: await Deno.readTextFile(path.join(tempPath, "wasmbuild_bg.js")),

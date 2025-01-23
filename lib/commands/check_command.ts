@@ -1,4 +1,4 @@
-// Copyright 2018-2024 the Deno authors. MIT license.
+// Copyright 2018-2025 the Deno authors. MIT license.
 
 import * as colors from "@std/fmt/colors";
 import type { CheckCommand } from "../args.ts";

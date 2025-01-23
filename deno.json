@@ -28,15 +28,15 @@
     "test:check": "deno task test:main --check"
   },
   "imports": {
-    "@david/dax": "jsr:@david/dax@^0.39.2",
+    "@david/dax": "jsr:@david/dax@^0.42.0",
     "@david/temp": "jsr:@david/temp@^0.1.1",
-    "@std/assert": "jsr:@std/assert@^0.218.2",
-    "@std/cli": "jsr:@std/cli@^0.218.2",
-    "@std/encoding": "jsr:@std/encoding@^0.218.2",
-    "@std/fmt": "jsr:@std/fmt@^0.218.2",
-    "@std/fs": "jsr:@std/fs@^0.218.2",
-    "@std/path": "jsr:@std/path@^0.218.2",
-    "@std/streams": "jsr:@std/streams@^1.0.6",
-    "@std/tar": "jsr:@std/tar@^0.1.2"
+    "@std/assert": "jsr:@std/assert@^1.0.11",
+    "@std/cli": "jsr:@std/cli@^1.0.11",
+    "@std/encoding": "jsr:@std/encoding@^1.0.6",
+    "@std/fmt": "jsr:@std/fmt@^1.0.4",
+    "@std/fs": "jsr:@std/fs@^1.0.10",
+    "@std/path": "jsr:@std/path@^1.0.8",
+    "@std/streams": "jsr:@std/streams@^1.0.8",
+    "@std/tar": "jsr:@std/tar@^0.1.4"
   }
 }

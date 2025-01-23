@@ -1,4 +1,4 @@
-// Copyright 2018-2024 the Deno authors. MIT license.
+// Copyright 2018-2025 the Deno authors. MIT license.
 
 /**
  * This module contains logic for ensuring that some other Rust dependencies
@@ -8,7 +8,7 @@
  * @see {@link https://github.com/rustwasm/wasm-bindgen/pull/2913#issuecomment-1139100835}
  */
 
-import { assertThrows } from "@std/assert/assert_throws";
+import { assertThrows } from "@std/assert";
 import { verifyVersions, versions } from "./versions.ts";
 
 Deno.test("should verify when all correct", () => {

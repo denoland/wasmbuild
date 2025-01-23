@@ -22,10 +22,11 @@
     "build": "deno run -A ./main.ts -p wasmbuild",
     "build:bindgen-upgrade": "WASMBUILD_BINDGEN_UPGRADE=1 deno task build",
     "build:lkg": "deno run -A jsr:@deno/wasmbuild@^0.15.4 -p wasmbuild",
-    "test": "cd tests && rm -rf lib lib_out_js_file lib_sync lib_no_cache && deno task test:main && deno task test:js-ext && deno test -A && deno task test:check",
+    "test": "cd tests && rm -rf lib lib_out_js_file lib_inline lib_no_cache && deno task test:main && deno task test:js-ext && deno task test:inline && deno test -A && deno task test:check",
     "test:main": "cd tests && deno run -A ../main.ts -p deno_test",
     "test:js-ext": "deno task test:main --js-ext mjs --out lib_out_js_file && cat tests/lib_out_js_file/deno_test.mjs > /dev/null",
-    "test:check": "deno task test:main --check"
+    "test:check": "deno task test:main --check",
+    "test:inline": "deno task test:main --inline --out lib_inline"
   },
   "imports": {
     "@david/dax": "jsr:@david/dax@^0.42.0",

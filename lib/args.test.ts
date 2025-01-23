@@ -14,6 +14,6 @@ Deno.test("no default features", () => {
   ]);
   assertEquals(
     (args as CommonBuild).cargoFlags,
-    ["--no-default-features", "--features", "wasm", "--sync"],
+    ["--no-default-features", "--features", "wasm", "--inline"],
   );
 });

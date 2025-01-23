@@ -23,7 +23,7 @@ export async function runCheckCommand(args: CheckCommand) {
   async function getOriginalSourceHash() {
     try {
       return getSourceHashFromText(
-        await args.outDir.join(`${output.crateName}.${args.bindingJsFileExt}`)
+        await args.outDir.join(`${output.bindingJsBg.path.basename()}`)
           .readText(),
       );
     } catch (err) {

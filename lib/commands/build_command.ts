@@ -88,8 +88,8 @@ async function handleWasmModuleOutput(
 // source-hash: ${output.sourceHash}
 
 import * as wasm from "./${output.wasmFileName}";
-export * from "./${output.crateName}.internal.${args.bindingJsFileExt}";
-import { __wbg_set_wasm } from "./${output.crateName}.internal.${args.bindingJsFileExt}";
+export * from "./${output.bindingJsBg.path.basename()}";
+import { __wbg_set_wasm } from "./${output.bindingJsBg.path.basename()}";
 __wbg_set_wasm(wasm);
 `),
   }, {
@@ -128,17 +128,17 @@ function base64decode(b64) {
   return bytes;
 }
 
-import * as imports from "./${output.crateName}.internal.${args.bindingJsFileExt}";
+import * as imports from "./${output.bindingJsBg.path.basename()}";
 const bytes = base64decode("\\\n${
       base64.encodeBase64(wasmBytes).replace(/.{78}/g, "$&\\\n")
     }\\\n");
 const wasmModule = new WebAssembly.Module(bytes);
 const wasm = new WebAssembly.Instance(wasmModule, {
-  "./${output.crateName}.internal.${args.bindingJsFileExt}": imports,
+  "./${output.bindingJsBg.path.basename()}": imports,
 });
 
-export * from "./${output.crateName}.internal.${args.bindingJsFileExt}";
-import { __wbg_set_wasm } from "./${output.crateName}.internal.${args.bindingJsFileExt}";
+export * from "./${output.bindingJsBg.path.basename()}";
+import { __wbg_set_wasm } from "./${output.bindingJsBg.path.basename()}";
 __wbg_set_wasm(wasm.exports);
 `),
   }, {

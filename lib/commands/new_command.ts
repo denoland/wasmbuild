@@ -1,14 +1,16 @@
-// Copyright 2018-2024 the Deno authors. MIT license.
+// Copyright 2018-2025 the Deno authors. MIT license.
 
 import * as colors from "@std/fmt/colors";
-import { ensureDir } from "@std/fs/ensure_dir";
 import { versions } from "../versions.ts";
-import { pathExists } from "../helpers.ts";
+import { Path } from "@david/path";
 
 export async function runNewCommand() {
   await checkIfRequiredToolsExist();
 
-  if (await pathExists("./rs_lib")) {
+  const rootDir = new Path(Deno.cwd());
+  const rsLibDir = rootDir.join("rs_lib");
+
+  if (rsLibDir.existsSync()) {
     console.log(
       `${
         colors.bold(colors.red("Error"))
@@ -21,10 +23,9 @@ export async function runNewCommand() {
     `${colors.bold(colors.green("Creating"))} rs_lib...`,
   );
 
-  if (!await pathExists("./Cargo.toml")) {
-    await Deno.writeTextFile(
-      "./Cargo.toml",
-      `[workspace]
+  writeIfNotExists(
+    rootDir.join("Cargo.toml"),
+    `[workspace]
 resolver = "2"
 members = [
   "rs_lib",
@@ -36,31 +37,30 @@ incremental = true
 lto = true
 opt-level = "z"
 `,
-    );
-  }
-  if (!await pathExists("./.rustfmt.toml")) {
-    await Deno.writeTextFile(
-      "./.rustfmt.toml",
-      `max_width = 80
+  );
+
+  writeIfNotExists(
+    rootDir.join(".rustfmt.toml"),
+    `max_width = 80
 tab_spaces = 2
 edition = "2021"
 `,
-    );
-  }
+  );
 
-  let gitIgnoreText = await getFileTextIfExists("./.gitignore") ?? "";
+  const gitIgnoreFile = rootDir.join(".gitignore");
+  let gitIgnoreText = gitIgnoreFile.readMaybeTextSync() ?? "";
   if (!/^\/target$/m.test(gitIgnoreText)) {
     gitIgnoreText = gitIgnoreText.trim();
     if (gitIgnoreText.length > 0) {
       gitIgnoreText = gitIgnoreText + "\n";
     }
     gitIgnoreText += "/target\n";
-    await Deno.writeTextFile("./.gitignore", gitIgnoreText);
+    gitIgnoreFile.writeTextSync(gitIgnoreText);
   }
 
-  await ensureDir("./rs_lib/src");
-  await Deno.writeTextFile(
-    "./rs_lib/Cargo.toml",
+  const srcDir = rsLibDir.join("src");
+  srcDir.ensureDirSync();
+  rsLibDir.join("./Cargo.toml").writeTextSync(
     `[package]
 name = "rs_lib"
 version = "0.0.0"
@@ -73,8 +73,8 @@ crate-type = ["cdylib"]
 wasm-bindgen = "=${versions["wasm-bindgen"]}"
 `,
   );
-  await Deno.writeTextFile(
-    "./rs_lib/src/lib.rs",
+
+  srcDir.join("lib.rs").writeTextSync(
     `use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -117,11 +117,11 @@ mod tests {
 }
 `,
   );
-  if (!await pathExists("./mod.js")) {
-    // use a .js file for the most compatibility out of the box (ex. browsers)
-    await Deno.writeTextFile(
-      "./mod.js",
-      `import { add, Greeter } from "./lib/rs_lib.js";
+
+  // use a .js file for the most compatibility out of the box (ex. browsers)
+  writeIfNotExists(
+    rootDir.join("mod.js"),
+    `import { add, Greeter } from "./lib/rs_lib.js";
 
 // adds
 console.log(add(1, 1));
@@ -130,23 +130,18 @@ console.log(add(1, 1));
 const greeter = new Greeter("world");
 console.log(greeter.greet());
 `,
-    );
-  }
+  );
+
   console.log("%cTo get started run:", "color:yellow");
   console.log("deno task wasmbuild");
   console.log("deno run mod.js");
 }
 
-async function getFileTextIfExists(path: string) {
-  try {
-    return await Deno.readTextFile(path);
-  } catch (err) {
-    if (err instanceof Deno.errors.NotFound) {
-      return undefined;
-    } else {
-      throw err;
-    }
+function writeIfNotExists(path: Path, text: string) {
+  if (path.existsSync()) {
+    return;
   }
+  path.writeTextSync(text);
 }
 
 async function checkIfRequiredToolsExist() {

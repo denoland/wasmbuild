@@ -1,44 +1,40 @@
-// Copyright 2018-2024 the Deno authors. MIT license.
+// Copyright 2018-2025 the Deno authors. MIT license.
 
 import type { BuildCommand, CheckCommand } from "./args.ts";
 import * as colors from "@std/fmt/colors";
-import * as path from "@std/path";
 import { Sha1 } from "./utils/sha1.ts";
-import { getCargoWorkspace, type WasmCrate } from "./manifest.ts";
+import { getCargoWorkspace } from "./manifest.ts";
 import { verifyVersions } from "./versions.ts";
 import { type BindgenOutput, generateBindgen } from "./bindgen.ts";
-import { pathExists } from "./helpers.ts";
+import { Path } from "@david/path";
 export type { BindgenOutput } from "./bindgen.ts";
 
-const generatedHeader = `// @generated file from wasmbuild -- do not edit
+export const generatedHeader = `// @generated file from wasmbuild -- do not edit
 // @ts-nocheck: generated
 // deno-lint-ignore-file
 // deno-fmt-ignore-file`;
 
 export interface PreBuildOutput {
+  crateName: string;
   bindgen: BindgenOutput;
-  bindingJs: {
-    path: string;
-    text: string;
-  };
   bindingJsBg: {
-    path: string;
+    path: Path;
     text: string;
   };
   bindingDts: {
-    path: string;
+    path: Path;
     text: string;
   };
   sourceHash: string;
-  wasmFileName: string | undefined;
+  wasmFileName: string;
 }
 
 export async function runPreBuild(
   args: CheckCommand | BuildCommand,
 ): Promise<PreBuildOutput> {
   const home = Deno.env.get("HOME");
-  const root = Deno.cwd();
-  if (!await pathExists(path.join(root, "Cargo.toml"))) {
+  const root = new Path(Deno.cwd());
+  if (!root.join("Cargo.toml").existsSync()) {
     console.error(
       "%cConsider running `deno task wasmbuild new` to get started",
       "color: yellow",
@@ -122,8 +118,7 @@ export async function runPreBuild(
   const bindgenOutput = await generateBindgen({
     libName: crate.libName,
     ext: args.bindingJsFileExt,
-    filePath: path.join(
-      workspace.metadata.target_directory,
+    filePath: new Path(workspace.metadata.target_directory).join(
       `wasm32-unknown-unknown/${args.profile}/${crate.libName}.wasm`,
     ),
   });
@@ -132,25 +127,19 @@ export async function runPreBuild(
     `${colors.bold(colors.green("Generating"))} lib JS bindings...`,
   );
 
-  const { bindingJsText, sourceHash } = await getBindingJsOutput(
-    crate,
-    bindgenOutput,
-  );
+  const sourceHash = await getHash();
 
   return {
+    crateName: crate.libName,
     bindgen: bindgenOutput,
-    bindingJs: {
-      path: path.join(args.outDir, bindgenOutput.js.name),
-      text: bindingJsText,
-    },
     bindingJsBg: {
-      path: path.join(args.outDir, bindgenOutput.jsBg.name),
+      path: args.outDir.join(bindgenOutput.jsBg.name),
       text: `${generatedHeader}\n\n${await getFormattedText(
         bindgenOutput.jsBg.text,
       )}`,
     },
     bindingDts: {
-      path: path.join(args.outDir, bindgenOutput.ts.name),
+      path: args.outDir.join(bindgenOutput.ts.name),
       text: `// @generated file from wasmbuild -- do not edit
 // deno-lint-ignore-file
 // deno-fmt-ignore-file
@@ -159,26 +148,6 @@ ${await getFormattedText(getLibraryDts(bindgenOutput))}`,
     },
     sourceHash,
     wasmFileName: bindgenOutput.wasm.name,
-  };
-}
-
-async function getBindingJsOutput(
-  crate: WasmCrate,
-  bindgenOutput: BindgenOutput,
-) {
-  const sourceHash = await getHash();
-  const header = `${generatedHeader}
-// @ts-self-types="./${bindgenOutput.ts.name}"
-`;
-  const genText = bindgenOutput.js.text;
-  const bodyText = await getFormattedText(`
-// source-hash: ${sourceHash}
-${genText}
-`);
-
-  return {
-    bindingJsText: `${header}\n${bodyText}`,
-    sourceHash,
   };
 
   async function getHash() {
@@ -201,7 +170,7 @@ ${genText}
   }
 }
 
-async function getFormattedText(inputText: string) {
+export async function getFormattedText(inputText: string) {
   const denoFmtCmdArgs = [
     "fmt",
     "--quiet",

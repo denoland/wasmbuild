@@ -28,7 +28,6 @@ pub struct BindgenBytesFileOutput {
 #[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Output {
-  pub js: BindgenTextFileOutput,
   pub js_bg: BindgenTextFileOutput,
   pub ts: Option<BindgenTextFileOutput>,
   pub snippets: HashMap<String, Vec<String>>,
@@ -65,16 +64,6 @@ fn inner(name: &str, ext: &str, wasm_bytes: Vec<u8>) -> Result<Output> {
   }
 
   Ok(Output {
-    js: BindgenTextFileOutput {
-      name: format!("{}.{}", name, ext),
-      text: format!(
-        "import * as wasm from \"./{name}.wasm\";
-export * from \"./{name}.internal.{ext}\";
-import {{ __wbg_set_wasm }} from \"./{name}.internal.{ext}\";
-__wbg_set_wasm(wasm);
-"
-      ),
-    },
     js_bg: BindgenTextFileOutput {
       name: format!("{}.internal.{}", name, ext),
       text: x.js().to_string(),

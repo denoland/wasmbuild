@@ -1,27 +1,33 @@
-// Copyright 2018-2024 the Deno authors. MIT license.
+// Copyright 2018-2025 the Deno authors. MIT license.
 
 import { UntarStream } from "@std/tar/untar-stream";
-import { ensureDir } from "@std/fs/ensure_dir";
 import * as colors from "@std/fmt/colors";
-import * as path from "@std/path";
+import { createTempFileSync } from "@david/temp";
+import { Path } from "@david/path";
 
 const wasmOptFileName = Deno.build.os === "windows"
   ? "wasm-opt.exe"
   : "wasm-opt";
-const tag = "version_109";
+const tag = "version_121";
 
-export async function runWasmOpt(filePath: string) {
+export async function runWasmOpt(fileBytes: Uint8Array) {
   const binPath = await getWasmOptBinaryPath();
-  const p = new Deno.Command(binPath, {
-    args: ["-Oz", filePath, "-o", filePath],
+  using outputTempFile = createTempFileSync();
+  using inputTempFile = createTempFileSync();
+  inputTempFile.writeSync(fileBytes);
+  const p = new Deno.Command(binPath.toString(), {
+    args: ["-Oz", inputTempFile.toString(), "-o", outputTempFile.toString()],
+    stdin: "inherit",
     stderr: "inherit",
     stdout: "inherit",
   }).spawn();
-  const output = await p.status;
 
-  if (!output.success) {
+  const status = await p.status;
+
+  if (!status.success) {
     throw new Error(`error executing wasmopt`);
   }
+  return outputTempFile.readBytesSync();
 }
 
 async function fetchWithRetries(url: URL | string, maxRetries = 5) {
@@ -46,20 +52,20 @@ async function fetchWithRetries(url: URL | string, maxRetries = 5) {
 }
 
 async function getWasmOptBinaryPath() {
-  const cacheDirPath = cacheDir();
-  if (!cacheDirPath) {
+  const cacheDirPathText = cacheDir();
+  if (!cacheDirPathText) {
     throw new Error("Could not find cache directory.");
   }
-  const tempDirPath = path.join(cacheDirPath, "wasmbuild", tag);
-  const wasmOptExePath = path.join(
-    tempDirPath,
+  const cacheDirPath = new Path(cacheDirPathText);
+  const tempDirPath = cacheDirPath.join("wasmbuild", tag);
+  const wasmOptExePath = tempDirPath.join(
     `binaryen-${tag}/bin`,
     wasmOptFileName,
   );
 
-  if (!(await fileExists(wasmOptExePath))) {
+  if (!wasmOptExePath.existsSync()) {
     await downloadBinaryen(tempDirPath);
-    if (!(await fileExists(wasmOptExePath))) {
+    if (!wasmOptExePath.existsSync()) {
       throw new Error(
         `For some reason the wasm-opt executable did not exist after downloading at ${wasmOptExePath}.`,
       );
@@ -69,20 +75,7 @@ async function getWasmOptBinaryPath() {
   return wasmOptExePath;
 }
 
-async function fileExists(path: string) {
-  try {
-    await Deno.stat(path);
-    return true;
-  } catch (err) {
-    if (err instanceof Deno.errors.NotFound) {
-      return false;
-    } else {
-      throw err;
-    }
-  }
-}
-
-async function downloadBinaryen(tempPath: string) {
+async function downloadBinaryen(tempPath: Path) {
   console.log(
     `${colors.bold(colors.green("Downloading"))} wasm-opt binary...`,
   );
@@ -97,9 +90,9 @@ async function downloadBinaryen(tempPath: string) {
       entry.path.endsWith(wasmOptFileName) ||
       entry.path.endsWith(".dylib")
     ) {
-      const fileName = path.join(tempPath, entry.path);
-      await ensureDir(path.dirname(fileName));
-      using file = await Deno.open(fileName, {
+      const filePath = tempPath.join(entry.path);
+      filePath.parentOrThrow().ensureDirSync();
+      using file = filePath.openSync({
         create: true,
         write: true,
         mode: 0o755,

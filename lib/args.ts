@@ -1,6 +1,7 @@
-// Copyright 2018-2024 the Deno authors. MIT license.
+// Copyright 2018-2025 the Deno authors. MIT license.
 
-import { parseArgs as parseFlags } from "@std/cli/parse_args";
+import { parseArgs as parseFlags } from "@std/cli/parse-args";
+import { Path } from "@david/path";
 
 export type Command = NewCommand | BuildCommand | CheckCommand | HelpCommand;
 
@@ -12,11 +13,12 @@ export interface HelpCommand {
 }
 
 export interface CommonBuild {
-  outDir: string;
+  outDir: Path;
   bindingJsFileExt: "js" | "mjs";
   profile: "debug" | "release";
   project: string | undefined;
   isOpt: boolean;
+  inline: boolean;
   cargoFlags: string[];
 }
 
@@ -29,7 +31,9 @@ export interface CheckCommand extends CommonBuild {
 }
 
 export function parseArgs(rawArgs: string[]): Command {
-  const flags = parseFlags(rawArgs, { "--": true });
+  const flags = parseFlags(rawArgs, {
+    "--": true,
+  });
   if (flags.help || flags.h) return { kind: "help" };
   switch (flags._[0]) {
     case "new":
@@ -57,7 +61,7 @@ export function parseArgs(rawArgs: string[]): Command {
   function getCommonBuild(): CommonBuild {
     if (flags.sync) {
       throw new Error(
-        "The --sync flag is no longer supported now that Wasmbuild supports Wasm imports. Use an old version if you need it.",
+        "The --sync flag has been renamed to --inline.",
       );
     }
     if (flags["no-cache"]) {
@@ -69,8 +73,9 @@ export function parseArgs(rawArgs: string[]): Command {
     return {
       profile: flags.debug ? "debug" : "release",
       project: flags.p ?? flags.project,
+      inline: flags.inline,
       isOpt: !(flags["skip-opt"] ?? flags.debug == "debug"),
-      outDir: flags.out ?? "./lib",
+      outDir: new Path(flags.out ?? "./lib"),
       bindingJsFileExt: getBindingJsFileExt(),
       cargoFlags: getCargoFlags(),
     };

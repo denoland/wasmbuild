@@ -1,4 +1,4 @@
-// Copyright 2018-2024 the Deno authors. MIT license.
+// Copyright 2018-2025 the Deno authors. MIT license.
 
 import * as colors from "@std/fmt/colors";
 import type { CheckCommand } from "../args.ts";
@@ -6,7 +6,7 @@ import { runPreBuild } from "../pre_build.ts";
 
 export async function runCheckCommand(args: CheckCommand) {
   const output = await runPreBuild(args);
-  const originalHash = await getOriginalSourceHash();
+  const originalHash = getOriginalSourceHash();
   if (originalHash === output.sourceHash) {
     console.log(
       `${colors.bold(colors.green("Success"))} ` +
@@ -20,13 +20,15 @@ export async function runCheckCommand(args: CheckCommand) {
     Deno.exit(1);
   }
 
-  async function getOriginalSourceHash() {
+  function getOriginalSourceHash() {
+    const filePath = args.outDir.join(
+      `${output.crateName}.${args.bindingJsFileExt}`,
+    );
     try {
-      return getSourceHashFromText(
-        await Deno.readTextFile(output.bindingJs.path),
-      );
+      return getSourceHashFromText(filePath.readTextSync());
     } catch (err) {
       if (err instanceof Deno.errors.NotFound) {
+        console.warn(`${colors.yellow("Warning")} could not find ${filePath}`);
         return undefined;
       } else {
         throw err;

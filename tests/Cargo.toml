@@ -5,6 +5,9 @@ edition = "2021"
 authors = ["the Deno authors"]
 license = "MIT"
 
+[features]
+start = []
+
 [dependencies]
 wasm-bindgen = "0.2.90"
 

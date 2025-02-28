@@ -91,6 +91,7 @@ import * as wasm from "./${output.wasmFileName}";
 export * from "./${output.bindingJsBg.path.basename()}";
 import { __wbg_set_wasm } from "./${output.bindingJsBg.path.basename()}";
 __wbg_set_wasm(wasm);
+${output.hasStart ? "wasm.__wbindgen_start();" : ""}
 `),
   }, {
     path: output.bindingJsBg.path,

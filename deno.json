@@ -26,7 +26,7 @@
     "test:js-ext": "deno task test:main --js-ext mjs --out lib_out_js_file && cat tests/lib_out_js_file/deno_test.mjs > /dev/null",
     "test:check": "deno task test:main --check",
     "test:inline": "deno task test:main --inline --out lib_inline",
-    "test:start": "cd tests && deno run -A ../main.ts -p deno_test --features start && deno test -A test.ts"
+    "test:start": "cd tests && deno run -A ../main.ts -p deno_test --features start && USES_START=1 deno test -A test.ts"
   },
   "imports": {
     "@david/path": "jsr:@david/path@^0.2.0",

@@ -5,7 +5,9 @@ import * as wasm2 from "./lib_inline/deno_test.js";
 Deno.test("test works export", () => {
   assertEquals(
     wasm.greet("Deno"),
-    Deno.env.get("USES_START") ? "Hello, Deno! Result: 4" : "Hello, Deno! Result: 3",
+    Deno.env.get("USES_START")
+      ? "Hello, Deno! Result: 4"
+      : "Hello, Deno! Result: 3",
   );
 });
 

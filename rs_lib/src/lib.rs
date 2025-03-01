@@ -32,6 +32,7 @@ pub struct Output {
   pub ts: Option<BindgenTextFileOutput>,
   pub snippets: HashMap<String, Vec<String>>,
   pub local_modules: HashMap<String, String>,
+  pub start: Option<String>,
   pub wasm: BindgenBytesFileOutput,
 }
 
@@ -85,6 +86,7 @@ fn inner(name: &str, ext: &str, wasm_bytes: Vec<u8>) -> Result<Output> {
     },
     snippets: x.snippets().clone(),
     local_modules: x.local_modules().clone(),
+    start: x.start().cloned(),
     wasm: BindgenBytesFileOutput {
       name: format!("{}.wasm", name),
       bytes: x.wasm_mut().emit_wasm(),

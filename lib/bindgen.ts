@@ -14,6 +14,7 @@ export interface BindgenOutput {
   ts: BindgenTextFileOutput;
   snippets: Map<string, string[]>;
   localModules: Map<string, string>;
+  start: string | undefined;
   wasm: {
     name: string;
     bytes: number[];
@@ -72,6 +73,7 @@ async function generateForSelfBuild(filePath: Path): Promise<BindgenOutput> {
     },
     localModules: new Map(),
     snippets: new Map(),
+    start: undefined,
     wasm: {
       name: "wasmbuild_bg.wasm",
       bytes: Array.from(wasmBytes),

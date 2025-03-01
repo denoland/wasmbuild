@@ -9,7 +9,7 @@
  * @license MIT
  */
 
-export type Message = string | number[] | ArrayBuffer;
+export type Message = string | number[] | ArrayBuffer | Uint8Array<ArrayBuffer>;
 
 const HEX_CHARS = "0123456789abcdef".split("");
 const EXTRA = [-2147483648, 8388608, 32768, 128] as const;
@@ -442,7 +442,7 @@ export class HmacSha1 extends Sha1 {
   #oKeyPad: number[];
   constructor(secretKey: Message, sharedMemory = false) {
     super(sharedMemory);
-    let key: number[] | Uint8Array | undefined;
+    let key: number[] | Uint8Array<ArrayBuffer> | undefined;
     if (typeof secretKey === "string") {
       const bytes: number[] = [];
       const length: number = secretKey.length;

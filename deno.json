@@ -21,7 +21,7 @@
     "fmt": "deno fmt && cargo fmt",
     "build": "WASMBUILD_BINDGEN_UPGRADE=1 deno run -A ./main.ts -p wasmbuild",
     "build:lkg": "deno run -A jsr:@deno/wasmbuild@^0.15.4 -p wasmbuild",
-    "test": "cd tests && rm -rf lib lib_out_js_file lib_inline lib_no_cache && deno task test:main && deno task test:js-ext && deno task test:inline && deno test -A && deno task test:check && deno task test:start && deno task test::start-inline",
+    "test": "cd tests && rm -rf lib lib_out_js_file lib_inline lib_no_cache && deno task test:main && deno task test:js-ext && deno task test:inline && deno test -A && deno task test:check && deno task test:start && deno task test:start-inline",
     "test:main": "cd tests && deno run -A ../main.ts -p deno_test",
     "test:js-ext": "deno task test:main --js-ext mjs --out lib_out_js_file && cat tests/lib_out_js_file/deno_test.mjs > /dev/null",
     "test:check": "deno task test:main --check",

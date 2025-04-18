@@ -130,7 +130,9 @@ const wasm = new WebAssembly.Instance(wasmModule, {
 
 export * from "./${output.bindingJsBg.path.basename()}";
 import { __wbg_set_wasm } from "./${output.bindingJsBg.path.basename()}";
-__wbg_set_wasm(wasm.exports);
+__wbg_set_wasm(wasm.exports);${
+      output.hasStart ? "\nwasm.exports.__wbindgen_start();" : ""
+    }
 
 function base64decode(b64) {
   const binString = atob(b64);

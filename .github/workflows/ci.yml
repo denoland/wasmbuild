@@ -48,7 +48,7 @@ jobs:
         run: deno task build --check
 
       - name: Install Playwright browsers
-        run: deno run -A npm:playwright@1.54.2/cli install --with-deps
+        run: deno run -A npm:playwright@1.54.2/playwright install --with-deps
 
       - name: Test
         run: deno task test

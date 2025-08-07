@@ -37,8 +37,10 @@
     "@std/encoding": "jsr:@std/encoding@^1.0.6",
     "@std/fmt": "jsr:@std/fmt@^1.0.4",
     "@std/fs": "jsr:@std/fs@^1.0.10",
+    "@std/http": "jsr:@std/http@^1.0.0",
     "@std/path": "jsr:@std/path@^1.0.8",
     "@std/streams": "jsr:@std/streams@^1.0.8",
-    "@std/tar": "jsr:@std/tar@^0.1.4"
+    "@std/tar": "jsr:@std/tar@^0.1.4",
+    "playwright": "npm:playwright@1.54.2"
   }
 }

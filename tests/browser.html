@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Wasmbuild Browser Test</title>
+    <script type="module">
+      import { greet } from "../lib_inline/deno_test.js";
+
+      window.testGreet = () => {
+        return greet("Browser");
+      };
+    </script>
+  </head>
+  <body>
+    <h1>Wasmbuild Browser Test</h1>
+  </body>
+</html>

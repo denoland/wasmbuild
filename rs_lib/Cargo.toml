@@ -7,10 +7,10 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-anyhow = "=1.0.93"
-js-sys = "=0.3.77"
+anyhow = "=1.0.99"
+js-sys = "=0.3.78"
 serde = { version = "1.0.215", features = ["derive", "rc"] }
 # make sure to update the version in lib/versions.ts to match this version
-wasm-bindgen = "=0.2.100"
-wasm-bindgen-cli-support = "=0.2.100"
+wasm-bindgen = "=0.2.101"
+wasm-bindgen-cli-support = "=0.2.101"
 serde-wasm-bindgen = "=0.6.5"

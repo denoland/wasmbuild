@@ -42,7 +42,7 @@ jobs:
         run: deno lint && cargo clippy
 
       - name: Install wasm-bindgen-cli
-        run: cargo install wasm-bindgen-cli --version 0.2.100 --locked
+        run: cargo install wasm-bindgen-cli --version 0.2.102 --locked
 
       - name: Check Wasm up-to-date
         run: deno task build --check

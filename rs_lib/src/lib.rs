@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::collections::HashMap;
 
 use anyhow::bail;
@@ -30,7 +31,7 @@ pub struct BindgenBytesFileOutput {
 pub struct Output {
   pub js_bg: BindgenTextFileOutput,
   pub ts: Option<BindgenTextFileOutput>,
-  pub snippets: HashMap<String, Vec<String>>,
+  pub snippets: BTreeMap<String, Vec<String>>,
   pub local_modules: HashMap<String, String>,
   pub start: Option<String>,
   pub wasm: BindgenBytesFileOutput,

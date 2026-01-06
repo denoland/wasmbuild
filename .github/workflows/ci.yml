@@ -41,9 +41,6 @@ jobs:
         if: contains(matrix.os, 'ubuntu')
         run: deno lint && cargo clippy
 
-      - name: Install wasm-bindgen-cli
-        run: cargo install wasm-bindgen-cli --version 0.2.105 --locked
-
       - name: Check Wasm up-to-date
         run: deno task build --check
 

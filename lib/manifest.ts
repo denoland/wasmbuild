@@ -50,10 +50,14 @@ export async function getCargoWorkspace(
     cwd: directory.toString(),
     args: ["metadata", "--format-version", "1", ...cargoFlags],
     stdout: "piped",
+    stderr: "piped",
   });
   const output = await p.output();
   if (!output.success) {
-    throw new Error("Error retrieving cargo metadata.");
+    const stderr = new TextDecoder().decode(output.stderr).trim();
+    throw new Error(
+      `Error retrieving cargo metadata.\n${stderr}`,
+    );
   }
   const result = new TextDecoder().decode(output.stdout);
   return new CargoWorkspace(JSON.parse(result!) as CargoMetadata);

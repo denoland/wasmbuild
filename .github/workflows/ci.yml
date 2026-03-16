@@ -44,6 +44,9 @@ jobs:
       - name: Check Wasm up-to-date
         run: deno task build --check
 
+      - name: Install Playwright browsers
+        run: deno run -A npm:playwright@1.54.2/playwright install --with-deps
+
       - name: Test
         run: deno task test
 

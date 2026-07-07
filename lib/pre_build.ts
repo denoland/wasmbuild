@@ -148,8 +148,7 @@ export async function runPreBuild(
 
 ${await getFormattedText(getLibraryDts(bindgenOutput))}`,
     },
-    hasStart: bindgenOutput.start != null &&
-      bindgenOutput.start.includes("__wbindgen_start"),
+    hasStart: bindgenOutput.hasStart,
     sourceHash,
     wasmFileName: bindgenOutput.wasm.name,
   };

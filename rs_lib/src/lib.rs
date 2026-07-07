@@ -33,7 +33,7 @@ pub struct Output {
   pub ts: Option<BindgenTextFileOutput>,
   pub snippets: BTreeMap<String, Vec<String>>,
   pub local_modules: HashMap<String, String>,
-  pub start: Option<String>,
+  pub has_start: bool,
   pub wasm: BindgenBytesFileOutput,
 }
 
@@ -65,10 +65,20 @@ fn inner(name: &str, ext: &str, wasm_bytes: Vec<u8>) -> Result<Output> {
     }
   }
 
+  // Since wasm-bindgen 0.2.107, in bundler mode `js()` returns the small
+  // entry module (which imports from `{name}_bg.js`) and `start()` returns
+  // the `_bg.js` bindings glue. wasmbuild generates its own entry, so it
+  // only needs the glue plus whether the entry has to call
+  // `__wbindgen_start()` (i.e. the crate uses `#[wasm_bindgen(start)]`).
+  let entry_js = x.js().to_string();
+  let Some(glue_js) = x.start().cloned() else {
+    bail!("expected wasm-bindgen to output the bindings glue module")
+  };
+
   Ok(Output {
     js_bg: BindgenTextFileOutput {
       name: format!("{}.internal.{}", name, ext),
-      text: x.js().to_string(),
+      text: glue_js,
     },
     ts: match x.ts() {
       Some(t) => Some(BindgenTextFileOutput {
@@ -87,7 +97,7 @@ fn inner(name: &str, ext: &str, wasm_bytes: Vec<u8>) -> Result<Output> {
     },
     snippets: x.snippets().clone(),
     local_modules: x.local_modules().clone(),
-    start: x.start().cloned(),
+    has_start: entry_js.contains("__wbindgen_start()"),
     wasm: BindgenBytesFileOutput {
       name: format!("{}.wasm", name),
       bytes: x.wasm_mut().emit_wasm(),

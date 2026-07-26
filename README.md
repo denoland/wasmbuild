@@ -13,7 +13,7 @@ deno run -A jsr:@deno/wasmbuild new
 This also adds a `wasmbuild` task to the _deno.json_ file and installs
 `@deno/wasmbuild`.
 
-## Or manual setup
+## Manual setup
 
 1. `deno install jsr:@deno/wasmbuild`
 1. Update _deno.json_ with:

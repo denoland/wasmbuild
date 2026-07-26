@@ -30,6 +30,7 @@
     "test:start-inline": "cd tests && deno run -A ../main.ts -p deno_test --features start --inline && USES_START=1 deno test -A test.ts"
   },
   "imports": {
+    "@david/jsonc-morph": "jsr:@david/jsonc-morph@^0.3.4",
     "@david/path": "jsr:@david/path@^0.2.0",
     "@david/temp": "jsr:@david/temp@^0.1.1",
     "@std/assert": "jsr:@std/assert@^1.0.11",

@@ -1,8 +1,11 @@
 // Copyright 2018-2025 the Deno authors. MIT license.
 
 import * as colors from "@std/fmt/colors";
+import * as jsonc from "@david/jsonc-morph";
 import { versions } from "../versions.ts";
 import { Path } from "@david/path";
+
+const WASMBUILD_TASK = "deno run -A @deno/wasmbuild";
 
 export async function runNewCommand() {
   await checkIfRequiredToolsExist();
@@ -132,9 +135,60 @@ console.log(greeter.greet());
 `,
   );
 
+  ensureWasmbuildTask(rootDir);
+  await installWasmbuild(rootDir);
+
   console.log("%cTo get started run:", "color:yellow");
   console.log("deno task wasmbuild");
   console.log("deno run mod.js");
+}
+
+/**
+ * Adds the wasmbuild task to the Deno config file, creating a
+ * deno.json when one doesn't exist.
+ */
+function ensureWasmbuildTask(rootDir: Path) {
+  const configFile = getDenoConfigFile(rootDir);
+  const configText = configFile.readMaybeTextSync();
+  using root = jsonc.parse(configText ?? "");
+  const tasks = root.asObjectOrForce().getIfObjectOrForce("tasks");
+  if (tasks.get("wasmbuild") != null) {
+    return;
+  }
+
+  console.log(
+    `${
+      colors.bold(colors.green(configText == null ? "Creating" : "Updating"))
+    } ${configFile.basename()}...`,
+  );
+  tasks.ensureMultiline();
+  tasks.append("wasmbuild", WASMBUILD_TASK);
+  configFile.writeTextSync(root.toString());
+}
+
+/** Deno resolves a deno.json file before a deno.jsonc file. */
+function getDenoConfigFile(rootDir: Path) {
+  const jsonFile = rootDir.join("deno.json");
+  if (jsonFile.existsSync()) {
+    return jsonFile;
+  }
+  const jsoncFile = rootDir.join("deno.jsonc");
+  return jsoncFile.existsSync() ? jsoncFile : jsonFile;
+}
+
+async function installWasmbuild(rootDir: Path) {
+  console.log(
+    `${colors.bold(colors.green("Installing"))} @deno/wasmbuild...`,
+  );
+  const output = await new Deno.Command(Deno.execPath(), {
+    args: ["install", "jsr:@deno/wasmbuild"],
+    cwd: rootDir.toString(),
+  })
+    .spawn()
+    .status;
+  if (!output.success) {
+    throw new Error("Failed installing @deno/wasmbuild.");
+  }
 }
 
 function writeIfNotExists(path: Path, text: string) {

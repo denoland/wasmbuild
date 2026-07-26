@@ -1,2 +1,2 @@
 # exclude these from the language stats
-lib/wasmbuild_bg.js linguist-vendored
+lib/wasmbuild.js linguist-vendored

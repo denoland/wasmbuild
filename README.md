@@ -2,17 +2,29 @@
 
 A build tool to generate wasm-bindgen glue code for Deno and the browser.
 
-## Setup
+## Scaffold project
 
-Add a task to the _deno.json_ file in your project:
+To create a starter Rust crate in an `rs_lib` subfolder of your project, run:
 
-```json
-{
-  "tasks": {
-    "wasmbuild": "deno run -A jsr:@deno/wasmbuild@VERSION_GOES_HERE"
-  }
-}
+```bash
+deno run -A jsr:@deno/wasmbuild new
 ```
+
+This also adds a `wasmbuild` task to the _deno.json_ file and installs
+`@deno/wasmbuild`.
+
+## Manual setup
+
+1. `deno install jsr:@deno/wasmbuild`
+1. Update _deno.json_ with:
+
+   ```json
+   {
+     "tasks": {
+       "wasmbuild": "deno run -A @deno/wasmbuild"
+     }
+   }
+   ```
 
 ## Browser, Node.js, or older Deno support
 
@@ -21,14 +33,6 @@ a bug unfortunately).
 
 Most browsers do not support Wasm imports yet, which this library generates. If
 you want output that works in more scenarios, build with the `--inline` flag.
-
-## Scaffold project (Optional)
-
-To create a starter Rust crate in an `rs_lib` subfolder of your project, run:
-
-```bash
-deno task wasmbuild new
-```
 
 ## Building
 

@@ -63,6 +63,7 @@ async function generateForSelfBuild(filePath: Path): Promise<BindgenOutput> {
     throw new Error("Failed.");
   }
   const wasmBytes = tempDir.join("wasmbuild_bg.wasm").readBytesSync();
+  const entryJs = tempDir.join("wasmbuild.js").readTextSync();
   return {
     jsBg: {
       name: "wasmbuild_bg.js",
@@ -74,7 +75,7 @@ async function generateForSelfBuild(filePath: Path): Promise<BindgenOutput> {
     },
     localModules: new Map(),
     snippets: new Map(),
-    hasStart: false,
+    hasStart: entryJs.includes("__wbindgen_start()"),
     wasm: {
       name: "wasmbuild_bg.wasm",
       bytes: Array.from(wasmBytes),
